@@ -1,0 +1,31 @@
+{
+    "defaultSeverity": "warning",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "rules": {
+        "quotemark": [
+            true,
+            "single"
+        ],
+        "no-consecutive-blank-lines": [
+            true,
+            2
+        ],
+        "prefer-const": [
+            false
+        ],
+        "interface-name": [
+            false
+        ],
+        "trailing-comma": [
+            false
+        ],
+        "member-ordering": [
+            false
+        ],
+        "object-literal-sort-keys": [
+            false
+        ]
+    }
+}
