@@ -4,17 +4,17 @@ Copy links to files in their online Git repositories from inside Visual Studio C
 
 Works with GitHub, GitHub Enterprise, Bitbucket Server and Bitbucket Cloud.
 
-:information_source: For GitHub Enterprise and Bitbucket Server, there is some configuration required. [See below for more details](#github-enterprise-and-bitbucket-server).
+For GitHub Enterprise and Bitbucket Server, there is some configuration required. [See below for more details](#github-enterprise-and-bitbucket-server).
 
 ## Copy Link to File
 
 To copy a link to the file on GitHub (or Bitbucket), right-click on the file's tab and select _Copy Web Link to File_.
 
-![Copy Link to File](media/copy-file-tab.png)
+![Copy Link to File](images/copy-file-tab.png)
 
 You can also right-click on a file in Explorer panel and select _Copy Web Link to File_.
 
-![Copy Link to File](media/copy-file-explorer.png)
+![Copy Link to File](images/copy-file-explorer.png)
 
 ## Copy Link to Selection
 
@@ -22,7 +22,7 @@ To copy a link to a particular line in the file, right-click on the line in the 
 
 If you want to copy a link to a range of lines, just select the lines first.
 
-![Copy Link to Selection](media/copy-selection.png)
+![Copy Link to Selection](images/copy-selection.png)
 
 ## GitHub Enterprise and Bitbucket Server
 

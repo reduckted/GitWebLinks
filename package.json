@@ -1,13 +1,27 @@
 {
-    "name": "gitweblinks",
-    "displayName": "Git Web Links",
+    "name": "vscode-gitweblinks",
+    "displayName": "Git Web Links for VS Code",
     "description": "Copy links to files in their online Git repositories",
     "version": "1.0.0",
     "publisher": "reduckted",
+    "homepage": "https://github.com/reduckted/vscode-gitweblinks",
     "repository": {
         "type": "git",
         "url": "https://github.com/reduckted/vscode-gitweblinks"
     },
+    "bugs": {
+        "url": "https://github.com/reduckted/vscode-gitweblinks/issues"
+    },
+    "icon": "images/icon.png",
+    "galleryBanner": {
+        "color": "#F0F0E6",
+        "theme": "light"
+    },
+    "keywords": [
+        "git",
+        "github",
+        "bitbucket"
+    ],
     "private": true,
     "main": "./out/src/extension",
     "license": "MIT",
@@ -91,6 +105,7 @@
             "properties": {
                 "gitweblinks.bitbucketServer": {
                     "type": "array",
+                    "description": "The URLs of your Bitbucket Server instances.",
                     "items": {
                         "type": "object",
                         "properties": {
@@ -110,6 +125,7 @@
                 },
                 "gitweblinks.gitHubEnterprise": {
                     "type": "array",
+                    "description": "The URLs of your GitHub Enterprise instances.",
                     "items": {
                         "type": "object",
                         "properties": {
