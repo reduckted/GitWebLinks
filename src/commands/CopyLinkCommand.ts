@@ -27,7 +27,7 @@ export abstract class CopyLinkCommand extends Disposable {
 
             url = await this.linkHandler.makeUrl(this.gitInfo, resource.fsPath, selection);
 
-            Clipboard.setText(url);
+            await Clipboard.setText(url);
         }
     }
 

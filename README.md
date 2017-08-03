@@ -61,11 +61,11 @@ There are two commands provided by this extension:
 
 ## Requirements
 
+This extension uses `xclip` on Linux.
+
 This extension requires Git to already be installed and on your PATH. If this isn't suitable for you and you'd prefer to specify the location of Git, please open a new issue in this repository and I'll see what I can do :)
 
 ## Release Notes
-
-Users appreciate release notes as you update your extension.
 
 ### 1.0.0
 
