@@ -1,13 +1,14 @@
 import { GitInfo } from '../git/GitInfo';
 import { LinkHandler } from '../links/LinkHandler';
 import { Selection } from '../utilities/Selection';
+import { WorkspaceMap } from '../utilities/WorkspaceMap';
 import { CopyLinkCommand } from './CopyLinkCommand';
 
 
 export class CopyLinkToFileCommand extends CopyLinkCommand {
 
-    constructor(gitInfo: GitInfo, linkHandler: LinkHandler) {
-        super('gitweblinks.copyFile', gitInfo, linkHandler);
+    constructor(workspaceMap: WorkspaceMap) {
+        super('gitweblinks.copyFile', workspaceMap);
     }
 
 
