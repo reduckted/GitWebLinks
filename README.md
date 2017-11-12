@@ -67,6 +67,10 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
+### 1.1.1
+
+Added support for multi-root workspaces.
+
 ### 1.0.0
 
 Initial release
