@@ -10,6 +10,7 @@ import * as sinon from 'sinon';
 import { v4 as guid } from 'uuid';
 
 import { CustomServerProvider } from '../../src/configuration/CustomServerProvider';
+import { LinkType, LinkTypeProvider } from '../../src/configuration/LinkTypeProvider';
 import { Git } from '../../src/git/Git';
 import { GitInfo } from '../../src/git/GitInfo';
 import { GitHubHandler } from '../../src/links/GitHubHandler';
@@ -108,6 +109,7 @@ describe('GitHubHandler', () => {
     describe('makeUrl', () => {
 
         let root: string;
+        let type: LinkType;
 
 
         beforeEach(async () => {
@@ -120,6 +122,9 @@ describe('GitHubHandler', () => {
 
             await Git.execute(root, 'add', '.');
             await Git.execute(root, 'commit', '-m', '"initial"');
+
+            sandbox.stub(LinkTypeProvider.prototype, 'getLinkType').callsFake(() => type);
+            type = 'branch';
         });
 
 
@@ -231,11 +236,34 @@ describe('GitHubHandler', () => {
             info = { rootDirectory: root, remoteUrl: 'git@github.com:dotnet/corefx.git' };
             fileName = path.join(root, 'src/System.IO.FileSystem/src/System/IO/Directory.cs');
             handler = new GitHubHandler();
+            type = 'branch';
 
             await Git.execute(root, 'checkout', '-b', 'feature/thing');
 
             expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
                 'https://github.com/dotnet/corefx/blob/feature/thing/src/System.IO.FileSystem/src/System/IO/Directory.cs',
+            );
+        });
+
+
+        it('should use the current hash.', async () => {
+            let handler: GitHubHandler;
+            let info: GitInfo;
+            let fileName: string;
+            let sha: string;
+
+
+            stubGetServers();
+
+            info = { rootDirectory: root, remoteUrl: 'git@github.com:dotnet/corefx.git' };
+            fileName = path.join(root, 'src/System.IO.FileSystem/src/System/IO/Directory.cs');
+            handler = new GitHubHandler();
+            type = 'hash';
+
+            sha = (await Git.execute(root, 'rev-parse', 'HEAD')).trim();
+
+            expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
+                `https://github.com/dotnet/corefx/blob/${sha}/src/System.IO.FileSystem/src/System/IO/Directory.cs`,
             );
         });
 

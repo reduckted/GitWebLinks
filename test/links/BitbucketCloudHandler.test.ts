@@ -6,8 +6,10 @@ import * as mkdirp from 'mkdirp';
 import * as os from 'os';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
+import * as sinon from 'sinon';
 import { v4 as guid } from 'uuid';
 
+import { LinkType, LinkTypeProvider } from '../../src/configuration/LinkTypeProvider';
 import { Git } from '../../src/git/Git';
 import { GitInfo } from '../../src/git/GitInfo';
 import { BitbucketCloudHandler } from '../../src/links/BitbucketCloudHandler';
@@ -54,6 +56,8 @@ describe('BitbucketCloudHandler', () => {
     describe('makeUrl', () => {
 
         let root: string;
+        let sandbox: sinon.SinonSandbox;
+        let type: LinkType;
 
 
         beforeEach(async () => {
@@ -66,10 +70,15 @@ describe('BitbucketCloudHandler', () => {
 
             await Git.execute(root, 'add', '.');
             await Git.execute(root, 'commit', '-m', '"initial"');
+
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(LinkTypeProvider.prototype, 'getLinkType').callsFake(() => type);
+            type = 'branch';
         });
 
 
         afterEach(() => {
+            sandbox.restore();
             rimraf.sync(root);
         });
 
@@ -133,11 +142,32 @@ describe('BitbucketCloudHandler', () => {
             info = { rootDirectory: root, remoteUrl: 'git@bitbucket.org:atlassian/atlassian-bamboo_rest.git' };
             fileName = path.join(root, 'lib/puppet/feature/restclient.rb');
             handler = new BitbucketCloudHandler();
+            type = 'branch';
 
             await Git.execute(root, 'checkout', '-b', 'feature/thing');
 
             expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
                 'https://bitbucket.org/atlassian/atlassian-bamboo_rest/src/feature/thing/lib/puppet/feature/restclient.rb',
+            );
+        });
+
+
+        it('uses the current hash.', async () => {
+            let handler: BitbucketCloudHandler;
+            let info: GitInfo;
+            let fileName: string;
+            let sha: string;
+
+
+            info = { rootDirectory: root, remoteUrl: 'git@bitbucket.org:atlassian/atlassian-bamboo_rest.git' };
+            fileName = path.join(root, 'lib/puppet/feature/restclient.rb');
+            handler = new BitbucketCloudHandler();
+            type = 'hash';
+
+            sha = (await Git.execute(root, 'rev-parse', 'HEAD')).trim();
+
+            expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
+                `https://bitbucket.org/atlassian/atlassian-bamboo_rest/src/${sha}/lib/puppet/feature/restclient.rb`,
             );
         });
 

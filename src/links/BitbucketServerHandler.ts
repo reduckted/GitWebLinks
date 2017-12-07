@@ -30,7 +30,7 @@ export class BitbucketServerHandler extends LinkHandler {
     protected createUrl(
         baseUrl: string,
         repositoryPath: string,
-        branch: string,
+        branchOrHash: string,
         relativePathToFile: string
     ): string {
 
@@ -52,7 +52,7 @@ export class BitbucketServerHandler extends LinkHandler {
         url = [baseUrl, 'projects', project, 'repos', repo, 'browse', relativePathToFile].join('/');
 
         // The branch name is specified via a query parameter.
-        return url + `?at=${encodeURIComponent(branch)}`;
+        return url + `?at=${encodeURIComponent(branchOrHash)}`;
     }
 
 

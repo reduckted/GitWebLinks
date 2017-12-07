@@ -27,10 +27,10 @@ export class BitbucketCloudHandler extends LinkHandler {
     protected createUrl(
         baseUrl: string,
         repositoryPath: string,
-        branch: string,
+        branchOrHash: string,
         relativePathToFile: string
     ): string {
-        return [baseUrl, repositoryPath, 'src', branch, relativePathToFile].join('/');
+        return [baseUrl, repositoryPath, 'src', branchOrHash, relativePathToFile].join('/');
     }
 
 

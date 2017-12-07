@@ -1,3 +1,5 @@
+import { LinkTypeProvider } from '../configuration/LinkTypeProvider';
+import { Git } from '../git/Git';
 import { GitInfo } from '../git/GitInfo';
 import { Selection } from '../utilities/Selection';
 import { ServerUrl } from '../utilities/ServerUrl';
@@ -6,6 +8,9 @@ import { ServerUrl } from '../utilities/ServerUrl';
 export abstract class LinkHandler {
 
     private static SSH_PREFIX: string = 'ssh://';
+
+
+    private linkTypeProvider: LinkTypeProvider = new LinkTypeProvider();
 
 
     public isMatch(remoteUrl: string): boolean {
@@ -19,7 +24,7 @@ export abstract class LinkHandler {
         let server: ServerUrl;
         let repositoryPath: string;
         let relativePathToFile: string;
-        let branch: string;
+        let branchOrHash: string;
         let baseUrl: string;
 
 
@@ -34,10 +39,13 @@ export abstract class LinkHandler {
         // Trim slashes from the start of the string.
         relativePathToFile = relativePathToFile.replace(/^\/+/, '');
 
-        // Get the current branch name. The remote branch might not be the same,
-        // but it's better than using a commit hash which won't match anything on
-        // the remote if there are commits to this branch on the local repository.
-        branch = await this.getCurrentBranch(gitInfo.rootDirectory);
+        // Get the current branch name or commit SHA
+        // depending on what type of link we need to create.
+        if (this.linkTypeProvider.getLinkType() === 'branch') {
+            branchOrHash = await this.getCurrentBranch(gitInfo.rootDirectory);
+        } else {
+            branchOrHash = (await Git.execute(gitInfo.rootDirectory, 'rev-parse', 'HEAD')).trim();
+        }
 
         baseUrl = server.baseUrl;
 
@@ -48,7 +56,7 @@ export abstract class LinkHandler {
         url = this.createUrl(
             baseUrl,
             repositoryPath,
-            encodeURI(branch),
+            encodeURI(branchOrHash),
             relativePathToFile.split('/').map((x) => encodeURIComponent(x)).join('/')
         );
 
@@ -123,7 +131,7 @@ export abstract class LinkHandler {
     protected abstract createUrl(
         baseUrl: string,
         repositoryPath: string,
-        branch: string,
+        branchOrHash: string,
         relativePathToFile: string
     ): string;
 

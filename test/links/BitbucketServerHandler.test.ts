@@ -10,6 +10,7 @@ import * as sinon from 'sinon';
 import { v4 as guid } from 'uuid';
 
 import { CustomServerProvider } from '../../src/configuration/CustomServerProvider';
+import { LinkType, LinkTypeProvider } from '../../src/configuration/LinkTypeProvider';
 import { Git } from '../../src/git/Git';
 import { GitInfo } from '../../src/git/GitInfo';
 import { BitbucketServerHandler } from '../../src/links/BitbucketServerHandler';
@@ -94,6 +95,7 @@ describe('BitbucketServerHandler', () => {
     describe('makeUrl', () => {
 
         let root: string;
+        let type: LinkType;
 
 
         beforeEach(async () => {
@@ -106,6 +108,9 @@ describe('BitbucketServerHandler', () => {
 
             await Git.execute(root, 'add', '.');
             await Git.execute(root, 'commit', '-m', '"initial"');
+
+            sandbox.stub(LinkTypeProvider.prototype, 'getLinkType').callsFake(() => type);
+            type = 'branch';
         });
 
 
@@ -212,6 +217,7 @@ describe('BitbucketServerHandler', () => {
             info = { rootDirectory: root, remoteUrl: getGitRemoteUrl() };
             fileName = path.join(root, 'lib/server/main.cs');
             handler = new BitbucketServerHandler();
+            type = 'branch';
 
             expect(await handler.makeUrl(info, fileName, { startLine: 10, endLine: 23 })).to.equal(
                 'https://local-bitbucket:7990/context/projects/bb/repos/my-code/browse/lib/server/main.cs?at=refs%2Fheads%2Fmaster#10-23',
@@ -230,11 +236,34 @@ describe('BitbucketServerHandler', () => {
             info = { rootDirectory: root, remoteUrl: getGitRemoteUrl() };
             fileName = path.join(root, 'lib/server/main.cs');
             handler = new BitbucketServerHandler();
+            type = 'branch';
 
             await Git.execute(root, 'checkout', '-b', 'feature/thing');
 
             expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
                 'https://local-bitbucket:7990/context/projects/bb/repos/my-code/browse/lib/server/main.cs?at=refs%2Fheads%2Ffeature%2Fthing',
+            );
+        });
+
+
+        it('uses the current hash.', async () => {
+            let handler: BitbucketServerHandler;
+            let info: GitInfo;
+            let fileName: string;
+            let sha: string;
+
+
+            stubGetServers();
+
+            info = { rootDirectory: root, remoteUrl: getGitRemoteUrl() };
+            fileName = path.join(root, 'lib/server/main.cs');
+            handler = new BitbucketServerHandler();
+            type = 'hash';
+
+            sha = (await Git.execute(root, 'rev-parse', 'HEAD')).trim();
+
+            expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
+                `https://local-bitbucket:7990/context/projects/bb/repos/my-code/browse/lib/server/main.cs?at=${sha}`,
             );
         });
 

@@ -4,6 +4,7 @@ import * as sinon from 'sinon';
 import { commands, Position, Selection, TextDocument, TextEditor, Uri, window, workspace } from 'vscode';
 
 import { CopyLinkToSelectionCommand } from '../../src/commands/CopyLinkToSelectionCommand';
+import { LinkTypeProvider } from '../../src/configuration/LinkTypeProvider';
 import { LinkHandler } from '../../src/links/LinkHandler';
 import { Clipboard } from '../../src/utilities/Clipboard';
 import { WorkspaceMap } from '../../src/utilities/WorkspaceMap';
@@ -20,6 +21,7 @@ describe('CopyLinkToSelectionCommand', () => {
 
     beforeEach(() => {
         sandbox = sinon.sandbox.create();
+        sandbox.stub(LinkTypeProvider.prototype, 'getLinkType').returns('branch');
         clipboardStub = sandbox.stub(Clipboard, 'setText');
     });
 

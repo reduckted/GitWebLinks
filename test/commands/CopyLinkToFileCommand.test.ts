@@ -3,6 +3,7 @@ import * as sinon from 'sinon';
 import { commands, Uri, window, workspace } from 'vscode';
 
 import { CopyLinkToFileCommand } from '../../src/commands/CopyLinkToFileCommand';
+import { LinkTypeProvider } from '../../src/configuration/LinkTypeProvider';
 import { LinkHandler } from '../../src/links/LinkHandler';
 import { Clipboard } from '../../src/utilities/Clipboard';
 import { WorkspaceData } from '../../src/utilities/WorkspaceData';
@@ -20,6 +21,7 @@ describe('CopyLinkToFileCommand', () => {
 
     beforeEach(() => {
         sandbox = sinon.sandbox.create();
+        sandbox.stub(LinkTypeProvider.prototype, 'getLinkType').returns('branch');
         clipboardStub = sandbox.stub(Clipboard, 'setText');
     });
 

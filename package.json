@@ -2,7 +2,7 @@
     "name": "vscode-gitweblinks",
     "displayName": "Git Web Links for VS Code",
     "description": "Copy links to files in their online Git repositories",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "publisher": "reduckted",
     "homepage": "https://github.com/reduckted/vscode-gitweblinks",
     "repository": {
@@ -104,6 +104,15 @@
         "configuration": {
             "title": "Git Web Links configuration",
             "properties": {
+                "gitweblinks.linkType": {
+                    "type": "string",
+                    "description": "The type of links to create:\n - \"hash\": Create a link to the current commit (default).\n - \"branch\": Create a link to the current branch.",
+                    "enum": [
+                        "hash",
+                        "branch"
+                    ],
+                    "default": "hash"
+                },
                 "gitweblinks.bitbucketServer": {
                     "type": "array",
                     "description": "The URLs of your Bitbucket Server instances.",

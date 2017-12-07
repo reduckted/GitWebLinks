@@ -24,6 +24,14 @@ If you want to copy a link to a range of lines, just select the lines first.
 
 ![Copy Link to Selection](images/copy-selection.png)
 
+## Link Format
+
+Links can be created using the current commit hash, or the current branch name. The current commit hash is the default format. This can be changed using the setting `gitweblinks.linkType`. You can specify either `"branch"` or `"hash"` as the value.
+
+```json
+"gitweblinks.linkType": "hash"
+```
+
 ## GitHub Enterprise and Bitbucket Server
 
 If you use GitHub Enterprise or Bitbucket Server, you will need to tell the extension the URLs of those servers. Do this in your user settings file (_File -> Preferences -> Settings_). You need to specify the base HTTP/HTTPS URL of the server, and if you use SSH, the base SSH URL.
@@ -66,6 +74,10 @@ This extension uses `xclip` on Linux.
 This extension requires Git to already be installed and on your PATH. If this isn't suitable for you and you'd prefer to specify the location of Git, please open a new issue in this repository and I'll see what I can do :)
 
 ## Release Notes
+
+### 1.2.0
+
+Added the ability to generate links using the current branch name of current commit hash.
 
 ### 1.1.1
 

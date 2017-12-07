@@ -42,10 +42,10 @@ export class GitHubHandler extends LinkHandler {
     protected createUrl(
         baseUrl: string,
         repositoryPath: string,
-        branch: string,
+        branchOrHash: string,
         relativePathToFile: string
     ): string {
-        return [baseUrl, repositoryPath, 'blob', branch, relativePathToFile].join('/');
+        return [baseUrl, repositoryPath, 'blob', branchOrHash, relativePathToFile].join('/');
     }
 
 
