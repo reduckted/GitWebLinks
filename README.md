@@ -2,7 +2,12 @@
 
 Copy links to files in their online Git repositories from inside Visual Studio Code.
 
-Works with GitHub, GitHub Enterprise, Bitbucket Server and Bitbucket Cloud.
+Works with:
+* GitHub
+* GitHub Enterprise
+* Bitbucket Server
+* Bitbucket Cloud
+* Visual Studio Team Services
 
 For GitHub Enterprise and Bitbucket Server, there is some configuration required. [See below for more details](#github-enterprise-and-bitbucket-server).
 
@@ -78,6 +83,7 @@ This extension requires Git to already be installed and on your PATH. If this is
 ### 1.2.0
 
 * Added the ability to generate links using the current branch name of current commit hash.
+* Added support for Visual Studio Team Services.
 * Fixed a bug that would create the wrong URL when there was a space in the file path.
 
 ### 1.1.1

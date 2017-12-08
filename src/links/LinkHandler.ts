@@ -1,4 +1,4 @@
-import { LinkTypeProvider } from '../configuration/LinkTypeProvider';
+import { LinkType, LinkTypeProvider } from '../configuration/LinkTypeProvider';
 import { Git } from '../git/Git';
 import { GitInfo } from '../git/GitInfo';
 import { Selection } from '../utilities/Selection';
@@ -29,7 +29,7 @@ export abstract class LinkHandler {
 
 
         fixedRemoteUrl = this.fixRemoteUrl(gitInfo.remoteUrl);
-        server = this.getMatchingServerUrl(fixedRemoteUrl);
+        server = this.getMatchingServerUrl(fixedRemoteUrl)!;
 
         // Get the repository's path out of the remote URL.
         repositoryPath = this.getRepositoryPath(fixedRemoteUrl, server);
@@ -41,7 +41,7 @@ export abstract class LinkHandler {
 
         // Get the current branch name or commit SHA
         // depending on what type of link we need to create.
-        if (this.linkTypeProvider.getLinkType() === 'branch') {
+        if (this.getLinkType() === 'branch') {
             branchOrHash = await this.getCurrentBranch(gitInfo.rootDirectory);
         } else {
             branchOrHash = (await Git.execute(gitInfo.rootDirectory, 'rev-parse', 'HEAD')).trim();
@@ -63,7 +63,7 @@ export abstract class LinkHandler {
     }
 
 
-    private getMatchingServerUrl(remoteUrl: string): ServerUrl {
+    protected getMatchingServerUrl(remoteUrl: string): ServerUrl | undefined {
         return this.getServerUrls().filter((x) => remoteUrl.startsWith(x.baseUrl) || remoteUrl.startsWith(x.sshUrl))[0];
     }
 
@@ -90,7 +90,11 @@ export abstract class LinkHandler {
     }
 
 
-    protected abstract getServerUrls(): ServerUrl[];
+    protected getServerUrls(): ServerUrl[] {
+        // Derived classes should override this if
+        // they don't overrides `GetMatchingServerUrl`.
+        throw new Error('LinkHandler.getServerUrls must be overridden.');
+    }
 
 
     private getRepositoryPath(remoteUrl: string, matchingServer: ServerUrl): string {
@@ -117,6 +121,11 @@ export abstract class LinkHandler {
         }
 
         return path;
+    }
+
+
+    protected getLinkType(): LinkType {
+        return this.linkTypeProvider.getLinkType();
     }
 
 

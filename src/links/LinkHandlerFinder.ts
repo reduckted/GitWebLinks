@@ -3,6 +3,7 @@ import { BitbucketCloudHandler } from './BitbucketCloudHandler';
 import { BitbucketServerHandler } from './BitbucketServerHandler';
 import { GitHubHandler } from './GitHubHandler';
 import { LinkHandler } from './LinkHandler';
+import { VisualStudioTeamServicesHandler } from './VisualStudioTeamServicesHandler';
 
 
 export class LinkHandlerFinder {
@@ -14,7 +15,8 @@ export class LinkHandlerFinder {
         this.handlers = [
             new BitbucketCloudHandler(),
             new BitbucketServerHandler(),
-            new GitHubHandler()
+            new GitHubHandler(),
+            new VisualStudioTeamServicesHandler()
         ];
     }
 

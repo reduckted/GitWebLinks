@@ -6,6 +6,7 @@ import { BitbucketServerHandler } from '../../src/links/BitbucketServerHandler';
 import { GitHubHandler } from '../../src/links/GitHubHandler';
 import { LinkHandler } from '../../src/links/LinkHandler';
 import { LinkHandlerFinder } from '../../src/links/LinkHandlerFinder';
+import { VisualStudioTeamServicesHandler } from '../../src/links/VisualStudioTeamServicesHandler';
 
 
 describe('LinkHandlerFinder', () => {
@@ -28,6 +29,7 @@ describe('LinkHandlerFinder', () => {
             BitbucketCloudHandler,
             BitbucketServerHandler,
             GitHubHandler,
+            VisualStudioTeamServicesHandler
         ];
     }
 
