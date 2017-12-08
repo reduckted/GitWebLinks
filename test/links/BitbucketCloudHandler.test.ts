@@ -101,6 +101,22 @@ describe('BitbucketCloudHandler', () => {
         });
 
 
+        it('creates correct link when path contains spaces.', async () => {
+            let handler: BitbucketCloudHandler;
+            let info: GitInfo;
+            let fileName: string;
+
+
+            info = { rootDirectory: root, remoteUrl: 'git@bitbucket.org:atlassian/atlassian-bamboo_rest.git' };
+            fileName = path.join(root, 'lib/sub dir/restclient.rb');
+            handler = new BitbucketCloudHandler();
+
+            expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
+                'https://bitbucket.org/atlassian/atlassian-bamboo_rest/src/master/lib/sub%20dir/restclient.rb',
+            );
+        });
+
+
         it('creates correct link with single line selection.', async () => {
             let handler: BitbucketCloudHandler;
             let info: GitInfo;

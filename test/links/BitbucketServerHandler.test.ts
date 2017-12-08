@@ -188,6 +188,24 @@ describe('BitbucketServerHandler', () => {
         });
 
 
+        it('creates correct link when path contains spaces.', async () => {
+            let handler: BitbucketServerHandler;
+            let info: GitInfo;
+            let fileName: string;
+
+
+            stubGetServers();
+
+            info = { rootDirectory: root, remoteUrl: getGitRemoteUrl() };
+            fileName = path.join(root, 'lib/sub dir/main.cs');
+            handler = new BitbucketServerHandler();
+
+            expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
+                'https://local-bitbucket:7990/context/projects/bb/repos/my-code/browse/lib/sub%20dir/main.cs?at=refs%2Fheads%2Fmaster',
+            );
+        });
+
+
         it('creates correct link with single line selection.', async () => {
             let handler: BitbucketServerHandler;
             let info: GitInfo;

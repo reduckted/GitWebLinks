@@ -189,6 +189,23 @@ describe('GitHubHandler', () => {
         });
 
 
+        it('creates correct link when path contains spaces.', async () => {
+            let handler: GitHubHandler;
+            let info: GitInfo;
+            let fileName: string;
+
+
+            stubGetServers();
+
+            info = { rootDirectory: root, remoteUrl: 'git@github.com:dotnet/corefx.git' };
+            fileName = path.join(root, 'src/sub dir/Directory.cs');
+            handler = new GitHubHandler();
+
+            expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
+                'https://github.com/dotnet/corefx/blob/master/src/sub%20dir/Directory.cs',
+            );
+        });
+
         it('should create the correct link with a single line selection.', async () => {
             let handler: GitHubHandler;
             let info: GitInfo;

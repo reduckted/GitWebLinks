@@ -77,12 +77,13 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ### 1.2.0
 
-Added the ability to generate links using the current branch name of current commit hash.
+* Added the ability to generate links using the current branch name of current commit hash.
+* Fixed a bug that would create the wrong URL when there was a space in the file path.
 
 ### 1.1.1
 
-Added support for multi-root workspaces.
+* Added support for multi-root workspaces.
 
 ### 1.0.0
 
-Initial release
+* Initial release

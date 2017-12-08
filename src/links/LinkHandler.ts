@@ -53,12 +53,7 @@ export abstract class LinkHandler {
             baseUrl = baseUrl.substring(0, baseUrl.length - 1);
         }
 
-        url = this.createUrl(
-            baseUrl,
-            repositoryPath,
-            encodeURI(branchOrHash),
-            relativePathToFile.split('/').map((x) => encodeURIComponent(x)).join('/')
-        );
+        url = this.createUrl(baseUrl, repositoryPath, branchOrHash, relativePathToFile);
 
         if (selection) {
             url += this.getSelectionHash(filePath, selection);

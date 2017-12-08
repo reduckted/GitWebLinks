@@ -45,7 +45,14 @@ export class GitHubHandler extends LinkHandler {
         branchOrHash: string,
         relativePathToFile: string
     ): string {
-        return [baseUrl, repositoryPath, 'blob', branchOrHash, relativePathToFile].join('/');
+
+        return [
+            baseUrl,
+            repositoryPath,
+            'blob',
+            encodeURI(branchOrHash),
+            encodeURI(relativePathToFile)
+        ].join('/');
     }
 
 

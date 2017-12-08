@@ -49,7 +49,15 @@ export class BitbucketServerHandler extends LinkHandler {
         project = match[1];
         repo = match[2];
 
-        url = [baseUrl, 'projects', project, 'repos', repo, 'browse', relativePathToFile].join('/');
+        url = [
+            baseUrl,
+            'projects',
+            project,
+            'repos',
+            repo,
+            'browse',
+            encodeURI(relativePathToFile)
+        ].join('/');
 
         // The branch name is specified via a query parameter.
         return url + `?at=${encodeURIComponent(branchOrHash)}`;
