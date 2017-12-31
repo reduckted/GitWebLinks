@@ -80,6 +80,10 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
+### 1.2.1
+
+* Added support for Visual Studio Team Services repositories in collections.
+
 ### 1.2.0
 
 * Added the ability to generate links using the current branch name of current commit hash.

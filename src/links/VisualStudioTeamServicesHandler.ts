@@ -12,21 +12,28 @@ export class VisualStudioTeamServicesHandler extends LinkHandler {
         let match: RegExpMatchArray | null;
 
 
-        match = /^([^.]+)@vs-ssh\.visualstudio\.com:22\/_ssh\/.+$/.exec(remoteUrl);
+        match = /^([^.]+)@vs-ssh\.visualstudio\.com:22(?:\/([^\/]+))?\/_ssh\/.+$/.exec(remoteUrl);
 
         if (!match) {
-            match = /^https:\/\/([^.]+)\.visualstudio\.com\/_git\/.+$/.exec(remoteUrl);
+            match = /^https:\/\/([^.]+)\.visualstudio\.com(?:\/([^\/]+))?\/_git\/.+$/.exec(remoteUrl);
         }
 
         if (match) {
             let username: string;
+            let collection: string;
 
 
             username = match[1];
 
+            if (match[2]) {
+                collection = `/${match[2]}`;
+            } else {
+                collection = '';
+            }
+
             return {
-                baseUrl: `https://${username}.visualstudio.com/_git`,
-                sshUrl: `${username}@vs-ssh.visualstudio.com:22/_ssh`
+                baseUrl: `https://${username}.visualstudio.com${collection}/_git`,
+                sshUrl: `${username}@vs-ssh.visualstudio.com:22${collection}/_ssh`
             };
         }
 

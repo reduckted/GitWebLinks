@@ -18,9 +18,22 @@ import { VisualStudioTeamServicesHandler } from '../../src/links/VisualStudioTea
 describe('VisualStudioTeamServicesHandler', () => {
 
     function getRemotes(): string[] {
+        return getNonCollectionRemotes().concat(getCollectionRemotes());
+    }
+
+
+    function getNonCollectionRemotes(): string[] {
         return [
             'https://foo.visualstudio.com/_git/MyRepo',
             'ssh://foo@vs-ssh.visualstudio.com:22/_ssh/MyRepo'
+        ];
+    }
+
+
+    function getCollectionRemotes(): string[] {
+        return [
+            'https://foo.visualstudio.com/DefaultCollection/_git/MyRepo',
+            'ssh://foo@vs-ssh.visualstudio.com:22/DefaultCollection/_ssh/MyRepo'
         ];
     }
 
@@ -81,7 +94,7 @@ describe('VisualStudioTeamServicesHandler', () => {
         });
 
 
-        getRemotes().forEach((remote) => {
+        getNonCollectionRemotes().forEach((remote) => {
             it(`should create the correct link from the remote URL '${remote}'.`, async () => {
                 let handler: VisualStudioTeamServicesHandler;
                 let info: GitInfo;
@@ -94,6 +107,24 @@ describe('VisualStudioTeamServicesHandler', () => {
 
                 expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
                     'https://foo.visualstudio.com/_git/MyRepo?path=%2Fsrc%2Ffile.cs&version=GBmaster',
+                );
+            });
+        });
+
+
+        getCollectionRemotes().forEach((remote) => {
+            it(`should create the correct link from the remote URL '${remote}'.`, async () => {
+                let handler: VisualStudioTeamServicesHandler;
+                let info: GitInfo;
+                let fileName: string;
+
+
+                info = { rootDirectory: root, remoteUrl: remote };
+                fileName = path.join(root, 'src/file.cs');
+                handler = new VisualStudioTeamServicesHandler();
+
+                expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
+                    'https://foo.visualstudio.com/DefaultCollection/_git/MyRepo?path=%2Fsrc%2Ffile.cs&version=GBmaster',
                 );
             });
         });
