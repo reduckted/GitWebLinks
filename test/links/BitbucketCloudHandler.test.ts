@@ -56,7 +56,6 @@ describe('BitbucketCloudHandler', () => {
     describe('makeUrl', () => {
 
         let root: string;
-        let sandbox: sinon.SinonSandbox;
         let type: LinkType;
 
 
@@ -71,14 +70,13 @@ describe('BitbucketCloudHandler', () => {
             await Git.execute(root, 'add', '.');
             await Git.execute(root, 'commit', '-m', '"initial"');
 
-            sandbox = sinon.sandbox.create();
-            sandbox.stub(LinkTypeProvider.prototype, 'getLinkType').callsFake(() => type);
+            sinon.stub(LinkTypeProvider.prototype, 'getLinkType').callsFake(() => type);
             type = 'branch';
         });
 
 
         afterEach(() => {
-            sandbox.restore();
+            sinon.restore();
             rimraf.sync(root);
         });
 

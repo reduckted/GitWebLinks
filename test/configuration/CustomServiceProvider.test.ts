@@ -13,33 +13,23 @@ const expect = chai.use(sinonChai).expect;
 
 describe('CustomServerProvider', () => {
 
-    let sandbox: sinon.SinonSandbox;
-
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
 
     describe('getServers', () => {
 
         it('should return the servers with the specified type.', () => {
-            let servers: ServerUrl[];
             let provider: CustomServerProvider;
-            let getConfiguration: sinon.SinonSpy;
             let get: sinon.SinonSpy;
 
 
             get = sinon.stub().returns([]);
-            getConfiguration = sandbox.stub(workspace, 'getConfiguration').returns({ get });
+            sinon.stub(workspace, 'getConfiguration').returns({ get } as any);
 
             provider = new CustomServerProvider();
-            servers = provider.getServers('foo');
+            provider.getServers('foo');
 
             expect(get).to.have.been.calledWith('gitweblinks.foo');
         });
@@ -48,7 +38,6 @@ describe('CustomServerProvider', () => {
         it('should not return servers without a base url.', () => {
             let servers: ServerUrl[];
             let provider: CustomServerProvider;
-            let getConfiguration: sinon.SinonSpy;
             let get: sinon.SinonSpy;
 
 
@@ -62,7 +51,7 @@ describe('CustomServerProvider', () => {
                 { baseUrl: 'i', sshUrl: undefined }
             ]);
 
-            getConfiguration = sandbox.stub(workspace, 'getConfiguration').returns({ get });
+            sinon.stub(workspace, 'getConfiguration').returns({ get } as any);
 
             provider = new CustomServerProvider();
             servers = provider.getServers('foo');

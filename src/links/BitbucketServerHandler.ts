@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { CustomServerProvider } from '../configuration/CustomServerProvider';
 import { Git } from '../git/Git';
 import { Selection } from '../utilities/Selection';

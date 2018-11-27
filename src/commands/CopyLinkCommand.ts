@@ -1,7 +1,5 @@
 import { commands, Disposable, Uri, window, workspace, WorkspaceFolder } from 'vscode';
 
-import { GitInfo } from '../git/GitInfo';
-import { LinkHandler } from '../links/LinkHandler';
 import { Clipboard } from '../utilities/Clipboard';
 import { Selection } from '../utilities/Selection';
 import { WorkspaceData } from '../utilities/WorkspaceData';

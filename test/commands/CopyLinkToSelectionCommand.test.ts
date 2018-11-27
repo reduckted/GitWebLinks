@@ -14,15 +14,13 @@ import { FINAL_URL, GIT_INFO, MockLinkHandler, WORKSPACE_FOLDER } from '../test-
 
 describe('CopyLinkToSelectionCommand', () => {
 
-    let sandbox: sinon.SinonSandbox;
     let clipboardStub: sinon.SinonStub;
     let command: CopyLinkToSelectionCommand | undefined;
 
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-        sandbox.stub(LinkTypeProvider.prototype, 'getLinkType').returns('branch');
-        clipboardStub = sandbox.stub(Clipboard, 'setText');
+        sinon.stub(LinkTypeProvider.prototype, 'getLinkType').returns('branch');
+        clipboardStub = sinon.stub(Clipboard, 'setText');
     });
 
 
@@ -32,7 +30,7 @@ describe('CopyLinkToSelectionCommand', () => {
             command = undefined;
         }
 
-        sandbox.restore();
+        sinon.restore();
     });
 
 
@@ -69,12 +67,12 @@ describe('CopyLinkToSelectionCommand', () => {
         map = new WorkspaceMap();
         map.add(WORKSPACE_FOLDER, GIT_INFO, handler);
 
-        sandbox.stub(map, 'get').returns({
+        sinon.stub(map, 'get').returns({
             handler,
             gitInfo: GIT_INFO
         });
 
-        sandbox.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
+        sinon.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
 
         command = new CopyLinkToSelectionCommand(map);
 
@@ -99,12 +97,12 @@ describe('CopyLinkToSelectionCommand', () => {
         map = new WorkspaceMap();
         map.add(WORKSPACE_FOLDER, GIT_INFO, handler);
 
-        sandbox.stub(map, 'get').returns({
+        sinon.stub(map, 'get').returns({
             handler,
             gitInfo: GIT_INFO
         });
 
-        sandbox.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
+        sinon.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
 
         command = new CopyLinkToSelectionCommand(map);
 
@@ -121,8 +119,8 @@ describe('CopyLinkToSelectionCommand', () => {
 
         map = new WorkspaceMap();
 
-        sandbox.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
-        showErrorMessage = sandbox.stub(window, 'showErrorMessage');
+        sinon.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
+        showErrorMessage = sinon.stub(window, 'showErrorMessage');
 
         command = new CopyLinkToSelectionCommand(map);
 

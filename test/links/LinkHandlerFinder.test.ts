@@ -11,16 +11,8 @@ import { VisualStudioTeamServicesHandler } from '../../src/links/VisualStudioTea
 
 describe('LinkHandlerFinder', () => {
 
-    let sandbox: sinon.SinonSandbox;
-
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
 
@@ -42,7 +34,7 @@ describe('LinkHandlerFinder', () => {
 
 
             getHandlerTypes().forEach((type) => {
-                sandbox.stub(type.prototype, 'isMatch').returns(false);
+                (sinon.stub(type.prototype, 'isMatch') as any).returns(false);
             });
 
             finder = new LinkHandlerFinder();
@@ -60,7 +52,7 @@ describe('LinkHandlerFinder', () => {
 
 
                 getHandlerTypes().forEach((type) => {
-                    sandbox.stub(type.prototype, 'isMatch').returns(type === handler);
+                    (sinon.stub(type.prototype, 'isMatch') as any).returns(type === handler);
                 });
 
                 finder = new LinkHandlerFinder();

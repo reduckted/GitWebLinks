@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.2.3] - 2018-11-27
+- Dependency updates
+
 ## [1.2.1] - 2017-12-31
 - Added support for Visual Studio Team Services repositories in collections.
 

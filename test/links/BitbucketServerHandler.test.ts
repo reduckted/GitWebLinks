@@ -19,9 +19,6 @@ import { ServerUrl } from '../../src/utilities/ServerUrl';
 
 describe('BitbucketServerHandler', () => {
 
-    let sandbox: sinon.SinonSandbox;
-
-
     function getRemotes(): string[] {
         return [
             getHttpsRemoteUrl(),
@@ -50,17 +47,12 @@ describe('BitbucketServerHandler', () => {
             }];
         }
 
-        sandbox.stub(CustomServerProvider.prototype, 'getServers').withArgs('bitbucketServer').returns(servers);
+        sinon.stub(CustomServerProvider.prototype, 'getServers').withArgs('bitbucketServer').returns(servers);
     }
 
 
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
 
@@ -109,7 +101,7 @@ describe('BitbucketServerHandler', () => {
             await Git.execute(root, 'add', '.');
             await Git.execute(root, 'commit', '-m', '"initial"');
 
-            sandbox.stub(LinkTypeProvider.prototype, 'getLinkType').callsFake(() => type);
+            sinon.stub(LinkTypeProvider.prototype, 'getLinkType').callsFake(() => type);
             type = 'branch';
         });
 

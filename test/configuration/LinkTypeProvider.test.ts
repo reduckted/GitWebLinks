@@ -4,8 +4,7 @@ import * as sinonChai from 'sinon-chai';
 
 import { workspace } from 'vscode';
 
-import { LinkType, LinkTypeProvider } from '../../src/configuration/LinkTypeProvider';
-import { ServerUrl } from '../../src/utilities/ServerUrl';
+import { LinkTypeProvider } from '../../src/configuration/LinkTypeProvider';
 
 
 const expect = chai.use(sinonChai).expect;
@@ -13,16 +12,8 @@ const expect = chai.use(sinonChai).expect;
 
 describe('LinkTypeProvider', () => {
 
-    let sandbox: sinon.SinonSandbox;
-
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
 
@@ -70,7 +61,7 @@ describe('LinkTypeProvider', () => {
 
 
         get = sinon.stub().withArgs('gitweblinks.linkType').returns(value);
-        sandbox.stub(workspace, 'getConfiguration').returns({ get });
+        sinon.stub(workspace, 'getConfiguration').returns({ get } as any);
     }
 
 });

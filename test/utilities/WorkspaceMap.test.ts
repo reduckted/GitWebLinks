@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import * as copyPaste from 'copy-paste';
 import { Uri, WorkspaceFolder } from 'vscode';
 
 import { GitInfo } from '../../src/git/GitInfo';

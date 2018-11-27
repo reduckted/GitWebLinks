@@ -1,5 +1,4 @@
 import * as chai from 'chai';
-import * as path from 'path';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
@@ -21,7 +20,6 @@ describe('ExtensionHost', () => {
 
     describe('activate', () => {
 
-        let sandbox: sinon.SinonSandbox;
         let context: vscode.ExtensionContext;
         let onDidChangeWorkspaceFolders: (e: vscode.WorkspaceFoldersChangeEvent) => Promise<void>;
 
@@ -34,7 +32,6 @@ describe('ExtensionHost', () => {
 
 
         beforeEach(() => {
-            sandbox = sinon.sandbox.create();
             context = mockContext();
             onDidChangeWorkspaceFolders = undefined as any;
 
@@ -50,19 +47,14 @@ describe('ExtensionHost', () => {
 
         afterEach(async () => {
             context.subscriptions.forEach((d) => d.dispose());
-            sandbox.restore();
+            sinon.restore();
         });
 
 
         it('should add the commands to the subscriptions when Git is initialized.', async () => {
-            let test: sinon.SinonSpy;
-            let findGitInfo: sinon.SinonSpy;
-            let findHandler: sinon.SinonSpy;
-
-
-            test = sandbox.stub(Git, 'test').returns(Promise.resolve());
-            findGitInfo = sandbox.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(undefined));
-            findHandler = sandbox.stub(LinkHandlerFinder.prototype, 'find').returns(Promise.resolve(undefined));
+            sinon.stub(Git, 'test').returns(Promise.resolve());
+            sinon.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(undefined));
+            sinon.stub(LinkHandlerFinder.prototype, 'find').returns(undefined);
 
             await (new ExtensionHost()).activate(context);
 
@@ -78,10 +70,10 @@ describe('ExtensionHost', () => {
             let executeCommand: sinon.SinonSpy;
 
 
-            test = sandbox.stub(Git, 'test').returns(Promise.reject(new Error('nope')));
-            findGitInfo = sandbox.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(undefined));
-            findHandler = sandbox.stub(LinkHandlerFinder.prototype, 'find').returns(Promise.resolve(undefined));
-            executeCommand = sandbox.spy(vscode.commands, 'executeCommand');
+            test = sinon.stub(Git, 'test').returns(Promise.reject(new Error('nope')));
+            findGitInfo = sinon.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(undefined));
+            findHandler = sinon.stub(LinkHandlerFinder.prototype, 'find').returns(undefined);
+            executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
             await (new ExtensionHost()).activate(context);
 
@@ -100,10 +92,10 @@ describe('ExtensionHost', () => {
             let executeCommand: sinon.SinonSpy;
 
 
-            test = sandbox.stub(Git, 'test').returns(Promise.resolve());
-            findGitInfo = sandbox.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(undefined));
-            findHandler = sandbox.stub(LinkHandlerFinder.prototype, 'find').returns(Promise.resolve(undefined));
-            executeCommand = sandbox.spy(vscode.commands, 'executeCommand');
+            test = sinon.stub(Git, 'test').returns(Promise.resolve());
+            findGitInfo = sinon.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(undefined));
+            findHandler = sinon.stub(LinkHandlerFinder.prototype, 'find').returns(undefined);
+            executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
             vscode.workspace.workspaceFolders = undefined;
 
@@ -124,10 +116,10 @@ describe('ExtensionHost', () => {
             let executeCommand: sinon.SinonSpy;
 
 
-            test = sandbox.stub(Git, 'test').returns(Promise.resolve());
-            findGitInfo = sandbox.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(undefined));
-            findHandler = sandbox.stub(LinkHandlerFinder.prototype, 'find').returns(Promise.resolve(undefined));
-            executeCommand = sandbox.spy(vscode.commands, 'executeCommand');
+            test = sinon.stub(Git, 'test').returns(Promise.resolve());
+            findGitInfo = sinon.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(undefined));
+            findHandler = sinon.stub(LinkHandlerFinder.prototype, 'find').returns(undefined);
+            executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
             vscode.workspace.workspaceFolders = [{
                 index: 0,
@@ -155,10 +147,10 @@ describe('ExtensionHost', () => {
 
             info = { rootDirectory: 'a', remoteUrl: 'b' };
 
-            test = sandbox.stub(Git, 'test').returns(Promise.resolve());
-            findGitInfo = sandbox.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(info));
-            findHandler = sandbox.stub(LinkHandlerFinder.prototype, 'find').returns(undefined);
-            executeCommand = sandbox.spy(vscode.commands, 'executeCommand');
+            test = sinon.stub(Git, 'test').returns(Promise.resolve());
+            findGitInfo = sinon.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(info));
+            findHandler = sinon.stub(LinkHandlerFinder.prototype, 'find').returns(undefined);
+            executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
             vscode.workspace.workspaceFolders = [{
                 index: 0,
@@ -188,10 +180,10 @@ describe('ExtensionHost', () => {
             info = { rootDirectory: 'a', remoteUrl: 'b' };
             handler = {} as any;
 
-            test = sandbox.stub(Git, 'test').returns(Promise.resolve());
-            findGitInfo = sandbox.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(info));
-            findHandler = sandbox.stub(LinkHandlerFinder.prototype, 'find').returns(handler);
-            executeCommand = sandbox.spy(vscode.commands, 'executeCommand');
+            test = sinon.stub(Git, 'test').returns(Promise.resolve());
+            findGitInfo = sinon.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(info));
+            findHandler = sinon.stub(LinkHandlerFinder.prototype, 'find').returns(handler);
+            executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
             vscode.workspace.workspaceFolders = [{
                 index: 0,
@@ -225,11 +217,11 @@ describe('ExtensionHost', () => {
             info = { rootDirectory: 'a', remoteUrl: 'b' };
             handler = {} as any;
 
-            test = sandbox.stub(Git, 'test').returns(Promise.resolve());
+            test = sinon.stub(Git, 'test').returns(Promise.resolve());
 
-            findGitInfo = sandbox.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(info));
-            findHandler = sandbox.stub(LinkHandlerFinder.prototype, 'find').returns(handler);
-            executeCommand = sandbox.spy(vscode.commands, 'executeCommand');
+            findGitInfo = sinon.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(info));
+            findHandler = sinon.stub(LinkHandlerFinder.prototype, 'find').returns(handler);
+            executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
             vscode.workspace.workspaceFolders = undefined;
 
@@ -264,11 +256,11 @@ describe('ExtensionHost', () => {
             info = { rootDirectory: 'a', remoteUrl: 'b' };
             handler = {} as any;
 
-            test = sandbox.stub(Git, 'test').returns(Promise.resolve());
+            test = sinon.stub(Git, 'test').returns(Promise.resolve());
 
-            findGitInfo = sandbox.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(info));
-            findHandler = sandbox.stub(LinkHandlerFinder.prototype, 'find').returns(handler);
-            executeCommand = sandbox.spy(vscode.commands, 'executeCommand');
+            findGitInfo = sinon.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(info));
+            findHandler = sinon.stub(LinkHandlerFinder.prototype, 'find').returns(handler);
+            executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
             vscode.workspace.workspaceFolders = [
                 {
@@ -310,11 +302,11 @@ describe('ExtensionHost', () => {
             info = { rootDirectory: 'a', remoteUrl: 'b' };
             handler = {} as any;
 
-            test = sandbox.stub(Git, 'test').returns(Promise.resolve());
+            test = sinon.stub(Git, 'test').returns(Promise.resolve());
 
-            findGitInfo = sandbox.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(info));
-            findHandler = sandbox.stub(LinkHandlerFinder.prototype, 'find').returns(handler);
-            executeCommand = sandbox.spy(vscode.commands, 'executeCommand');
+            findGitInfo = sinon.stub(GitInfoFinder.prototype, 'find').returns(Promise.resolve(info));
+            findHandler = sinon.stub(LinkHandlerFinder.prototype, 'find').returns(handler);
+            executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
             vscode.workspace.workspaceFolders = [{
                 index: 0,

@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { Git } from '../git/Git';
 import { Selection } from '../utilities/Selection';
 import { ServerUrl } from '../utilities/ServerUrl';

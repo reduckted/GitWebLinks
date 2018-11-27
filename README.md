@@ -80,6 +80,10 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
+### 1.2.3
+
+* Dependency updates.
+
 ### 1.2.1
 
 * Added support for Visual Studio Team Services repositories in collections.

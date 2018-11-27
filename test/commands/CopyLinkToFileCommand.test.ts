@@ -6,7 +6,6 @@ import { CopyLinkToFileCommand } from '../../src/commands/CopyLinkToFileCommand'
 import { LinkTypeProvider } from '../../src/configuration/LinkTypeProvider';
 import { LinkHandler } from '../../src/links/LinkHandler';
 import { Clipboard } from '../../src/utilities/Clipboard';
-import { WorkspaceData } from '../../src/utilities/WorkspaceData';
 import { WorkspaceMap } from '../../src/utilities/WorkspaceMap';
 
 import { FINAL_URL, GIT_INFO, MockLinkHandler, WORKSPACE_FOLDER } from '../test-helpers/MockLinkHandler';
@@ -14,15 +13,13 @@ import { FINAL_URL, GIT_INFO, MockLinkHandler, WORKSPACE_FOLDER } from '../test-
 
 describe('CopyLinkToFileCommand', () => {
 
-    let sandbox: sinon.SinonSandbox;
     let clipboardStub: sinon.SinonStub;
     let command: CopyLinkToFileCommand | undefined;
 
 
     beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-        sandbox.stub(LinkTypeProvider.prototype, 'getLinkType').returns('branch');
-        clipboardStub = sandbox.stub(Clipboard, 'setText');
+        sinon.stub(LinkTypeProvider.prototype, 'getLinkType').returns('branch');
+        clipboardStub = sinon.stub(Clipboard, 'setText');
     });
 
 
@@ -32,7 +29,7 @@ describe('CopyLinkToFileCommand', () => {
             command = undefined;
         }
 
-        sandbox.restore();
+        sinon.restore();
     });
 
 
@@ -77,7 +74,6 @@ describe('CopyLinkToFileCommand', () => {
 
     it('should copy the URL to the clipboard.', async () => {
         let map: WorkspaceMap;
-        let data: WorkspaceData;
         let handler: LinkHandler;
 
 
@@ -86,12 +82,12 @@ describe('CopyLinkToFileCommand', () => {
         map = new WorkspaceMap();
         map.add(WORKSPACE_FOLDER, GIT_INFO, handler);
 
-        sandbox.stub(map, 'get').returns({
+        sinon.stub(map, 'get').returns({
             handler,
             gitInfo: GIT_INFO
         });
 
-        sandbox.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
+        sinon.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
 
         command = new CopyLinkToFileCommand(map);
 
@@ -108,8 +104,8 @@ describe('CopyLinkToFileCommand', () => {
 
         map = new WorkspaceMap();
 
-        sandbox.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
-        showErrorMessage = sandbox.stub(window, 'showErrorMessage');
+        sinon.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
+        showErrorMessage = sinon.stub(window, 'showErrorMessage');
 
         command = new CopyLinkToFileCommand(map);
 

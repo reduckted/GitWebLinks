@@ -1,7 +1,6 @@
 import { WorkspaceFolder } from 'vscode';
 
 import { GitInfo } from '../git/GitInfo';
-import { BitbucketCloudHandler } from '../links/BitbucketCloudHandler';
 import { LinkHandler } from '../links/LinkHandler';
 import { WorkspaceData } from './WorkspaceData';
 

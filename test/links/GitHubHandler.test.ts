@@ -19,9 +19,6 @@ import { ServerUrl } from '../../src/utilities/ServerUrl';
 
 describe('GitHubHandler', () => {
 
-    let sandbox: sinon.SinonSandbox;
-
-
     function getCloudRemotes(): string[] {
         return [
             'https://github.com/dotnet/corefx.git',
@@ -40,17 +37,12 @@ describe('GitHubHandler', () => {
             }];
         }
 
-        sandbox.stub(CustomServerProvider.prototype, 'getServers').withArgs('gitHubEnterprise').returns(servers);
+        sinon.stub(CustomServerProvider.prototype, 'getServers').withArgs('gitHubEnterprise').returns(servers);
     }
 
 
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
-
     afterEach(() => {
-        sandbox.restore();
+        sinon.restore();
     });
 
 
@@ -123,7 +115,7 @@ describe('GitHubHandler', () => {
             await Git.execute(root, 'add', '.');
             await Git.execute(root, 'commit', '-m', '"initial"');
 
-            sandbox.stub(LinkTypeProvider.prototype, 'getLinkType').callsFake(() => type);
+            sinon.stub(LinkTypeProvider.prototype, 'getLinkType').callsFake(() => type);
             type = 'branch';
         });
 
