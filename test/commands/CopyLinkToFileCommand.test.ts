@@ -1,11 +1,10 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { commands, Uri, window, workspace } from 'vscode';
+import { commands, env, Uri, window, workspace } from 'vscode';
 
 import { CopyLinkToFileCommand } from '../../src/commands/CopyLinkToFileCommand';
 import { LinkTypeProvider } from '../../src/configuration/LinkTypeProvider';
 import { LinkHandler } from '../../src/links/LinkHandler';
-import { Clipboard } from '../../src/utilities/Clipboard';
 import { WorkspaceMap } from '../../src/utilities/WorkspaceMap';
 
 import { FINAL_URL, GIT_INFO, MockLinkHandler, WORKSPACE_FOLDER } from '../test-helpers/MockLinkHandler';
@@ -13,13 +12,13 @@ import { FINAL_URL, GIT_INFO, MockLinkHandler, WORKSPACE_FOLDER } from '../test-
 
 describe('CopyLinkToFileCommand', () => {
 
-    let clipboardStub: sinon.SinonStub;
+    let writeTextStub: sinon.SinonStub;
     let command: CopyLinkToFileCommand | undefined;
 
 
     beforeEach(() => {
         sinon.stub(LinkTypeProvider.prototype, 'getLinkType').returns('branch');
-        clipboardStub = sinon.stub(Clipboard, 'setText');
+        writeTextStub = sinon.stub(env.clipboard, 'writeText').returns(Promise.resolve());
     });
 
 
@@ -93,7 +92,7 @@ describe('CopyLinkToFileCommand', () => {
 
         await commands.executeCommand('gitweblinks.copyFile', Uri.file(`${GIT_INFO.rootDirectory}foo.txt`));
 
-        expect(clipboardStub.calledWith(FINAL_URL)).to.be.true;
+        expect(writeTextStub.calledWith(FINAL_URL)).to.be.true;
     });
 
 
@@ -111,7 +110,7 @@ describe('CopyLinkToFileCommand', () => {
 
         await commands.executeCommand('gitweblinks.copyFile', Uri.file(`${GIT_INFO.rootDirectory}foo.txt`));
 
-        expect(clipboardStub.called).to.be.false;
+        expect(writeTextStub.called).to.be.false;
         expect(showErrorMessage.called).to.be.true;
     });
 

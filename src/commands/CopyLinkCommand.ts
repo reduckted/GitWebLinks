@@ -1,6 +1,5 @@
-import { commands, Disposable, Uri, window, workspace, WorkspaceFolder } from 'vscode';
+import { commands, Disposable, env, Uri, window, workspace, WorkspaceFolder } from 'vscode';
 
-import { Clipboard } from '../utilities/Clipboard';
 import { Selection } from '../utilities/Selection';
 import { WorkspaceData } from '../utilities/WorkspaceData';
 import { WorkspaceMap } from '../utilities/WorkspaceMap';
@@ -39,7 +38,7 @@ export abstract class CopyLinkCommand extends Disposable {
 
                     url = await data.handler.makeUrl(data.gitInfo, resource.fsPath, selection);
 
-                    await Clipboard.setText(url);
+                    await env.clipboard.writeText(url);
 
                 } else {
                     window.showErrorMessage('This workspace is not tracked by Git.');

@@ -74,11 +74,13 @@ There are two commands provided by this extension:
 
 ## Requirements
 
-This extension uses `xclip` on Linux.
-
 This extension requires Git to already be installed and on your PATH. If this isn't suitable for you and you'd prefer to specify the location of Git, please open a new issue in this repository and I'll see what I can do :)
 
 ## Release Notes
+
+### 1.3.0
+
+* Used VS Code's clipboard API. No longer requires `xclip` on Linux!
 
 ### 1.2.3
 

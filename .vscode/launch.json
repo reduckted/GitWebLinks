@@ -1,4 +1,3 @@
-// A launch configuration that compiles the extension and then opens it inside a new window
 {
     "version": "0.1.0",
     "configurations": [
@@ -15,7 +14,7 @@
             "outFiles": [
                 "${workspaceRoot}/out/src/**/*.js"
             ],
-            "preLaunchTask": "npm"
+            "preLaunchTask": "npm: watch"
         },
         {
             "name": "Launch Tests",
@@ -34,7 +33,7 @@
             "outFiles": [
                 "${workspaceRoot}/out/test/**/*.js"
             ],
-            "preLaunchTask": "npm"
+            "preLaunchTask": "npm: watch"
         }
     ]
 }
