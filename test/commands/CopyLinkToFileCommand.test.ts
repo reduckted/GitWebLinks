@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { commands, env, Uri, window, workspace } from 'vscode';
+import { commands, env, MessageItem, MessageOptions, Uri, window, workspace } from 'vscode';
 
 import { CopyLinkToFileCommand } from '../../src/commands/CopyLinkToFileCommand';
 import { LinkTypeProvider } from '../../src/configuration/LinkTypeProvider';
@@ -12,7 +12,7 @@ import { FINAL_URL, GIT_INFO, MockLinkHandler, WORKSPACE_FOLDER } from '../test-
 
 describe('CopyLinkToFileCommand', () => {
 
-    let writeTextStub: sinon.SinonStub;
+    let writeTextStub: sinon.SinonStub<[string], Thenable<void>>;
     let command: CopyLinkToFileCommand | undefined;
 
 
@@ -98,7 +98,9 @@ describe('CopyLinkToFileCommand', () => {
 
     it('should show a notification if the workspace is not in Git.', async () => {
         let map: WorkspaceMap;
-        let showErrorMessage: sinon.SinonStub;
+        let showErrorMessage: sinon.SinonStub<
+            [string, MessageOptions, ...MessageItem[]], Thenable<MessageItem | undefined>
+        >;
 
 
         map = new WorkspaceMap();

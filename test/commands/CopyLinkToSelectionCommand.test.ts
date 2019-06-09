@@ -1,7 +1,19 @@
 import { expect } from 'chai';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import { commands, env, Position, Selection, TextDocument, TextEditor, Uri, window, workspace } from 'vscode';
+import {
+    commands,
+    env,
+    MessageItem,
+    MessageOptions,
+    Position,
+    Selection,
+    TextDocument,
+    TextEditor,
+    Uri,
+    window,
+    workspace
+} from 'vscode';
 
 import { CopyLinkToSelectionCommand } from '../../src/commands/CopyLinkToSelectionCommand';
 import { LinkTypeProvider } from '../../src/configuration/LinkTypeProvider';
@@ -13,13 +25,13 @@ import { FINAL_URL, GIT_INFO, MockLinkHandler, WORKSPACE_FOLDER } from '../test-
 
 describe('CopyLinkToSelectionCommand', () => {
 
-    let writeTextStub: sinon.SinonStub;
+    let writeTextStub: sinon.SinonStub<[string], Thenable<void>>;
     let command: CopyLinkToSelectionCommand | undefined;
 
 
     beforeEach(() => {
         sinon.stub(LinkTypeProvider.prototype, 'getLinkType').returns('branch');
-        writeTextStub = sinon.stub(env.clipboard, 'writeText').returns(Promise.resolve());;
+        writeTextStub = sinon.stub(env.clipboard, 'writeText').returns(Promise.resolve());
     });
 
 
@@ -113,8 +125,9 @@ describe('CopyLinkToSelectionCommand', () => {
 
     it('should show a notification if the workspace is not in Git.', async () => {
         let map: WorkspaceMap;
-        let showErrorMessage: sinon.SinonStub;
-
+        let showErrorMessage: sinon.SinonStub<
+            [string, MessageOptions, ...MessageItem[]], Thenable<MessageItem | undefined>
+        >;
 
         map = new WorkspaceMap();
 

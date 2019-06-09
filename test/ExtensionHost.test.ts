@@ -67,7 +67,7 @@ describe('ExtensionHost', () => {
             let test: sinon.SinonSpy;
             let findGitInfo: sinon.SinonSpy;
             let findHandler: sinon.SinonSpy;
-            let executeCommand: sinon.SinonSpy;
+            let executeCommand: sinon.SinonSpy<[string, ...any[]], Thenable<unknown>>;
 
 
             test = sinon.stub(Git, 'test').returns(Promise.reject(new Error('nope')));
@@ -89,7 +89,7 @@ describe('ExtensionHost', () => {
             let test: sinon.SinonSpy;
             let findGitInfo: sinon.SinonSpy;
             let findHandler: sinon.SinonSpy;
-            let executeCommand: sinon.SinonSpy;
+            let executeCommand: sinon.SinonSpy<[string, ...any[]], Thenable<unknown>>;
 
 
             test = sinon.stub(Git, 'test').returns(Promise.resolve());
@@ -113,7 +113,7 @@ describe('ExtensionHost', () => {
             let test: sinon.SinonSpy;
             let findGitInfo: sinon.SinonSpy;
             let findHandler: sinon.SinonSpy;
-            let executeCommand: sinon.SinonSpy;
+            let executeCommand: sinon.SinonSpy<[string, ...any[]], Thenable<unknown>>;
 
 
             test = sinon.stub(Git, 'test').returns(Promise.resolve());
@@ -141,7 +141,7 @@ describe('ExtensionHost', () => {
             let test: sinon.SinonSpy;
             let findGitInfo: sinon.SinonSpy;
             let findHandler: sinon.SinonSpy;
-            let executeCommand: sinon.SinonSpy;
+            let executeCommand: sinon.SinonSpy<[string, ...any[]], Thenable<unknown>>;
             let info: GitInfo;
 
 
@@ -171,7 +171,7 @@ describe('ExtensionHost', () => {
             let test: sinon.SinonSpy;
             let findGitInfo: sinon.SinonSpy;
             let findHandler: sinon.SinonSpy;
-            let executeCommand: sinon.SinonSpy;
+            let executeCommand: sinon.SinonSpy<[string, ...any[]], Thenable<unknown>>;
             let info: GitInfo;
             let handler: LinkHandler;
             let commands: string[];
@@ -208,7 +208,7 @@ describe('ExtensionHost', () => {
             let test: sinon.SinonSpy;
             let findGitInfo: sinon.SinonSpy;
             let findHandler: sinon.SinonSpy;
-            let executeCommand: sinon.SinonSpy;
+            let executeCommand: sinon.SinonSpy<[string, ...any[]], Thenable<unknown>>;
             let info: GitInfo;
             let handler: LinkHandler;
             let commands: string[];
@@ -247,7 +247,7 @@ describe('ExtensionHost', () => {
             let test: sinon.SinonSpy;
             let findGitInfo: sinon.SinonSpy;
             let findHandler: sinon.SinonSpy;
-            let executeCommand: sinon.SinonSpy;
+            let executeCommand: sinon.SinonSpy<[string, ...any[]], Thenable<unknown>>;
             let info: GitInfo;
             let handler: LinkHandler;
             let commands: string[];
@@ -293,7 +293,7 @@ describe('ExtensionHost', () => {
             let test: sinon.SinonSpy;
             let findGitInfo: sinon.SinonSpy;
             let findHandler: sinon.SinonSpy;
-            let executeCommand: sinon.SinonSpy;
+            let executeCommand: sinon.SinonSpy<[string, ...any[]], Thenable<unknown>>;
             let info: GitInfo;
             let handler: LinkHandler;
             let commands: string[];
