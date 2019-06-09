@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.3.1] - 2019-06-09
+- Dependency updates
+
 ## [1.3.0] - 2018-12-13
 - Used VS Code's clipboard API. No longer requires `xclip` on Linux!
 

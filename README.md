@@ -78,6 +78,10 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
+### 1.3.1
+
+* Dependency updates.
+
 ### 1.3.0
 
 * Used VS Code's clipboard API. No longer requires `xclip` on Linux!
