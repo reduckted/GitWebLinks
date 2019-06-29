@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.4.0] - 2019-06-29
+
+-   Added support for Azure DevOps.
+
 ## [1.3.1] - 2019-06-09
 
 -   Dependency updates

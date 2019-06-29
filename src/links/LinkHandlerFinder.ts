@@ -1,4 +1,5 @@
 import { GitInfo } from '../git/GitInfo';
+import { AzureDevOpsHandler } from './AzureDevOpsHandler';
 import { BitbucketCloudHandler } from './BitbucketCloudHandler';
 import { BitbucketServerHandler } from './BitbucketServerHandler';
 import { GitHubHandler } from './GitHubHandler';
@@ -10,6 +11,7 @@ export class LinkHandlerFinder {
 
     constructor() {
         this.handlers = [
+            new AzureDevOpsHandler(),
             new BitbucketCloudHandler(),
             new BitbucketServerHandler(),
             new GitHubHandler(),

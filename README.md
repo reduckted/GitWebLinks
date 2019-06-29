@@ -9,6 +9,7 @@ Works with:
 -   Bitbucket Server
 -   Bitbucket Cloud
 -   Visual Studio Team Services
+-   Azure Dev Ops
 
 For GitHub Enterprise and Bitbucket Server, there is some configuration required. [See below for more details](#github-enterprise-and-bitbucket-server).
 
@@ -78,6 +79,10 @@ There are two commands provided by this extension:
 This extension requires Git to already be installed and on your PATH. If this isn't suitable for you and you'd prefer to specify the location of Git, please open a new issue in this repository and I'll see what I can do :)
 
 ## Release Notes
+
+### 1.4.0
+
+-   Added support for Azure DevOps.
 
 ### 1.3.1
 
