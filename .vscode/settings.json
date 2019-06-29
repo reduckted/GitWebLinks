@@ -1,12 +1,9 @@
 {
     "files.exclude": {
-        "out": true,
-        "node_modules": true,
-        ".vscode-test": true
-    },
-    "search.exclude": {
-        "out": true,
-        ".vscode-test": true
+        "out/": true,
+        "node_modules/": true,
+        ".vscode-test/": true,
+        "dist/": true
     },
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {

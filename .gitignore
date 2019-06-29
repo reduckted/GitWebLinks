@@ -1,9 +1,4 @@
-.vscode/*
 .vscode-test/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 
 # Windows thumbnail cache files
 Thumbs.db
@@ -87,5 +82,6 @@ typings/
 # dotenv environment variables file
 .env
 
+dist/
 out/
 *.vsix
