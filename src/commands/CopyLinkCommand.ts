@@ -1,31 +1,37 @@
-import { commands, Disposable, env, Uri, window, workspace, WorkspaceFolder } from 'vscode';
+import {
+    commands,
+    Disposable,
+    env,
+    Uri,
+    window,
+    workspace,
+    WorkspaceFolder
+} from 'vscode';
 
 import { Selection } from '../utilities/Selection';
 import { WorkspaceData } from '../utilities/WorkspaceData';
 import { WorkspaceMap } from '../utilities/WorkspaceMap';
 
-
 export abstract class CopyLinkCommand extends Disposable {
-
     private disposable: Disposable;
-
 
     constructor(identifier: string, private workspaceMap: WorkspaceMap) {
         super(() => this.disposable && this.disposable.dispose());
-        this.disposable = commands.registerCommand(identifier, this.execute, this);
+        this.disposable = commands.registerCommand(
+            identifier,
+            this.execute,
+            this
+        );
     }
 
-
     protected async execute(resource: Uri | undefined): Promise<any> {
-        if (resource && (resource.scheme === 'file')) {
+        if (resource && resource.scheme === 'file') {
             let folder: WorkspaceFolder | undefined;
-
 
             folder = workspace.getWorkspaceFolder(resource);
 
             if (folder) {
                 let data: WorkspaceData | undefined;
-
 
                 data = this.workspaceMap.get(folder);
 
@@ -33,21 +39,23 @@ export abstract class CopyLinkCommand extends Disposable {
                     let selection: Selection | undefined;
                     let url: string;
 
-
                     selection = this.getLineSelection();
 
-                    url = await data.handler.makeUrl(data.gitInfo, resource.fsPath, selection);
+                    url = await data.handler.makeUrl(
+                        data.gitInfo,
+                        resource.fsPath,
+                        selection
+                    );
 
                     await env.clipboard.writeText(url);
-
                 } else {
-                    window.showErrorMessage('This workspace is not tracked by Git.');
+                    window.showErrorMessage(
+                        'This workspace is not tracked by Git.'
+                    );
                 }
             }
         }
     }
 
-
     protected abstract getLineSelection(): Selection | undefined;
-
 }

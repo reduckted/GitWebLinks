@@ -4,17 +4,13 @@ import { Selection } from '../utilities/Selection';
 import { WorkspaceMap } from '../utilities/WorkspaceMap';
 import { CopyLinkCommand } from './CopyLinkCommand';
 
-
 export class CopyLinkToSelectionCommand extends CopyLinkCommand {
-
     constructor(workspaceMap: WorkspaceMap) {
         super('gitweblinks.copySelection', workspaceMap);
     }
 
-
     protected getLineSelection(): Selection | undefined {
         let editor: TextEditor | undefined;
-
 
         editor = window.activeTextEditor;
 
@@ -29,5 +25,4 @@ export class CopyLinkToSelectionCommand extends CopyLinkCommand {
 
         return undefined;
     }
-
 }

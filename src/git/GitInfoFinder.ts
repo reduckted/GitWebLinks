@@ -4,24 +4,19 @@ import * as path from 'path';
 import { Git } from './Git';
 import { GitInfo } from './GitInfo';
 
-
 interface Remote {
     name: string;
     url: string;
 }
 
-
 export class GitInfoFinder {
-
     public async find(workspaceRoot: string): Promise<GitInfo | undefined> {
         let root: string | undefined;
-
 
         root = await this.findGitRoot(workspaceRoot);
 
         if (root) {
             let remote: string | undefined;
-
 
             remote = await this.findRemote(root);
 
@@ -33,16 +28,15 @@ export class GitInfoFinder {
         return undefined;
     }
 
-
-    private async findGitRoot(startingDirectory: string): Promise<string | undefined> {
+    private async findGitRoot(
+        startingDirectory: string
+    ): Promise<string | undefined> {
         let dir: string;
-
 
         dir = startingDirectory;
 
         while (dir) {
             let parent: string;
-
 
             if (await this.directoryExists(path.join(dir, '.git'))) {
                 return dir;
@@ -60,7 +54,6 @@ export class GitInfoFinder {
         return undefined;
     }
 
-
     private async directoryExists(dir: string): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
             fs.stat(dir, (err, stats) => {
@@ -69,16 +62,17 @@ export class GitInfoFinder {
         });
     }
 
-
     private async findRemote(root: string): Promise<string | undefined> {
         let data: string;
         let remotes: Remote[];
         let remote: Remote;
 
-
         data = await Git.execute(root, 'remote', '-v');
 
-        remotes = data.split('\n').filter((x) => !!x).map((x) => this.parseRemote(x));
+        remotes = data
+            .split('\n')
+            .filter((x) => !!x)
+            .map((x) => this.parseRemote(x));
 
         // Use the "origin" remote if it exists;
         // otherwise, just use the first remote.
@@ -96,17 +90,14 @@ export class GitInfoFinder {
         return undefined;
     }
 
-
     private parseRemote(line: string): Remote {
         let name: string;
         let urlAndType: string;
         let url: string;
-
 
         [name, urlAndType] = line.split('\t');
         [url] = urlAndType.split(' ');
 
         return { name, url };
     }
-
 }

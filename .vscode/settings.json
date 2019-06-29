@@ -7,5 +7,9 @@
     "search.exclude": {
         "out": true,
         ".vscode-test": true
+    },
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": true
     }
 }

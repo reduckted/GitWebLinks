@@ -3,11 +3,12 @@
 Copy links to files in their online Git repositories from inside Visual Studio Code.
 
 Works with:
-* GitHub
-* GitHub Enterprise
-* Bitbucket Server
-* Bitbucket Cloud
-* Visual Studio Team Services
+
+-   GitHub
+-   GitHub Enterprise
+-   Bitbucket Server
+-   Bitbucket Cloud
+-   Visual Studio Team Services
 
 For GitHub Enterprise and Bitbucket Server, there is some configuration required. [See below for more details](#github-enterprise-and-bitbucket-server).
 
@@ -69,8 +70,8 @@ Make sure you include any port numbers (if it's not port 80) and context paths.
 
 There are two commands provided by this extension:
 
-* `gitweblinks.copyFile`
-* `gitweblinks.copySelection`
+-   `gitweblinks.copyFile`
+-   `gitweblinks.copySelection`
 
 ## Requirements
 
@@ -80,30 +81,30 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ### 1.3.1
 
-* Dependency updates.
+-   Dependency updates.
 
 ### 1.3.0
 
-* Used VS Code's clipboard API. No longer requires `xclip` on Linux!
+-   Used VS Code's clipboard API. No longer requires `xclip` on Linux!
 
 ### 1.2.3
 
-* Dependency updates.
+-   Dependency updates.
 
 ### 1.2.1
 
-* Added support for Visual Studio Team Services repositories in collections.
+-   Added support for Visual Studio Team Services repositories in collections.
 
 ### 1.2.0
 
-* Added the ability to generate links using the current branch name of current commit hash.
-* Added support for Visual Studio Team Services.
-* Fixed a bug that would create the wrong URL when there was a space in the file path.
+-   Added the ability to generate links using the current branch name of current commit hash.
+-   Added support for Visual Studio Team Services.
+-   Fixed a bug that would create the wrong URL when there was a space in the file path.
 
 ### 1.1.1
 
-* Added support for multi-root workspaces.
+-   Added support for multi-root workspaces.
 
 ### 1.0.0
 
-* Initial release
+-   Initial release

@@ -8,13 +8,10 @@ import { LinkHandler } from '../../src/links/LinkHandler';
 import { LinkHandlerFinder } from '../../src/links/LinkHandlerFinder';
 import { VisualStudioTeamServicesHandler } from '../../src/links/VisualStudioTeamServicesHandler';
 
-
 describe('LinkHandlerFinder', () => {
-
     afterEach(() => {
         sinon.restore();
     });
-
 
     function getHandlerTypes(): any[] {
         return [
@@ -25,13 +22,10 @@ describe('LinkHandlerFinder', () => {
         ];
     }
 
-
     describe('find', () => {
-
         it('should return undefined when no handler matches.', () => {
             let finder: LinkHandlerFinder;
             let result: LinkHandler | undefined;
-
 
             getHandlerTypes().forEach((type) => {
                 (sinon.stub(type.prototype, 'isMatch') as any).returns(false);
@@ -44,15 +38,15 @@ describe('LinkHandlerFinder', () => {
             expect(result).to.be.undefined;
         });
 
-
         getHandlerTypes().forEach((handler) => {
             it(`should return the ${handler.name} when it matches.`, () => {
                 let finder: LinkHandlerFinder;
                 let result: LinkHandler | undefined;
 
-
                 getHandlerTypes().forEach((type) => {
-                    (sinon.stub(type.prototype, 'isMatch') as any).returns(type === handler);
+                    (sinon.stub(type.prototype, 'isMatch') as any).returns(
+                        type === handler
+                    );
                 });
 
                 finder = new LinkHandlerFinder();
@@ -62,7 +56,5 @@ describe('LinkHandlerFinder', () => {
                 expect(result).to.be.an.instanceOf(handler);
             });
         });
-
     });
-
 });

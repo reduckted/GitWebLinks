@@ -4,11 +4,8 @@ import { Selection } from '../utilities/Selection';
 import { ServerUrl } from '../utilities/ServerUrl';
 import { LinkHandler } from './LinkHandler';
 
-
 export class BitbucketServerHandler extends LinkHandler {
-
     private customServerProvider: CustomServerProvider;
-
 
     constructor() {
         super();
@@ -19,11 +16,13 @@ export class BitbucketServerHandler extends LinkHandler {
         return this.customServerProvider.getServers('bitbucketServer');
     }
 
-
     protected async getCurrentBranch(rootDirectory: string): Promise<string> {
-        return (await Git.execute(rootDirectory, 'symbolic-ref', 'HEAD')).trim();
+        return (await Git.execute(
+            rootDirectory,
+            'symbolic-ref',
+            'HEAD'
+        )).trim();
     }
-
 
     protected createUrl(
         baseUrl: string,
@@ -31,17 +30,17 @@ export class BitbucketServerHandler extends LinkHandler {
         branchOrHash: string,
         relativePathToFile: string
     ): string {
-
         let match: RegExpExecArray | null;
         let project: string;
         let repo: string;
         let url: string;
 
-
         match = /([^\/]+)\/([^\/]+)$/.exec(repositoryPath);
 
         if (!match) {
-            throw new Error('Could not find the project and repository names in the remote URL.');
+            throw new Error(
+                'Could not find the project and repository names in the remote URL.'
+            );
         }
 
         project = match[1];
@@ -61,10 +60,8 @@ export class BitbucketServerHandler extends LinkHandler {
         return url + `?at=${encodeURIComponent(branchOrHash)}`;
     }
 
-
     protected getSelectionHash(filePath: string, selection: Selection): string {
         let hash: string;
-
 
         hash = `#${selection.startLine}`;
 
@@ -74,5 +71,4 @@ export class BitbucketServerHandler extends LinkHandler {
 
         return hash;
     }
-
 }
