@@ -80,6 +80,10 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
+## 1.4.1
+
+-   Fixed selection ranges in Azure DevOps.
+
 ### 1.4.0
 
 -   Added support for Azure DevOps.

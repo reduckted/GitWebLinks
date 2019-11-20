@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.4.1] - 2019-11-20
+
+-   Fixed selection ranges in Azure DevOps.
+
 ## [1.4.0] - 2019-06-29
 
 -   Added support for Azure DevOps.
