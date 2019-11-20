@@ -19,7 +19,9 @@ export class CopyLinkToSelectionCommand extends CopyLinkCommand {
             // editor, but we need them to be one-based.
             return {
                 startLine: editor.selection.start.line + 1,
-                endLine: editor.selection.end.line + 1
+                endLine: editor.selection.end.line + 1,
+                startColumn: editor.selection.start.character + 1,
+                endColumn: editor.selection.end.character + 1
             };
         }
 

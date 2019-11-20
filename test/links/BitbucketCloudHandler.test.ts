@@ -126,7 +126,9 @@ describe('BitbucketCloudHandler', () => {
             expect(
                 await handler.makeUrl(info, fileName, {
                     startLine: 2,
-                    endLine: 2
+                    endLine: 2,
+                    startColumn: 1,
+                    endColumn: 1
                 })
             ).to.equal(
                 'https://bitbucket.org/atlassian/atlassian-bamboo_rest/src/master/lib/puppet/feature/restclient.rb#restclient.rb-2'
@@ -149,7 +151,9 @@ describe('BitbucketCloudHandler', () => {
             expect(
                 await handler.makeUrl(info, fileName, {
                     startLine: 1,
-                    endLine: 3
+                    endLine: 3,
+                    startColumn: 1,
+                    endColumn: 1
                 })
             ).to.equal(
                 'https://bitbucket.org/atlassian/atlassian-bamboo_rest/src/master/lib/puppet/feature/restclient.rb#restclient.rb-1:3'

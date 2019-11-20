@@ -151,7 +151,9 @@ describe('VisualStudioTeamServicesHandler', () => {
             expect(
                 await handler.makeUrl(info, fileName, {
                     startLine: 2,
-                    endLine: 2
+                    endLine: 2,
+                    startColumn: 1,
+                    endColumn: 1
                 })
             ).to.equal(
                 'https://foo.visualstudio.com/_git/MyRepo?path=%2Fsrc%2Ffile.cs&version=GBmaster&line=2'
@@ -173,7 +175,9 @@ describe('VisualStudioTeamServicesHandler', () => {
             expect(
                 await handler.makeUrl(info, fileName, {
                     startLine: 1,
-                    endLine: 3
+                    endLine: 3,
+                    startColumn: 1,
+                    endColumn: 1
                 })
             ).to.equal(
                 'https://foo.visualstudio.com/_git/MyRepo?path=%2Fsrc%2Ffile.cs&version=GBmaster&line=1&lineEnd=3'

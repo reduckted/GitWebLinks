@@ -236,7 +236,9 @@ describe('GitHubHandler', () => {
             expect(
                 await handler.makeUrl(info, fileName, {
                     startLine: 38,
-                    endLine: 38
+                    endLine: 38,
+                    startColumn: 1,
+                    endColumn: 1
                 })
             ).to.equal(
                 'https://github.com/dotnet/corefx/blob/master/src/System.IO.FileSystem/src/System/IO/Directory.cs#L38'
@@ -263,7 +265,9 @@ describe('GitHubHandler', () => {
             expect(
                 await handler.makeUrl(info, fileName, {
                     startLine: 38,
-                    endLine: 49
+                    endLine: 49,
+                    startColumn: 1,
+                    endColumn: 1
                 })
             ).to.equal(
                 'https://github.com/dotnet/corefx/blob/master/src/System.IO.FileSystem/src/System/IO/Directory.cs#L38-L49'

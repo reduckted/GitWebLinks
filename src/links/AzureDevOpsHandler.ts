@@ -74,7 +74,29 @@ export class AzureDevOpsHandler extends LinkHandler {
         args = `&line=${selection.startLine}`;
 
         if (selection.startLine !== selection.endLine) {
+            // The selection spans multiple lines. Add the end line number.
             args += `&lineEnd=${selection.endLine}`;
+
+            // Multi-line selections always need to specify the start
+            // and end columns, otherwise nothing ends up being selected.
+            args += `&lineStartColumn=${selection.startColumn}&lineEndColumn=${selection.endColumn}`;
+        } else {
+            // If the single-line selection is an actual selection as opposed to the caret
+            // being somewhere on the line but not actually selecting any text, then we will
+            // include that same selection range in the link. If there is no selected text, then
+            // we'll leave the start and end columns out. If we include them when they are the same
+            // value, Azure DevOps will still scroll to the line, but the line won't be highlighted.
+            if (selection.startColumn !== selection.endColumn) {
+                args += `&lineStartColumn=${selection.startColumn}&lineEndColumn=${selection.endColumn}`;
+            } else {
+                // The modern repository landing page in Azure DevOps won't highlight
+                // any text if we only provide a start line number. We also need to include
+                // the start column and end column. Since there is no actual text selected,
+                // we will select the whole line by setting the end line number to the next
+                // line and the start and end columns to the start of each line.
+                args += `&lineEnd=${selection.startLine +
+                    1}&lineStartColumn=1&lineEndColumn=1`;
+            }
         }
 
         return args;

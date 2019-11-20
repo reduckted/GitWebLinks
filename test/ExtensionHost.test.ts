@@ -121,7 +121,9 @@ describe('ExtensionHost', () => {
                 .returns(undefined);
             executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
-            vscode.workspace.workspaceFolders = undefined;
+            sinon
+                .stub(vscode.workspace, 'workspaceFolders')
+                .get(() => undefined);
 
             await new ExtensionHost().activate(context);
 
@@ -154,13 +156,13 @@ describe('ExtensionHost', () => {
                 .returns(undefined);
             executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
-            vscode.workspace.workspaceFolders = [
+            sinon.stub(vscode.workspace, 'workspaceFolders').get(() => [
                 {
                     index: 0,
                     name: 'foo',
                     uri: vscode.Uri.parse('file:///abc')
                 }
-            ];
+            ]);
 
             await new ExtensionHost().activate(context);
 
@@ -196,13 +198,13 @@ describe('ExtensionHost', () => {
                 .returns(undefined);
             executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
-            vscode.workspace.workspaceFolders = [
+            sinon.stub(vscode.workspace, 'workspaceFolders').get(() => [
                 {
                     index: 0,
                     name: 'foo',
                     uri: vscode.Uri.parse('file:///abc')
                 }
-            ];
+            ]);
 
             await new ExtensionHost().activate(context);
 
@@ -240,13 +242,13 @@ describe('ExtensionHost', () => {
                 .returns(handler);
             executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
-            vscode.workspace.workspaceFolders = [
+            sinon.stub(vscode.workspace, 'workspaceFolders').get(() => [
                 {
                     index: 0,
                     name: 'foo',
                     uri: vscode.Uri.parse('file:///abc')
                 }
-            ];
+            ]);
 
             await new ExtensionHost().activate(context);
 
@@ -289,7 +291,9 @@ describe('ExtensionHost', () => {
                 .returns(handler);
             executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
-            vscode.workspace.workspaceFolders = undefined;
+            sinon
+                .stub(vscode.workspace, 'workspaceFolders')
+                .get(() => undefined);
 
             await new ExtensionHost().activate(context);
 
@@ -343,7 +347,7 @@ describe('ExtensionHost', () => {
                 .returns(handler);
             executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
-            vscode.workspace.workspaceFolders = [
+            sinon.stub(vscode.workspace, 'workspaceFolders').get(() => [
                 {
                     index: 0,
                     name: 'foo',
@@ -354,7 +358,7 @@ describe('ExtensionHost', () => {
                     name: 'bar',
                     uri: vscode.Uri.parse('file:///bar')
                 }
-            ];
+            ]);
 
             await new ExtensionHost().activate(context);
 
@@ -367,7 +371,7 @@ describe('ExtensionHost', () => {
 
             await onDidChangeWorkspaceFolders({
                 added: [],
-                removed: [vscode.workspace.workspaceFolders[0]]
+                removed: [vscode.workspace.workspaceFolders![0]]
             });
 
             expect(executeCommand).to.have.not.been.calledWith(
@@ -402,13 +406,13 @@ describe('ExtensionHost', () => {
                 .returns(handler);
             executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
-            vscode.workspace.workspaceFolders = [
+            sinon.stub(vscode.workspace, 'workspaceFolders').get(() => [
                 {
                     index: 0,
                     name: 'foo',
                     uri: vscode.Uri.parse('file:///foo')
                 }
-            ];
+            ]);
 
             await new ExtensionHost().activate(context);
 
@@ -421,7 +425,7 @@ describe('ExtensionHost', () => {
 
             await onDidChangeWorkspaceFolders({
                 added: [],
-                removed: [vscode.workspace.workspaceFolders[0]]
+                removed: [vscode.workspace.workspaceFolders![0]]
             });
 
             expect(executeCommand).to.have.been.calledWith(

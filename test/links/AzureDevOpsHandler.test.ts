@@ -107,7 +107,7 @@ describe('VisualStudioTeamServicesHandler', () => {
             );
         });
 
-        it('creates correct link with single line selection.', async () => {
+        it('creates correct link with single line selection with no width.', async () => {
             let handler: AzureDevOpsHandler;
             let info: GitInfo;
             let fileName: string;
@@ -122,10 +122,36 @@ describe('VisualStudioTeamServicesHandler', () => {
             expect(
                 await handler.makeUrl(info, fileName, {
                     startLine: 2,
-                    endLine: 2
+                    endLine: 2,
+                    startColumn: 5,
+                    endColumn: 5
                 })
             ).to.equal(
-                'https://dev.azure.com/user/MyProject/_git/MyRepo?path=%2Fsrc%2Ffile.cs&version=GBmaster&line=2'
+                'https://dev.azure.com/user/MyProject/_git/MyRepo?path=%2Fsrc%2Ffile.cs&version=GBmaster&line=2&lineEnd=3&lineStartColumn=1&lineEndColumn=1'
+            );
+        });
+
+        it('creates correct link with single line selection with non-zero width.', async () => {
+            let handler: AzureDevOpsHandler;
+            let info: GitInfo;
+            let fileName: string;
+
+            info = {
+                rootDirectory: root,
+                remoteUrl: 'git@ssh.dev.azure.com:v3/user/MyProject/MyRepo'
+            };
+            fileName = path.join(root, 'src/file.cs');
+            handler = new AzureDevOpsHandler();
+
+            expect(
+                await handler.makeUrl(info, fileName, {
+                    startLine: 2,
+                    endLine: 5,
+                    startColumn: 6,
+                    endColumn: 9
+                })
+            ).to.equal(
+                'https://dev.azure.com/user/MyProject/_git/MyRepo?path=%2Fsrc%2Ffile.cs&version=GBmaster&line=2&lineEnd=5&lineStartColumn=6&lineEndColumn=9'
             );
         });
 
@@ -144,10 +170,12 @@ describe('VisualStudioTeamServicesHandler', () => {
             expect(
                 await handler.makeUrl(info, fileName, {
                     startLine: 1,
-                    endLine: 3
+                    endLine: 3,
+                    startColumn: 6,
+                    endColumn: 11
                 })
             ).to.equal(
-                'https://dev.azure.com/user/MyProject/_git/MyRepo?path=%2Fsrc%2Ffile.cs&version=GBmaster&line=1&lineEnd=3'
+                'https://dev.azure.com/user/MyProject/_git/MyRepo?path=%2Fsrc%2Ffile.cs&version=GBmaster&line=1&lineEnd=3&lineStartColumn=6&lineEndColumn=11'
             );
         });
 

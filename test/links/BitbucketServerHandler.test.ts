@@ -206,7 +206,9 @@ describe('BitbucketServerHandler', () => {
             expect(
                 await handler.makeUrl(info, fileName, {
                     startLine: 2,
-                    endLine: 2
+                    endLine: 2,
+                    startColumn: 1,
+                    endColumn: 1
                 })
             ).to.equal(
                 'https://local-bitbucket:7990/context/projects/bb/repos/my-code/browse/lib/server/main.cs?at=refs%2Fheads%2Fmaster#2'
@@ -228,7 +230,9 @@ describe('BitbucketServerHandler', () => {
             expect(
                 await handler.makeUrl(info, fileName, {
                     startLine: 10,
-                    endLine: 23
+                    endLine: 23,
+                    startColumn: 1,
+                    endColumn: 1
                 })
             ).to.equal(
                 'https://local-bitbucket:7990/context/projects/bb/repos/my-code/browse/lib/server/main.cs?at=refs%2Fheads%2Fmaster#10-23'

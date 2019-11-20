@@ -95,8 +95,8 @@ describe('CopyLinkToSelectionCommand', () => {
         editor = await window.showTextDocument(doc);
 
         editor.selection = new Selection(
-            new Position(1, 3),
-            new Position(5, 2)
+            new Position(1, 13),
+            new Position(5, 12)
         );
 
         await commands.executeCommand(
@@ -104,7 +104,12 @@ describe('CopyLinkToSelectionCommand', () => {
             Uri.file(`${GIT_INFO.rootDirectory}foo.txt`)
         );
 
-        expect(handler.selection).to.deep.equal({ startLine: 2, endLine: 6 });
+        expect(handler.selection).to.deep.equal({
+            startLine: 2,
+            endLine: 6,
+            startColumn: 14,
+            endColumn: 13
+        });
     });
 
     it('should copy the URL to the clipboard.', async () => {
