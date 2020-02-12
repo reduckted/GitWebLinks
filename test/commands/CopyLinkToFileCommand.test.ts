@@ -106,6 +106,77 @@ describe('CopyLinkToFileCommand', () => {
         expect(writeTextStub.calledWith(FINAL_URL)).to.be.true;
     });
 
+    it('should use the active document when no resource is passed.', async () => {
+        let map: WorkspaceMap;
+        let handler: LinkHandler;
+
+        handler = new MockLinkHandler();
+
+        map = new WorkspaceMap();
+        map.add(WORKSPACE_FOLDER, GIT_INFO, handler);
+
+        sinon.stub(map, 'get').returns({
+            handler,
+            gitInfo: GIT_INFO
+        });
+
+        sinon.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
+        sinon.stub(window, 'activeTextEditor').value({
+            document: { uri: Uri.file(`${GIT_INFO.rootDirectory}foo.txt`) }
+        });
+
+        command = new CopyLinkToFileCommand(map);
+
+        await commands.executeCommand('gitweblinks.copyFile');
+
+        expect(writeTextStub.calledWith(FINAL_URL)).to.be.true;
+    });
+
+    it('should show a notification when no resource is passed and there is no active document.', async () => {
+        let map: WorkspaceMap;
+        let showErrorMessage: sinon.SinonStub<
+            [string, MessageOptions, ...MessageItem[]],
+            Thenable<MessageItem | undefined>
+        >;
+
+        map = new WorkspaceMap();
+
+        sinon.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
+        sinon.stub(window, 'activeTextEditor').value(undefined);
+        showErrorMessage = sinon.stub(window, 'showErrorMessage');
+
+        command = new CopyLinkToFileCommand(map);
+
+        await commands.executeCommand('gitweblinks.copyFile');
+
+        expect(writeTextStub.called).to.be.false;
+        expect(showErrorMessage.called).to.be.true;
+    });
+
+    it('should show a notification when the file is not in a workspace.', async () => {
+        let map: WorkspaceMap;
+        let showErrorMessage: sinon.SinonStub<
+            [string, MessageOptions, ...MessageItem[]],
+            Thenable<MessageItem | undefined>
+        >;
+
+        map = new WorkspaceMap();
+
+        sinon.stub(workspace, 'getWorkspaceFolder').returns(undefined);
+        sinon.stub(window, 'activeTextEditor').value(undefined);
+        showErrorMessage = sinon.stub(window, 'showErrorMessage');
+
+        command = new CopyLinkToFileCommand(map);
+
+        await commands.executeCommand(
+            'gitweblinks.copyFile',
+            Uri.file(`${GIT_INFO.rootDirectory}foo.txt`)
+        );
+
+        expect(writeTextStub.called).to.be.false;
+        expect(showErrorMessage.called).to.be.true;
+    });
+
     it('should show a notification if the workspace is not in Git.', async () => {
         let map: WorkspaceMap;
         let showErrorMessage: sinon.SinonStub<

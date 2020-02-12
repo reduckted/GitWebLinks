@@ -25,6 +25,14 @@ export abstract class CopyLinkCommand extends Disposable {
     }
 
     protected async execute(resource: Uri | undefined): Promise<any> {
+        // When the command is run from a menu, the resource parameter refers
+        // to the file that the menu was opened from. When the command is run
+        // from the command palette or via a keyboard shortcut, there won't be a
+        // resource. In those cases we will use the document in the active editor.
+        if (!resource) {
+            resource = window.activeTextEditor?.document.uri;
+        }
+
         if (resource && resource.scheme === 'file') {
             let folder: WorkspaceFolder | undefined;
 
@@ -48,12 +56,24 @@ export abstract class CopyLinkCommand extends Disposable {
                     );
 
                     await env.clipboard.writeText(url);
+
+                    window.showInformationMessage(
+                        'Web link copied to the clipboard.'
+                    );
                 } else {
                     window.showErrorMessage(
                         'This workspace is not tracked by Git.'
                     );
                 }
+            } else {
+                window.showErrorMessage(
+                    "Cannot copy a link to the file because it's not in a workspace."
+                );
             }
+        } else {
+            window.showErrorMessage(
+                'Cannot copy a link because no file is selected.'
+            );
         }
     }
 

@@ -2,7 +2,7 @@
     "defaultSeverity": "warning",
     "extends": ["tslint:recommended"],
     "rules": {
-        "quotemark": [true, "single"],
+        "quotemark": [false],
         "no-consecutive-blank-lines": [true, 2],
         "prefer-const": [false],
         "interface-name": [false],
