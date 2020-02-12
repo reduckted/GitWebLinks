@@ -73,11 +73,13 @@
         "commands": [
             {
                 "command": "gitweblinks.copyFile",
-                "title": "Copy Web Link to File"
+                "title": "Copy Web Link to File",
+                "category": "Git Web Links"
             },
             {
                 "command": "gitweblinks.copySelection",
-                "title": "Copy Web Link to Selection"
+                "title": "Copy Web Link to Selection",
+                "category": "Git Web Links"
             }
         ],
         "menus": {
