@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.5.0] - 2020-02-12
+
+-   Commands can now be run via the command palette or shortcut keys (#2).
+-   Shows a notification when a link is copied.
+-   Commands are listed under the "Git Web Links" category.
+-   Dependency updates.
+
 ## [1.4.1] - 2019-11-20
 
 -   Fixed selection ranges in Azure DevOps.
@@ -10,7 +17,7 @@
 
 ## [1.3.1] - 2019-06-09
 
--   Dependency updates
+-   Dependency updates.
 
 ## [1.3.0] - 2018-12-13
 
