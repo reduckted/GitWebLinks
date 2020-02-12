@@ -297,7 +297,7 @@ describe('ExtensionHost', () => {
 
             await new ExtensionHost().activate(context);
 
-            expect(onDidChangeWorkspaceFolders).to.not.be.undefined;
+            expect(onDidChangeWorkspaceFolders).to.exist;
             expect(executeCommand).to.have.been.calledWith(
                 'setContext',
                 'gitweblinks:canCopy',
@@ -362,7 +362,7 @@ describe('ExtensionHost', () => {
 
             await new ExtensionHost().activate(context);
 
-            expect(onDidChangeWorkspaceFolders).to.not.be.undefined;
+            expect(onDidChangeWorkspaceFolders).to.exist;
             expect(executeCommand).to.have.been.calledWith(
                 'setContext',
                 'gitweblinks:canCopy',
@@ -392,6 +392,7 @@ describe('ExtensionHost', () => {
             let info: GitInfo;
             let handler: LinkHandler;
             let commands: string[];
+            let folder: vscode.WorkspaceFolder;
 
             info = { rootDirectory: 'a', remoteUrl: 'b' };
             handler = {} as any;
@@ -406,17 +407,19 @@ describe('ExtensionHost', () => {
                 .returns(handler);
             executeCommand = sinon.spy(vscode.commands, 'executeCommand');
 
-            sinon.stub(vscode.workspace, 'workspaceFolders').get(() => [
-                {
-                    index: 0,
-                    name: 'foo',
-                    uri: vscode.Uri.parse('file:///foo')
-                }
-            ]);
+            folder = {
+                index: 0,
+                name: 'foo',
+                uri: vscode.Uri.parse('file:///foo')
+            };
+
+            sinon
+                .stub(vscode.workspace, 'workspaceFolders')
+                .get(() => [folder]);
 
             await new ExtensionHost().activate(context);
 
-            expect(onDidChangeWorkspaceFolders).to.not.be.undefined;
+            expect(onDidChangeWorkspaceFolders).to.exist;
             expect(executeCommand).to.have.been.calledWith(
                 'setContext',
                 'gitweblinks:canCopy',
