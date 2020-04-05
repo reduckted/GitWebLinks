@@ -80,18 +80,18 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
-## 1.5.1
+### 1.5.1
 
 -   Dependency updates.
 
-## 1.5.0
+### 1.5.0
 
 -   Commands can now be run via the command palette or shortcut keys (#2).
 -   Shows a notification when a link is copied.
 -   Commands are listed under the "Git Web Links" category.
 -   Dependency updates.
 
-## 1.4.1
+### 1.4.1
 
 -   Fixed selection ranges in Azure DevOps.
 

@@ -22,4 +22,4 @@ jobs:
             - name: 'Publish'
               env:
                   PUBLISHER_TOKEN: ${{ secrets.PUBLISHER_TOKEN }}
-              run: node node_modules/.bin/vsce publish -p $PUBLISHER_TOKEN
+              run: node_modules/.bin/vsce publish -p $PUBLISHER_TOKEN
