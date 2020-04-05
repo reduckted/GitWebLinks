@@ -28,10 +28,10 @@
     "license": "MIT",
     "scripts": {
         "vscode:prepublish": "webpack --mode production",
-        "webpack": "webpack --mode development",
-        "webpack-dev": "webpack --mode development --watch",
-        "test-compile": "tsc -p ./",
-        "lint": "tslint -p tsconfig.json"
+        "lint": "tslint -p tsconfig.json",
+        "test": "tsc -p ./",
+        "build": "webpack --mode development",
+        "build:dev": "webpack --mode development --watch"
     },
     "dependencies": {
         "spawn-rx": "2.0.12"
