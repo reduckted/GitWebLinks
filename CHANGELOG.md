@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.5.1] - 2020-04-05
+
+-   Dependency updates.
+
 ## [1.5.0] - 2020-02-12
 
 -   Commands can now be run via the command palette or shortcut keys (#2).

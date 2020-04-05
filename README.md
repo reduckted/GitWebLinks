@@ -80,6 +80,10 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
+## 1.5.1
+
+-   Dependency updates.
+
 ## 1.5.0
 
 -   Commands can now be run via the command palette or shortcut keys (#2).
