@@ -31,12 +31,14 @@ export class GitHubHandler extends LinkHandler {
     }
 
     protected async getCurrentBranch(rootDirectory: string): Promise<string> {
-        return (await Git.execute(
-            rootDirectory,
-            'rev-parse',
-            '--abbrev-ref',
-            'HEAD'
-        )).trim();
+        return (
+            await Git.execute(
+                rootDirectory,
+                'rev-parse',
+                '--abbrev-ref',
+                'HEAD'
+            )
+        ).trim();
     }
 
     protected createUrl(

@@ -48,11 +48,9 @@ export abstract class LinkHandler {
         if (this.getLinkType() === 'branch') {
             branchOrHash = await this.getCurrentBranch(gitInfo.rootDirectory);
         } else {
-            branchOrHash = (await Git.execute(
-                gitInfo.rootDirectory,
-                'rev-parse',
-                'HEAD'
-            )).trim();
+            branchOrHash = (
+                await Git.execute(gitInfo.rootDirectory, 'rev-parse', 'HEAD')
+            ).trim();
         }
 
         baseUrl = server.baseUrl;

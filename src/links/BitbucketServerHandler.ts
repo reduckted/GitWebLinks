@@ -17,11 +17,9 @@ export class BitbucketServerHandler extends LinkHandler {
     }
 
     protected async getCurrentBranch(rootDirectory: string): Promise<string> {
-        return (await Git.execute(
-            rootDirectory,
-            'symbolic-ref',
-            'HEAD'
-        )).trim();
+        return (
+            await Git.execute(rootDirectory, 'symbolic-ref', 'HEAD')
+        ).trim();
     }
 
     protected createUrl(

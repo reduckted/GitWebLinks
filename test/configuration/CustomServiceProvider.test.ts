@@ -35,15 +35,13 @@ describe('CustomServerProvider', () => {
 
             provider = new CustomServerProvider();
 
-            get = sinon
-                .stub()
-                .returns([
-                    { baseUrl: 'a', sshUrl: 'b' },
-                    { baseUrl: '', sshUrl: 'd' },
-                    { baseUrl: undefined, sshUrl: 'f' },
-                    { baseUrl: 'g', sshUrl: '' },
-                    { baseUrl: 'i', sshUrl: undefined }
-                ]);
+            get = sinon.stub().returns([
+                { baseUrl: 'a', sshUrl: 'b' },
+                { baseUrl: '', sshUrl: 'd' },
+                { baseUrl: undefined, sshUrl: 'f' },
+                { baseUrl: 'g', sshUrl: '' },
+                { baseUrl: 'i', sshUrl: undefined }
+            ]);
 
             sinon.stub(workspace, 'getConfiguration').returns({ get } as any);
 

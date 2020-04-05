@@ -47,10 +47,7 @@ describe('LinkTypeProvider', () => {
     function setupConfiguration(value: any): void {
         let get: sinon.SinonSpy;
 
-        get = sinon
-            .stub()
-            .withArgs('gitweblinks.linkType')
-            .returns(value);
+        get = sinon.stub().withArgs('gitweblinks.linkType').returns(value);
         sinon.stub(workspace, 'getConfiguration').returns({ get } as any);
     }
 });
