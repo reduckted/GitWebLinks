@@ -1,13 +1,9 @@
 // tslint:disable:max-line-length
 
 import { expect } from 'chai';
-import * as fs from 'fs';
-import * as mkdirp from 'mkdirp';
-import * as os from 'os';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
 import * as sinon from 'sinon';
-import { v4 as guid } from 'uuid';
 
 import { CustomServerProvider } from '../../src/configuration/CustomServerProvider';
 import {
@@ -18,6 +14,7 @@ import { Git } from '../../src/git/Git';
 import { GitInfo } from '../../src/git/GitInfo';
 import { BitbucketServerHandler } from '../../src/links/BitbucketServerHandler';
 import { ServerUrl } from '../../src/utilities/ServerUrl';
+import { setupRepository } from '../test-helpers/setup-repository';
 
 describe('BitbucketServerHandler', () => {
     function getRemotes(): string[] {
@@ -85,20 +82,12 @@ describe('BitbucketServerHandler', () => {
         let type: LinkType;
 
         beforeEach(async () => {
-            root = path.join(os.tmpdir(), guid());
-            mkdirp.sync(root);
-
-            await Git.execute(root, 'init');
-
-            fs.writeFileSync(path.join(root, 'file'), '', 'utf8');
-
-            await Git.execute(root, 'add', '.');
-            await Git.execute(root, 'commit', '-m', '"initial"');
+            root = await setupRepository();
+            type = 'branch';
 
             sinon
                 .stub(LinkTypeProvider.prototype, 'getLinkType')
                 .callsFake(() => type);
-            type = 'branch';
         });
 
         afterEach(() => {
