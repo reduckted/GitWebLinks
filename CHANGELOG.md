@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+-   Replaced `vscode` dependency with `@types/vscode`.
+
 ## [1.5.1] - 2020-04-05
 
 -   Dependency updates.
