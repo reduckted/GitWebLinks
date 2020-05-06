@@ -55,7 +55,9 @@ export class ExtensionHost {
         );
     }
 
-    private async addFolders(folders: WorkspaceFolder[]): Promise<void> {
+    private async addFolders(
+        folders: readonly WorkspaceFolder[]
+    ): Promise<void> {
         for (let folder of folders) {
             if (folder.uri.fsPath) {
                 let gitInfo: GitInfo | undefined;
@@ -75,7 +77,7 @@ export class ExtensionHost {
         }
     }
 
-    private removeFolders(folders: WorkspaceFolder[]): void {
+    private removeFolders(folders: readonly WorkspaceFolder[]): void {
         for (let folder of folders) {
             this.map.remove(folder);
         }
