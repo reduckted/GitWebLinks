@@ -7,12 +7,12 @@ export class VisualStudioTeamServicesHandler extends LinkHandler {
     protected getMatchingServerUrl(remoteUrl: string): ServerUrl | undefined {
         let match: RegExpMatchArray | null;
 
-        match = /^([^.]+)@vs-ssh\.visualstudio\.com:22(?:\/([^\/]+))?\/_ssh\/.+$/.exec(
+        match = /^([^.]+)@vs-ssh\.visualstudio\.com:22(?:\/(.+))?\/_ssh\/.+$/.exec(
             remoteUrl
         );
 
         if (!match) {
-            match = /^https:\/\/([^.]+)\.visualstudio\.com(?:\/([^\/]+))?\/_git\/.+$/.exec(
+            match = /^https:\/\/([^.]+)\.visualstudio\.com(?:\/(.+))?\/_git\/.+$/.exec(
                 remoteUrl
             );
         }

@@ -16,7 +16,9 @@ import { setupRepository } from '../test-helpers/setup-repository';
 
 describe('VisualStudioTeamServicesHandler', () => {
     function getRemotes(): string[] {
-        return getNonCollectionRemotes().concat(getCollectionRemotes());
+        return getNonCollectionRemotes().concat(
+            getCollectionRemotes().map((x) => x.url)
+        );
     }
 
     function getNonCollectionRemotes(): string[] {
@@ -26,10 +28,28 @@ describe('VisualStudioTeamServicesHandler', () => {
         ];
     }
 
-    function getCollectionRemotes(): string[] {
+    function getCollectionRemotes(): { url: string; collection: string }[] {
         return [
-            'https://foo.visualstudio.com/DefaultCollection/_git/MyRepo',
-            'ssh://foo@vs-ssh.visualstudio.com:22/DefaultCollection/_ssh/MyRepo'
+            {
+                url:
+                    'https://foo.visualstudio.com/DefaultCollection/_git/MyRepo',
+                collection: 'DefaultCollection'
+            },
+            {
+                url:
+                    'https://foo.visualstudio.com/DefaultCollection/Child/_git/MyRepo',
+                collection: 'DefaultCollection/Child'
+            },
+            {
+                url:
+                    'ssh://foo@vs-ssh.visualstudio.com:22/DefaultCollection/_ssh/MyRepo',
+                collection: 'DefaultCollection'
+            },
+            {
+                url:
+                    'ssh://foo@vs-ssh.visualstudio.com:22/DefaultCollection/Child/_ssh/MyRepo',
+                collection: 'DefaultCollection/Child'
+            }
         ];
     }
 
@@ -90,20 +110,20 @@ describe('VisualStudioTeamServicesHandler', () => {
             });
         });
 
-        getCollectionRemotes().forEach((remote) => {
-            it(`should create the correct link from the remote URL '${remote}'.`, async () => {
+        getCollectionRemotes().forEach(({ url, collection }) => {
+            it(`should create the correct link from the remote URL '${url}'.`, async () => {
                 let handler: VisualStudioTeamServicesHandler;
                 let info: GitInfo;
                 let fileName: string;
 
-                info = { rootDirectory: root, remoteUrl: remote };
+                info = { rootDirectory: root, remoteUrl: url };
                 fileName = path.join(root, 'src/file.cs');
                 handler = new VisualStudioTeamServicesHandler();
 
                 expect(
                     await handler.makeUrl(info, fileName, undefined)
                 ).to.equal(
-                    'https://foo.visualstudio.com/DefaultCollection/_git/MyRepo?path=%2Fsrc%2Ffile.cs&version=GBmaster'
+                    `https://foo.visualstudio.com/${collection}/_git/MyRepo?path=%2Fsrc%2Ffile.cs&version=GBmaster`
                 );
             });
         });
