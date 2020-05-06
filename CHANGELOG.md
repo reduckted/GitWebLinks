@@ -1,8 +1,9 @@
 # Change Log
 
-## Unreleased
+## [1.5.2] - 2020-05-06
 
 -   Replaced `vscode` dependency with `@types/vscode`.
+-   Handled VSTS repositories in sub-directories.
 
 ## [1.5.1] - 2020-04-05
 

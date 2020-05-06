@@ -80,6 +80,10 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
+### 1.5.2
+
+-   Handled VSTS repositories in sub-directories.
+
 ### 1.5.1
 
 -   Dependency updates.
