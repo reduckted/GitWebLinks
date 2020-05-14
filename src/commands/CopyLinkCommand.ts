@@ -11,6 +11,7 @@ import {
 import { Selection } from '../utilities/Selection';
 import { WorkspaceData } from '../utilities/WorkspaceData';
 import { WorkspaceMap } from '../utilities/WorkspaceMap';
+import { INVALID_PATH } from '../constants';
 
 export abstract class CopyLinkCommand extends Disposable {
     private disposable: Disposable;
@@ -55,11 +56,16 @@ export abstract class CopyLinkCommand extends Disposable {
                         selection
                     );
 
-                    await env.clipboard.writeText(url);
-
-                    window.showInformationMessage(
-                        'Web link copied to the clipboard.'
-                    );
+                    if (url === INVALID_PATH) {
+                        window.showInformationMessage(
+                            'Web link could not be resolved.'
+                        );
+                    } else {
+                        await env.clipboard.writeText(url);
+                        window.showInformationMessage(
+                            'Web link copied to the clipboard.'
+                        );
+                    }
                 } else {
                     window.showErrorMessage(
                         'This workspace is not tracked by Git.'

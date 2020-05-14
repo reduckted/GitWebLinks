@@ -1,8 +1,11 @@
+import * as fs from 'fs';
+
 import { LinkType, LinkTypeProvider } from '../configuration/LinkTypeProvider';
 import { Git } from '../git/Git';
 import { GitInfo } from '../git/GitInfo';
 import { Selection } from '../utilities/Selection';
 import { ServerUrl } from '../utilities/ServerUrl';
+import { INVALID_PATH } from '../constants';
 
 export abstract class LinkHandler {
     private static SSH_PREFIX: string = 'ssh://';
@@ -25,6 +28,7 @@ export abstract class LinkHandler {
         let fixedRemoteUrl: string;
         let server: ServerUrl;
         let repositoryPath: string;
+        let resolvedPath: string;
         let relativePathToFile: string;
         let branchOrHash: string;
         let baseUrl: string;
@@ -35,7 +39,14 @@ export abstract class LinkHandler {
         // Get the repository's path out of the remote URL.
         repositoryPath = this.getRepositoryPath(fixedRemoteUrl, server);
 
-        relativePathToFile = filePath
+        // Check if the file selected was a symbolic link
+        resolvedPath = await this.handleSymbolicLinkedFiles(filePath);
+
+        if (resolvedPath === INVALID_PATH) {
+            return INVALID_PATH;
+        }
+
+        relativePathToFile = resolvedPath
             .substring(gitInfo.rootDirectory.length)
             .split('\\')
             .join('/');
@@ -98,6 +109,26 @@ export abstract class LinkHandler {
         }
 
         return remoteUrl;
+    }
+
+    private async handleSymbolicLinkedFiles(
+        filePath: string
+    ): Promise<string> {
+        return new Promise((resolve, reject) => {
+            fs.lstat(filePath, function (err, stats) {
+                if (stats && stats.isSymbolicLink()) {
+                    fs.realpath(filePath, (err, realPath) => {
+                        if (!err) {
+                            resolve(realPath);
+                        } else {
+                            resolve(INVALID_PATH);
+                        }
+                    });
+                } else {
+                    resolve(filePath);
+                }
+            });
+        });
     }
 
     protected getServerUrls(): ServerUrl[] {
