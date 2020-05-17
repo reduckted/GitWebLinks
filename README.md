@@ -80,7 +80,7 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
-### Unreleased
+### 1.6.0
 
 -   Supported getting web links for symlinked files and directories.
 
