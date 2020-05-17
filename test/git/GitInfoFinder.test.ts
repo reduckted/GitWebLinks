@@ -1,21 +1,24 @@
 import { expect } from 'chai';
-import * as mkdirp from 'mkdirp';
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as rimraf from 'rimraf';
+import { promisify } from 'util';
 import { v4 as guid } from 'uuid';
 
 import { Git } from '../../src/git/Git';
 import { GitInfo } from '../../src/git/GitInfo';
 import { GitInfoFinder } from '../../src/git/GitInfoFinder';
 
+const mkdir = promisify(fs.mkdir);
+
 describe('Git', () => {
     describe('find', () => {
         let root: string;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             root = path.join(os.tmpdir(), guid());
-            mkdirp.sync(root);
+            await mkdir(root, { recursive: true });
         });
 
         afterEach(() => {
@@ -52,7 +55,7 @@ describe('Git', () => {
             await Git.execute(root, 'init');
 
             child = path.join(root, 'child');
-            mkdirp.sync(child);
+            await mkdir(child, { recursive: true });
 
             finder = new GitInfoFinder();
             result = await finder.find(child);
