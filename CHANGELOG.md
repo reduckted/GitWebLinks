@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+-   Supported getting web links for symlinked files and directories.
+
 ## [1.5.2] - 2020-05-06
 
 -   Replaced `vscode` dependency with `@types/vscode`.

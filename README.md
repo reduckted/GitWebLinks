@@ -80,6 +80,10 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
+### Unreleased
+
+-   Supported getting web links for symlinked files and directories.
+
 ### 1.5.2
 
 -   Handled VSTS repositories in sub-directories.

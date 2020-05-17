@@ -1,8 +1,15 @@
+import * as fs from 'fs';
+import * as path from 'path';
+import { promisify } from 'util';
+
 import { LinkType, LinkTypeProvider } from '../configuration/LinkTypeProvider';
 import { Git } from '../git/Git';
 import { GitInfo } from '../git/GitInfo';
 import { Selection } from '../utilities/Selection';
 import { ServerUrl } from '../utilities/ServerUrl';
+
+const lstat = promisify(fs.lstat);
+const realpath = promisify(fs.realpath);
 
 export abstract class LinkHandler {
     private static SSH_PREFIX: string = 'ssh://';
@@ -35,13 +42,10 @@ export abstract class LinkHandler {
         // Get the repository's path out of the remote URL.
         repositoryPath = this.getRepositoryPath(fixedRemoteUrl, server);
 
-        relativePathToFile = filePath
-            .substring(gitInfo.rootDirectory.length)
-            .split('\\')
-            .join('/');
-
-        // Trim slashes from the start of the string.
-        relativePathToFile = relativePathToFile.replace(/^\/+/, '');
+        relativePathToFile = await this.getRelativePath(
+            filePath,
+            gitInfo.rootDirectory
+        );
 
         // Get the current branch name or commit SHA
         // depending on what type of link we need to create.
@@ -110,28 +114,100 @@ export abstract class LinkHandler {
         remoteUrl: string,
         matchingServer: ServerUrl
     ): string {
-        let path: string;
+        let repositoryPath: string;
 
         if (remoteUrl.startsWith(matchingServer.baseUrl)) {
-            path = remoteUrl.substring(matchingServer.baseUrl.length);
+            repositoryPath = remoteUrl.substring(matchingServer.baseUrl.length);
         } else {
-            path = remoteUrl.substring(matchingServer.sshUrl.length);
+            repositoryPath = remoteUrl.substring(matchingServer.sshUrl.length);
         }
 
         // The server URL we matched against may not have ended
         // with a slash (for HTTPS paths) or a colon (for Git paths),
         // which means the path might start with that. Trim that off now.
-        if (path.length > 0) {
-            if (path[0] === '/' || path[0] === ':') {
-                path = path.substring(1);
+        if (repositoryPath.length > 0) {
+            if (repositoryPath[0] === '/' || repositoryPath[0] === ':') {
+                repositoryPath = repositoryPath.substring(1);
             }
         }
 
-        if (path.endsWith('.git')) {
-            path = path.substring(0, path.length - 4);
+        if (repositoryPath.endsWith('.git')) {
+            repositoryPath = repositoryPath.substring(
+                0,
+                repositoryPath.length - 4
+            );
         }
 
-        return path;
+        return repositoryPath;
+    }
+
+    private async getRelativePath(
+        filePath: string,
+        rootDirectory: string
+    ): Promise<string> {
+        // If the file is a symbolic link, or is under a directory that's a
+        // symbolic link, then we want to resolve the path to the real file
+        // because the sybmolic link won't be in the Git repository.
+        if (await this.isSymbolicLink(filePath, rootDirectory)) {
+            try {
+                filePath = await realpath(filePath);
+
+                // Getting the real path of the file resolves all symbolic links,
+                // which means if the reposotiry is also under a symbolic link,
+                // then the new file path may no longer be under the root directory.
+                // We can fix this by also getting the real path of the root directory.
+                rootDirectory = await realpath(rootDirectory);
+            } catch (ex) {
+                // Provide a nicer error message that
+                // explains what we were trying to do.
+                throw new Error(
+                    `Unable to resolve the symbolic link '${filePath}' to a real path.\n${ex}`
+                );
+            }
+        }
+
+        // Get the relative path, then normalize
+        // the separators to forward slashes.
+        return path.relative(rootDirectory, filePath).replace(/\\/g, '/');
+    }
+
+    private async isSymbolicLink(
+        filePath: string,
+        rootDirectory: string
+    ): Promise<boolean> {
+        // Check if the file is a symbolic link. If it isn't, then walk up
+        // the tree to see if an ancestor directory is a symbolic link. Keep
+        // stepping up until we reach the root directory of the repository,
+        // because we only need to resolve symbolic links within the repository.
+        // If the entire repository is under a symbolic link, then we don't
+        // want to resolve paths to somewhere outside the repository.
+        while (filePath !== rootDirectory) {
+            let stats: fs.Stats;
+            let parent: string;
+
+            try {
+                stats = await lstat(filePath);
+            } catch (ex) {
+                // Assume that the path isn't a symbolic link.
+                return false;
+            }
+
+            if (stats.isSymbolicLink()) {
+                return true;
+            }
+
+            parent = path.dirname(filePath);
+
+            if (parent === filePath) {
+                // We can't go any higher, so the
+                // path cannot be a symbolic link.
+                return false;
+            }
+
+            filePath = parent;
+        }
+
+        return false;
     }
 
     protected getLinkType(): LinkType {

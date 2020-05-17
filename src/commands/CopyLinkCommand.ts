@@ -49,17 +49,23 @@ export abstract class CopyLinkCommand extends Disposable {
 
                     selection = this.getLineSelection();
 
-                    url = await data.handler.makeUrl(
-                        data.gitInfo,
-                        resource.fsPath,
-                        selection
-                    );
+                    try {
+                        url = await data.handler.makeUrl(
+                            data.gitInfo,
+                            resource.fsPath,
+                            selection
+                        );
 
-                    await env.clipboard.writeText(url);
+                        await env.clipboard.writeText(url);
 
-                    window.showInformationMessage(
-                        'Web link copied to the clipboard.'
-                    );
+                        window.showInformationMessage(
+                            'Web link copied to the clipboard.'
+                        );
+                    } catch (ex) {
+                        window.showErrorMessage(
+                            `Unable to create a web link: ${ex}`
+                        );
+                    }
                 } else {
                     window.showErrorMessage(
                         'This workspace is not tracked by Git.'

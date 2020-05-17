@@ -199,4 +199,37 @@ describe('CopyLinkToFileCommand', () => {
         expect(writeTextStub.called).to.be.false;
         expect(showErrorMessage.called).to.be.true;
     });
+
+    it('should show an error notification if the link handler throws an error.', async () => {
+        let map: WorkspaceMap;
+        let handler: LinkHandler;
+        let showErrorMessage: sinon.SinonStub<
+            [string, MessageOptions, ...MessageItem[]],
+            Thenable<MessageItem | undefined>
+        >;
+
+        handler = new MockLinkHandler();
+        sinon.stub(handler, 'makeUrl').rejects(new Error('Boom'));
+
+        map = new WorkspaceMap();
+        map.add(WORKSPACE_FOLDER, GIT_INFO, handler);
+
+        sinon.stub(map, 'get').returns({
+            handler,
+            gitInfo: GIT_INFO
+        });
+
+        sinon.stub(workspace, 'getWorkspaceFolder').returns(WORKSPACE_FOLDER);
+        showErrorMessage = sinon.stub(window, 'showErrorMessage');
+
+        command = new CopyLinkToFileCommand(map);
+
+        await commands.executeCommand(
+            'gitweblinks.copyFile',
+            Uri.file(`${GIT_INFO.rootDirectory}foo.txt`)
+        );
+
+        expect(writeTextStub.called).to.be.false;
+        expect(showErrorMessage.called).to.be.true;
+    });
 });
