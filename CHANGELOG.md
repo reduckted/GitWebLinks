@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.7.0
 
 -   GitLab support.
 

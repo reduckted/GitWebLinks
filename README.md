@@ -92,7 +92,7 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
-### Unreleased
+### 1.7.0
 
 -   GitLab support.
 
