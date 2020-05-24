@@ -18,10 +18,11 @@
         "theme": "light"
     },
     "keywords": [
+        "azure devops",
+        "bitbucket",
         "git",
         "github",
-        "bitbucket",
-        "multi-root ready"
+        "gitlab"
     ],
     "private": true,
     "main": "./dist/extension",
@@ -142,6 +143,26 @@
                 "gitweblinks.gitHubEnterprise": {
                     "type": "array",
                     "description": "The URLs of your GitHub Enterprise instances.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "baseUrl": {
+                                "type": "string",
+                                "description": "The base URL for the website."
+                            },
+                            "sshUrl": {
+                                "type": "string",
+                                "description": "The SSH URL for remotes."
+                            }
+                        },
+                        "required": [
+                            "baseUrl"
+                        ]
+                    }
+                },
+                "gitweblinks.gitLabEnterprise": {
+                    "type": "array",
+                    "description": "The URLs of your GitLab Enterprise Edition or GitLab Community Edition instances.",
                     "items": {
                         "type": "object",
                         "properties": {

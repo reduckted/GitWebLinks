@@ -3,6 +3,7 @@ import { AzureDevOpsHandler } from './AzureDevOpsHandler';
 import { BitbucketCloudHandler } from './BitbucketCloudHandler';
 import { BitbucketServerHandler } from './BitbucketServerHandler';
 import { GitHubHandler } from './GitHubHandler';
+import { GitLabHandler } from './GitLabHandler';
 import { LinkHandler } from './LinkHandler';
 import { VisualStudioTeamServicesHandler } from './VisualStudioTeamServicesHandler';
 
@@ -15,6 +16,7 @@ export class LinkHandlerFinder {
             new BitbucketCloudHandler(),
             new BitbucketServerHandler(),
             new GitHubHandler(),
+            new GitLabHandler(),
             new VisualStudioTeamServicesHandler()
         ];
     }

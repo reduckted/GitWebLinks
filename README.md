@@ -4,14 +4,15 @@ Copy links to files in their online Git repositories from inside Visual Studio C
 
 Works with:
 
+-   Azure DevOps
+-   Bitbucket Cloud
+-   Bitbucket Server
 -   GitHub
 -   GitHub Enterprise
--   Bitbucket Server
--   Bitbucket Cloud
+-   GitLab
 -   Visual Studio Team Services
--   Azure Dev Ops
 
-For GitHub Enterprise and Bitbucket Server, there is some configuration required. [See below for more details](#github-enterprise-and-bitbucket-server).
+For GitHub Enterprise, GitLab Enterprise/Community Edition and Bitbucket Server, there is some configuration required. [See below for more details](#github-enterprise-gitlab-enterprise-and-bitbucket-server).
 
 ## Copy Link to File
 
@@ -39,9 +40,9 @@ Links can be created using the current commit hash, or the current branch name. 
 "gitweblinks.linkType": "hash"
 ```
 
-## GitHub Enterprise and Bitbucket Server
+## GitHub Enterprise, GitLab Enterprise and Bitbucket Server
 
-If you use GitHub Enterprise or Bitbucket Server, you will need to tell the extension the URLs of those servers. Do this in your user settings file (_File -> Preferences -> Settings_). You need to specify the base HTTP/HTTPS URL of the server, and if you use SSH, the base SSH URL.
+If you use either GitHub Enterprise, GitLab Enterprise/Community Edition or Bitbucket Server, you will need to tell the extension the URLs of those servers. Do this in your user settings file (_File -> Preferences -> Settings_). You need to specify the base HTTP/HTTPS URL of the server, and if you use SSH, the base SSH URL.
 
 Make sure you include any port numbers (if it's not port 80) and context paths.
 
@@ -52,6 +53,17 @@ Make sure you include any port numbers (if it's not port 80) and context paths.
     {
         "baseUrl": "https://local-github",
         "sshUrl": "git@local-github"
+    }
+]
+```
+
+### GitHub Enterprise
+
+```json
+"gitweblinks.gitLabEnterprise": [
+    {
+        "baseUrl": "https://local-gitlab",
+        "sshUrl": "git@local-gitlab"
     }
 ]
 ```
@@ -79,6 +91,10 @@ There are two commands provided by this extension:
 This extension requires Git to already be installed and on your PATH. If this isn't suitable for you and you'd prefer to specify the location of Git, please open a new issue in this repository and I'll see what I can do :)
 
 ## Release Notes
+
+### Unreleased
+
+-   GitLab support.
 
 ### 1.6.0
 

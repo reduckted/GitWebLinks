@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+
+-   GitLab support.
+
 ## [1.6.0] - 2020-05-17
 
 -   Supported getting web links for symlinked files and directories.
