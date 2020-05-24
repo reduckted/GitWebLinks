@@ -57,7 +57,7 @@ Make sure you include any port numbers (if it's not port 80) and context paths.
 ]
 ```
 
-### GitHub Enterprise
+### GitLab Enterprise/Community Edition
 
 ```json
 "gitweblinks.gitLabEnterprise": [
