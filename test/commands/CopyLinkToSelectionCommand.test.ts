@@ -33,9 +33,7 @@ describe('CopyLinkToSelectionCommand', () => {
 
     beforeEach(() => {
         sinon.stub(LinkTypeProvider.prototype, 'getLinkType').returns('branch');
-        writeTextStub = sinon
-            .stub(env.clipboard, 'writeText')
-            .returns(Promise.resolve());
+        writeTextStub = sinon.stub(env.clipboard, 'writeText').resolves();
     });
 
     afterEach(() => {

@@ -50,10 +50,8 @@ describe('ExtensionHost', () => {
         });
 
         it('should add the commands to the subscriptions when Git is initialized.', async () => {
-            sinon.stub(Git, 'test').returns(Promise.resolve());
-            sinon
-                .stub(GitInfoFinder.prototype, 'find')
-                .returns(Promise.resolve(undefined));
+            sinon.stub(Git, 'test').resolves();
+            sinon.stub(GitInfoFinder.prototype, 'find').resolves(undefined);
             sinon.stub(LinkHandlerFinder.prototype, 'find').returns(undefined);
 
             await new ExtensionHost().activate(context);
@@ -79,12 +77,10 @@ describe('ExtensionHost', () => {
                 Thenable<unknown>
             >;
 
-            test = sinon
-                .stub(Git, 'test')
-                .returns(Promise.reject(new Error('nope')));
+            test = sinon.stub(Git, 'test').rejects(new Error('nope'));
             findGitInfo = sinon
                 .stub(GitInfoFinder.prototype, 'find')
-                .returns(Promise.resolve(undefined));
+                .resolves(undefined);
             findHandler = sinon
                 .stub(LinkHandlerFinder.prototype, 'find')
                 .returns(undefined);
@@ -112,10 +108,10 @@ describe('ExtensionHost', () => {
                 Thenable<unknown>
             >;
 
-            test = sinon.stub(Git, 'test').returns(Promise.resolve());
+            test = sinon.stub(Git, 'test').resolves();
             findGitInfo = sinon
                 .stub(GitInfoFinder.prototype, 'find')
-                .returns(Promise.resolve(undefined));
+                .resolves(undefined);
             findHandler = sinon
                 .stub(LinkHandlerFinder.prototype, 'find')
                 .returns(undefined);
@@ -147,10 +143,10 @@ describe('ExtensionHost', () => {
                 Thenable<unknown>
             >;
 
-            test = sinon.stub(Git, 'test').returns(Promise.resolve());
+            test = sinon.stub(Git, 'test').resolves();
             findGitInfo = sinon
                 .stub(GitInfoFinder.prototype, 'find')
-                .returns(Promise.resolve(undefined));
+                .resolves(undefined);
             findHandler = sinon
                 .stub(LinkHandlerFinder.prototype, 'find')
                 .returns(undefined);
@@ -189,10 +185,10 @@ describe('ExtensionHost', () => {
 
             info = { rootDirectory: 'a', remoteUrl: 'b' };
 
-            test = sinon.stub(Git, 'test').returns(Promise.resolve());
+            test = sinon.stub(Git, 'test').resolves();
             findGitInfo = sinon
                 .stub(GitInfoFinder.prototype, 'find')
-                .returns(Promise.resolve(info));
+                .resolves(info);
             findHandler = sinon
                 .stub(LinkHandlerFinder.prototype, 'find')
                 .returns(undefined);
@@ -233,10 +229,10 @@ describe('ExtensionHost', () => {
             info = { rootDirectory: 'a', remoteUrl: 'b' };
             handler = {} as any;
 
-            test = sinon.stub(Git, 'test').returns(Promise.resolve());
+            test = sinon.stub(Git, 'test').resolves();
             findGitInfo = sinon
                 .stub(GitInfoFinder.prototype, 'find')
-                .returns(Promise.resolve(info));
+                .resolves(info);
             findHandler = sinon
                 .stub(LinkHandlerFinder.prototype, 'find')
                 .returns(handler);
@@ -281,11 +277,11 @@ describe('ExtensionHost', () => {
             info = { rootDirectory: 'a', remoteUrl: 'b' };
             handler = {} as any;
 
-            test = sinon.stub(Git, 'test').returns(Promise.resolve());
+            test = sinon.stub(Git, 'test').resolves();
 
             findGitInfo = sinon
                 .stub(GitInfoFinder.prototype, 'find')
-                .returns(Promise.resolve(info));
+                .resolves(info);
             findHandler = sinon
                 .stub(LinkHandlerFinder.prototype, 'find')
                 .returns(handler);
@@ -337,11 +333,11 @@ describe('ExtensionHost', () => {
             info = { rootDirectory: 'a', remoteUrl: 'b' };
             handler = {} as any;
 
-            test = sinon.stub(Git, 'test').returns(Promise.resolve());
+            test = sinon.stub(Git, 'test').resolves();
 
             findGitInfo = sinon
                 .stub(GitInfoFinder.prototype, 'find')
-                .returns(Promise.resolve(info));
+                .resolves(info);
             findHandler = sinon
                 .stub(LinkHandlerFinder.prototype, 'find')
                 .returns(handler);
@@ -397,11 +393,11 @@ describe('ExtensionHost', () => {
             info = { rootDirectory: 'a', remoteUrl: 'b' };
             handler = {} as any;
 
-            test = sinon.stub(Git, 'test').returns(Promise.resolve());
+            test = sinon.stub(Git, 'test').resolves();
 
             findGitInfo = sinon
                 .stub(GitInfoFinder.prototype, 'find')
-                .returns(Promise.resolve(info));
+                .resolves(info);
             findHandler = sinon
                 .stub(LinkHandlerFinder.prototype, 'find')
                 .returns(handler);
