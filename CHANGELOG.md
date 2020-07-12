@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.8.1
+
+-   Logging improvements.
+
 ## 1.8.0
 
 -   Logging to the "GitWebLinks" output channel.
