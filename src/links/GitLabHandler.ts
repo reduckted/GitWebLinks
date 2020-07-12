@@ -17,6 +17,8 @@ export class GitLabHandler extends LinkHandler {
         this.customServerProvider = new CustomServerProvider();
     }
 
+    public readonly name: string = 'GitLab';
+
     protected getServerUrls(): ServerUrl[] {
         let urls: ServerUrl[];
 

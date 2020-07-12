@@ -16,6 +16,8 @@ export abstract class LinkHandler {
 
     private linkTypeProvider: LinkTypeProvider = new LinkTypeProvider();
 
+    public abstract readonly name: string;
+
     public isMatch(remoteUrl: string): boolean {
         return (
             this.getMatchingServerUrl(this.fixRemoteUrl(remoteUrl)) !==

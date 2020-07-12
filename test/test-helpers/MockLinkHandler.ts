@@ -20,6 +20,8 @@ export const WORKSPACE_FOLDER: WorkspaceFolder = {
 };
 
 export class MockLinkHandler extends LinkHandler {
+    public name: string = 'Mock';
+
     public selection: Selection | undefined;
 
     protected getServerUrls(): ServerUrl[] {

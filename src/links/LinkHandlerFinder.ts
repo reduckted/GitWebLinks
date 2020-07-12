@@ -28,12 +28,10 @@ export class LinkHandlerFinder {
         );
 
         for (let handler of this.handlers) {
-            Logger.writeLine(`Testing '${handler.constructor.name}'.`);
+            Logger.writeLine(`Testing '${handler.name}'.`);
 
             if (handler.isMatch(gitInfo.remoteUrl)) {
-                Logger.writeLine(
-                    `Handler '${handler.constructor.name}' is a match.`
-                );
+                Logger.writeLine(`Handler '${handler.name}' is a match.`);
                 return handler;
             }
         }

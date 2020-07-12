@@ -11,6 +11,8 @@ export class BitbucketCloudHandler extends LinkHandler {
         sshUrl: 'git@bitbucket.org'
     };
 
+    public readonly name: string = 'Bitbucket Cloud';
+
     protected getServerUrls(): ServerUrl[] {
         return [BitbucketCloudHandler.BITBUCKET_SERVER];
     }

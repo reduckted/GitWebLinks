@@ -12,6 +12,8 @@ export class BitbucketServerHandler extends LinkHandler {
         this.customServerProvider = new CustomServerProvider();
     }
 
+    public readonly name: string = 'Bitbucket Server';
+
     protected getServerUrls(): ServerUrl[] {
         return this.customServerProvider.getServers('bitbucketServer');
     }

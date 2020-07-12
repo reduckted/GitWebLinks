@@ -4,6 +4,8 @@ import { ServerUrl } from '../utilities/ServerUrl';
 import { LinkHandler } from './LinkHandler';
 
 export class AzureDevOpsHandler extends LinkHandler {
+    public readonly name: string = 'Azure DevOps';
+
     protected getMatchingServerUrl(remoteUrl: string): ServerUrl | undefined {
         let match: RegExpMatchArray | null;
 

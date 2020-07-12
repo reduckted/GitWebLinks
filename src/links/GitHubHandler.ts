@@ -17,6 +17,8 @@ export class GitHubHandler extends LinkHandler {
         this.customServerProvider = new CustomServerProvider();
     }
 
+    public readonly name: string = 'GitHub';
+
     protected getServerUrls(): ServerUrl[] {
         let urls: ServerUrl[];
 

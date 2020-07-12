@@ -80,7 +80,7 @@ export class ExtensionHost {
 
                     if (handler) {
                         Logger.writeLine(
-                            `Found handler '${handler.constructor.name}' for path '${folder.uri.fsPath}'.`
+                            `Found handler '${handler.name}' for path '${folder.uri.fsPath}'.`
                         );
 
                         this.map.add(folder, gitInfo, handler);

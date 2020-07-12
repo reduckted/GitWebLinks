@@ -4,6 +4,8 @@ import { ServerUrl } from '../utilities/ServerUrl';
 import { LinkHandler } from './LinkHandler';
 
 export class VisualStudioTeamServicesHandler extends LinkHandler {
+    public readonly name: string = 'Visual Studio Team Services';
+
     protected getMatchingServerUrl(remoteUrl: string): ServerUrl | undefined {
         let match: RegExpMatchArray | null;
 

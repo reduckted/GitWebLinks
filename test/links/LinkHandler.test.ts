@@ -152,6 +152,8 @@ async function tryCreateSymlink(
 }
 
 class TestHandler extends LinkHandler {
+    public name: string = 'Test';
+
     protected getMatchingServerUrl(remoteUrl: string): ServerUrl | undefined {
         return {
             baseUrl: 'http://example.com',
