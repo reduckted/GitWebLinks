@@ -3,6 +3,7 @@ import * as path from 'path';
 
 import { Git } from './Git';
 import { GitInfo } from './GitInfo';
+import { Logger } from '../utilities/Logger';
 
 interface Remote {
     name: string;
@@ -13,16 +14,29 @@ export class GitInfoFinder {
     public async find(workspaceRoot: string): Promise<GitInfo | undefined> {
         let root: string | undefined;
 
+        Logger.writeLine(
+            `Finding root directory of Git repository starting from '${workspaceRoot}'.`
+        );
+
         root = await this.findGitRoot(workspaceRoot);
 
         if (root) {
             let remote: string | undefined;
 
+            Logger.writeLine(`The root directory is '${root}'.`);
+
             remote = await this.findRemote(root);
 
             if (remote) {
+                Logger.writeLine(`Using remote '${remote}'.`);
                 return { rootDirectory: root, remoteUrl: remote };
+            } else {
+                Logger.writeLine(`Could not find a remote URL to use.`);
             }
+        } else {
+            Logger.writeLine(
+                `Could not find the root directory of the Git repository.`
+            );
         }
 
         return undefined;
@@ -67,12 +81,16 @@ export class GitInfoFinder {
         let remotes: Remote[];
         let remote: Remote;
 
+        Logger.writeLine('Finding remote repositories.');
+
         data = await Git.execute(root, 'remote', '-v');
 
         remotes = data
             .split('\n')
             .filter((x) => !!x)
             .map((x) => this.parseRemote(x));
+
+        Logger.writeLine('Remotes found:', remotes);
 
         // Use the "origin" remote if it exists;
         // otherwise, just use the first remote.
