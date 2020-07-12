@@ -8,6 +8,7 @@
             "runtimeExecutable": "${execPath}",
             "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "env": { "EXTENSION_TESTING": "" },
             "preLaunchTask": "npm: debug-build"
         },
         {
@@ -21,6 +22,8 @@
                 "--extensionTestsPath=${workspaceFolder}/out/test/index"
             ],
             "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
+            "sourceMaps": true,
+            "env": { "EXTENSION_TESTING": "1" },
             "preLaunchTask": "npm: debug-test"
         }
     ]

@@ -5,8 +5,10 @@ import { ExtensionHost } from './ExtensionHost';
 let extension: ExtensionHost;
 
 export async function activate(context: ExtensionContext): Promise<void> {
-    extension = new ExtensionHost();
-    await extension.activate(context);
+    if (!process.env.EXTENSION_TESTING) {
+        extension = new ExtensionHost();
+        await extension.activate(context);
+    }
 }
 
 export function deactivate(): void {
