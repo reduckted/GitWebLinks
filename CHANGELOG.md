@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.8.0
+
+-   Logging to the "GitWebLinks" output channel.
+
 ## 1.7.0
 
 -   GitLab support.

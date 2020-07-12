@@ -92,6 +92,10 @@ This extension requires Git to already be installed and on your PATH. If this is
 
 ## Release Notes
 
+### 1.8.0
+
+-   Logging to the "GitWebLinks" output channel.
+
 ### 1.7.0
 
 -   GitLab support.
