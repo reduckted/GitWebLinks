@@ -11,7 +11,7 @@ import {
 } from '../../src/configuration/LinkTypeProvider';
 import { Git } from '../../src/git/Git';
 import { GitInfo } from '../../src/git/GitInfo';
-import { AzureDevOpsHandler } from '../../src/links/AzureDevOpsHandler';
+import { AzureDevOpsCloudHandler } from '../../src/links/AzureDevOpsCloudHandler';
 import { setupRepository } from '../test-helpers/setup-repository';
 
 describe('VisualStudioTeamServicesHandler', () => {
@@ -25,18 +25,18 @@ describe('VisualStudioTeamServicesHandler', () => {
     describe('isMatch', () => {
         getRemotes().forEach((remote) => {
             it(`should match server '${remote}'.`, () => {
-                let handler: AzureDevOpsHandler;
+                let handler: AzureDevOpsCloudHandler;
 
-                handler = new AzureDevOpsHandler();
+                handler = new AzureDevOpsCloudHandler();
 
                 expect(handler.isMatch(remote)).to.be.true;
             });
         });
 
         it('should not match other servers.', () => {
-            let handler: AzureDevOpsHandler;
+            let handler: AzureDevOpsCloudHandler;
 
-            handler = new AzureDevOpsHandler();
+            handler = new AzureDevOpsCloudHandler();
 
             expect(handler.isMatch('https://codeplex.com/foo/bar.git')).to.be
                 .false;
@@ -63,13 +63,13 @@ describe('VisualStudioTeamServicesHandler', () => {
 
         getRemotes().forEach((remote) => {
             it(`should create the correct link from the remote URL '${remote}'.`, async () => {
-                let handler: AzureDevOpsHandler;
+                let handler: AzureDevOpsCloudHandler;
                 let info: GitInfo;
                 let fileName: string;
 
                 info = { rootDirectory: root, remoteUrl: remote };
                 fileName = path.join(root, 'src/file.cs');
-                handler = new AzureDevOpsHandler();
+                handler = new AzureDevOpsCloudHandler();
 
                 expect(
                     await handler.makeUrl(info, fileName, undefined)
@@ -80,7 +80,7 @@ describe('VisualStudioTeamServicesHandler', () => {
         });
 
         it('creates correct link when path contains spaces.', async () => {
-            let handler: AzureDevOpsHandler;
+            let handler: AzureDevOpsCloudHandler;
             let info: GitInfo;
             let fileName: string;
 
@@ -89,7 +89,7 @@ describe('VisualStudioTeamServicesHandler', () => {
                 remoteUrl: 'git@ssh.dev.azure.com:v3/user/MyProject/MyRepo'
             };
             fileName = path.join(root, 'src/sub dir/file.cs');
-            handler = new AzureDevOpsHandler();
+            handler = new AzureDevOpsCloudHandler();
 
             expect(await handler.makeUrl(info, fileName, undefined)).to.equal(
                 'https://dev.azure.com/user/MyProject/_git/MyRepo?path=%2Fsrc%2Fsub%20dir%2Ffile.cs&version=GBmaster'
@@ -97,7 +97,7 @@ describe('VisualStudioTeamServicesHandler', () => {
         });
 
         it('creates correct link with single line selection with no width.', async () => {
-            let handler: AzureDevOpsHandler;
+            let handler: AzureDevOpsCloudHandler;
             let info: GitInfo;
             let fileName: string;
 
@@ -106,7 +106,7 @@ describe('VisualStudioTeamServicesHandler', () => {
                 remoteUrl: 'git@ssh.dev.azure.com:v3/user/MyProject/MyRepo'
             };
             fileName = path.join(root, 'src/file.cs');
-            handler = new AzureDevOpsHandler();
+            handler = new AzureDevOpsCloudHandler();
 
             expect(
                 await handler.makeUrl(info, fileName, {
@@ -121,7 +121,7 @@ describe('VisualStudioTeamServicesHandler', () => {
         });
 
         it('creates correct link with single line selection with non-zero width.', async () => {
-            let handler: AzureDevOpsHandler;
+            let handler: AzureDevOpsCloudHandler;
             let info: GitInfo;
             let fileName: string;
 
@@ -130,7 +130,7 @@ describe('VisualStudioTeamServicesHandler', () => {
                 remoteUrl: 'git@ssh.dev.azure.com:v3/user/MyProject/MyRepo'
             };
             fileName = path.join(root, 'src/file.cs');
-            handler = new AzureDevOpsHandler();
+            handler = new AzureDevOpsCloudHandler();
 
             expect(
                 await handler.makeUrl(info, fileName, {
@@ -145,7 +145,7 @@ describe('VisualStudioTeamServicesHandler', () => {
         });
 
         it('creates correct link with multiple line selection.', async () => {
-            let handler: AzureDevOpsHandler;
+            let handler: AzureDevOpsCloudHandler;
             let info: GitInfo;
             let fileName: string;
 
@@ -154,7 +154,7 @@ describe('VisualStudioTeamServicesHandler', () => {
                 remoteUrl: 'git@ssh.dev.azure.com:v3/user/MyProject/MyRepo'
             };
             fileName = path.join(root, 'src/file.cs');
-            handler = new AzureDevOpsHandler();
+            handler = new AzureDevOpsCloudHandler();
 
             expect(
                 await handler.makeUrl(info, fileName, {
@@ -169,7 +169,7 @@ describe('VisualStudioTeamServicesHandler', () => {
         });
 
         it('uses the current branch.', async () => {
-            let handler: AzureDevOpsHandler;
+            let handler: AzureDevOpsCloudHandler;
             let info: GitInfo;
             let fileName: string;
 
@@ -178,7 +178,7 @@ describe('VisualStudioTeamServicesHandler', () => {
                 remoteUrl: 'git@ssh.dev.azure.com:v3/user/MyProject/MyRepo'
             };
             fileName = path.join(root, 'src/file.cs');
-            handler = new AzureDevOpsHandler();
+            handler = new AzureDevOpsCloudHandler();
             type = 'branch';
 
             await Git.execute(root, 'checkout', '-b', 'feature/work');
@@ -189,7 +189,7 @@ describe('VisualStudioTeamServicesHandler', () => {
         });
 
         it('uses the current hash.', async () => {
-            let handler: AzureDevOpsHandler;
+            let handler: AzureDevOpsCloudHandler;
             let info: GitInfo;
             let fileName: string;
             let sha: string;
@@ -199,7 +199,7 @@ describe('VisualStudioTeamServicesHandler', () => {
                 remoteUrl: 'git@ssh.dev.azure.com:v3/user/MyProject/MyRepo'
             };
             fileName = path.join(root, 'src/file.cs');
-            handler = new AzureDevOpsHandler();
+            handler = new AzureDevOpsCloudHandler();
             type = 'hash';
 
             sha = (await Git.execute(root, 'rev-parse', 'HEAD')).trim();

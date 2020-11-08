@@ -1,38 +1,21 @@
+import { CustomServerProvider } from '../configuration/CustomServerProvider';
 import { Git } from '../git/Git';
 import { Selection } from '../utilities/Selection';
 import { ServerUrl } from '../utilities/ServerUrl';
 import { LinkHandler } from './LinkHandler';
 
-export class AzureDevOpsHandler extends LinkHandler {
-    public readonly name: string = 'Azure DevOps';
+export class AzureDevOpsServerHandler extends LinkHandler {
+    private customServerProvider: CustomServerProvider;
 
-    protected getMatchingServerUrl(remoteUrl: string): ServerUrl | undefined {
-        let match: RegExpMatchArray | null;
+    constructor() {
+        super();
+        this.customServerProvider = new CustomServerProvider();
+    }
 
-        match = /^git@ssh\.dev\.azure\.com:v3\/([^\/]+)\/([^\/]+)\/.+$/.exec(
-            remoteUrl
-        );
+    public readonly name: string = 'Azure DevOps Server';
 
-        if (!match) {
-            match = /https:\/\/(?:.+@)?dev\.azure\.com\/([^\/]+)\/([^\/]+)\/_git\/.+/.exec(
-                remoteUrl
-            );
-        }
-
-        if (match) {
-            let username: string;
-            let project: string;
-
-            username = match[1];
-            project = match[2];
-
-            return {
-                baseUrl: `https://dev.azure.com/${username}/${project}/_git`,
-                sshUrl: `git@ssh.dev.azure.com:v3/${username}/${project}`
-            };
-        }
-
-        return undefined;
+    protected getServerUrls(): ServerUrl[] {
+        return this.customServerProvider.getServers('azureDevOpsServer');
     }
 
     protected async getCurrentBranch(rootDirectory: string): Promise<string> {
@@ -98,9 +81,8 @@ export class AzureDevOpsHandler extends LinkHandler {
                 // the start column and end column. Since there is no actual text selected,
                 // we will select the whole line by setting the end line number to the next
                 // line and the start and end columns to the start of each line.
-                args += `&lineEnd=${
-                    selection.startLine + 1
-                }&lineStartColumn=1&lineEndColumn=1`;
+                args += `&lineEnd=${selection.startLine + 1
+                    }&lineStartColumn=1&lineEndColumn=1`;
             }
         }
 
