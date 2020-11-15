@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.9.0
+
+-   Added support for Azure DevOps Server.
+
 ## 1.8.1
 
 -   Logging improvements.

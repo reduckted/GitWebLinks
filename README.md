@@ -12,7 +12,7 @@ Works with:
 -   GitLab
 -   Visual Studio Team Services
 
-For GitHub Enterprise, GitLab Enterprise/Community Edition and Bitbucket Server, there is some configuration required. [See below for more details](#github-enterprise-gitlab-enterprise-and-bitbucket-server).
+For GitHub Enterprise, GitLab Enterprise/Community Edition, Bitbucket Server and Azure DevOps Server, there is some configuration required. [See below for more details](#on-premise-servers).
 
 ## Copy Link to File
 
@@ -40,9 +40,9 @@ Links can be created using the current commit hash, or the current branch name. 
 "gitweblinks.linkType": "hash"
 ```
 
-## GitHub Enterprise, GitLab Enterprise and Bitbucket Server
+## On-Premise Servers
 
-If you use either GitHub Enterprise, GitLab Enterprise/Community Edition or Bitbucket Server, you will need to tell the extension the URLs of those servers. Do this in your user settings file (_File -> Preferences -> Settings_). You need to specify the base HTTP/HTTPS URL of the server, and if you use SSH, the base SSH URL.
+If you use an on-premise server for either GitHub Enterprise, GitLab Enterprise/Community Edition, Bitbucket Server and Azure DevOps Server, you will need to tell the extension the URLs of those servers. Do this in your user settings file (_File -> Preferences -> Settings_). You need to specify the base HTTP/HTTPS URL of the server, and if you use SSH, the base SSH URL.
 
 Make sure you include any port numbers (if it's not port 80) and context paths.
 
@@ -79,6 +79,17 @@ Make sure you include any port numbers (if it's not port 80) and context paths.
 ]
 ```
 
+### Azure DevOps Server
+
+```json
+"gitweblinks.azureDevOpsServer": [
+    {
+        "baseUrl": "https://local-devops",
+        "sshUrl": "git@local-devops"
+    }
+]
+```
+
 ## Commands
 
 There are two commands provided by this extension:
@@ -91,6 +102,10 @@ There are two commands provided by this extension:
 This extension requires Git to already be installed and on your PATH. If this isn't suitable for you and you'd prefer to specify the location of Git, please open a new issue in this repository and I'll see what I can do :)
 
 ## Release Notes
+
+## 1.9.0
+
+-   Added support for Azure DevOps Server.
 
 ## 1.8.1
 
