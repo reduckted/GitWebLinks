@@ -120,6 +120,26 @@
                     ],
                     "default": "hash"
                 },
+                "gitweblinks.azureDevOpsServer": {
+                    "type": "array",
+                    "description": "The URLs of your Azure DevOps Server instances.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "baseUrl": {
+                                "type": "string",
+                                "description": "The base URL for the website."
+                            },
+                            "sshUrl": {
+                                "type": "string",
+                                "description": "The SSH URL for remotes."
+                            }
+                        },
+                        "required": [
+                            "baseUrl"
+                        ]
+                    }
+                },
                 "gitweblinks.bitbucketServer": {
                     "type": "array",
                     "description": "The URLs of your Bitbucket Server instances.",
