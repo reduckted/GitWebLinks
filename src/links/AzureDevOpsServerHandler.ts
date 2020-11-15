@@ -81,8 +81,9 @@ export class AzureDevOpsServerHandler extends LinkHandler {
                 // the start column and end column. Since there is no actual text selected,
                 // we will select the whole line by setting the end line number to the next
                 // line and the start and end columns to the start of each line.
-                args += `&lineEnd=${selection.startLine + 1
-                    }&lineStartColumn=1&lineEndColumn=1`;
+                args += `&lineEnd=${
+                    selection.startLine + 1
+                }&lineStartColumn=1&lineEndColumn=1`;
             }
         }
 

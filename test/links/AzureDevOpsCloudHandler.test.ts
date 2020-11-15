@@ -14,7 +14,7 @@ import { GitInfo } from '../../src/git/GitInfo';
 import { AzureDevOpsCloudHandler } from '../../src/links/AzureDevOpsCloudHandler';
 import { setupRepository } from '../test-helpers/setup-repository';
 
-describe('VisualStudioTeamServicesHandler', () => {
+describe('AzureDevOpsCloudHandler', () => {
     function getRemotes(): string[] {
         return [
             'https://user@dev.azure.com/user/MyProject/_git/MyRepo',
