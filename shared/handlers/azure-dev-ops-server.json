@@ -1,0 +1,70 @@
+{
+    "$schema": "../handler-schema.json",
+    "name": "Azure Dev Ops Server",
+    "private": "azureDevOpsServer",
+    "branch": ["rev-parse", "--abbrev-ref"],
+    "url": "{{ base }}/{{ repository }}?path=%2F{{ file | uri_component }}&version=G{{ type | slice:0,1 | upcase }}{{ ref | uri_component }}",
+    "selection": [
+        "&line={{ startLine }}",
+        "{% if startLine == endLine %}",
+        "{% if startColumn == endColumn %}",
+        "&lineEnd={{ startLine | plus:1 }}&lineStartColumn=1&lineEndColumn=1",
+        "{% else %}",
+        "&lineStartColumn={{ startColumn }}&lineEndColumn={{ endColumn }}",
+        "{% endif %}",
+        "{% else %}",
+        "&lineEnd={{ endLine }}&lineStartColumn={{ startColumn }}&lineEndColumn={{ endColumn }}",
+        "{% endif %}"
+    ],
+    "tests": {
+        "settings": {
+            "azureDevOpsServer": [
+                {
+                    "http": "https://local-devops",
+                    "ssh": "git@local-devops:22"
+                }
+            ]
+        },
+        "createUrl": {
+            "remotes": {
+                "http": "https://local-devops/collection/foo/_git/bar",
+                "httpWithUsername": "https://user@local-devops/collection/foo/_git/bar",
+                "ssh": "git@local-devops:22/collection/foo/_git/bar",
+                "sshWithProtocol": "ssh://git@local-devops:22/collection/foo/_git/bar",
+                "result": "https://local-devops/collection/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster"
+            },
+            "spaces": {
+                "remote": "https://local-devops/collection/foo/_git/bar",
+                "result": "https://local-devops/collection/foo/_git/bar?path=%2Fsrc%2Fpath%20spaces%2Ffile%20spaces.txt&version=GBmaster"
+            },
+            "branch": {
+                "remote": "https://local-devops/collection/foo/_git/bar",
+                "result": "https://local-devops/collection/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBfeature%2Ftest"
+            },
+            "commit": {
+                "remote": "https://local-devops/collection/foo/_git/bar",
+                "result": "https://local-devops/collection/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GC{{ commit }}"
+            },
+            "selection": {
+                "remote": "https://local-devops/collection/foo/_git/bar",
+                "point": {
+                    "line": 10,
+                    "result": "https://local-devops/collection/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineEnd=11&lineStartColumn=1&lineEndColumn=1"
+                },
+                "singleLine": {
+                    "line": 10,
+                    "startColumn": 20,
+                    "endColumn": 30,
+                    "result": "https://local-devops/collection/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineStartColumn=20&lineEndColumn=30"
+                },
+                "multipleLines": {
+                    "startLine": 10,
+                    "startColumn": 20,
+                    "endLine": 30,
+                    "endColumn": 40,
+                    "result": "https://local-devops/collection/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineEnd=30&lineStartColumn=20&lineEndColumn=40"
+                }
+            }
+        }
+    }
+}

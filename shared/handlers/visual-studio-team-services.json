@@ -1,0 +1,99 @@
+{
+    "$schema": "../handler-schema.json",
+    "name": "Visual Studio Team Services",
+    "server": [
+        {
+            "pattern": "^([^.]+)@vs-ssh\\.visualstudio\\.com:22(?:/(.+))?/_ssh/.+$",
+            "http": "https://{{ match[1] }}.visualstudio.com{% if match[2] %}/{{ match[2] }}{% endif %}/_git",
+            "ssh": "{{ match[1] }}@vs-ssh.visualstudio.com:22{% if match[2] %}/{{ match[2] }}{% endif %}/_ssh"
+        },
+        {
+            "pattern": "^https://([^.]+).visualstudio.com(?:/(.+))?/_git/.+$",
+            "http": "https://{{ match[1] }}.visualstudio.com{% if match[2] %}/{{ match[2] }}{% endif %}/_git",
+            "ssh": "{{ match[1] }}@vs-ssh.visualstudio.com:22{% if match[2] %}/{{ match[2] }}{% endif %}/_ssh"
+        }
+    ],
+    "branch": ["rev-parse", "--abbrev-ref"],
+    "url": [
+        "{{ base }}/{{ repository }}",
+        "?path=%2F{{ file | uri_component }}",
+        "&version=G{{ type | slice:0,1 | upcase }}{{ ref | uri_component }}"
+    ],
+    "selection": [
+        "&line={{ startLine }}",
+        "{% if startLine == endLine %}",
+        "{% if startColumn == endColumn %}",
+        "&lineEnd={{ startLine | plus:1 }}&lineStartColumn=1&lineEndColumn=1",
+        "{% else %}",
+        "&lineStartColumn={{ startColumn }}&lineEndColumn={{ endColumn }}",
+        "{% endif %}",
+        "{% else %}",
+        "&lineEnd={{ endLine }}&lineStartColumn={{ startColumn }}&lineEndColumn={{ endColumn }}",
+        "{% endif %}"
+    ],
+    "tests": {
+        "createUrl": {
+            "remotes": {
+                "http": "https://foo.visualstudio.com/_git/bar",
+                "httpWithUsername": "https://username@foo.visualstudio.com/_git/bar",
+                "ssh": "foo@vs-ssh.visualstudio.com:22/_ssh/bar",
+                "sshWithProtocol": "ssh://foo@vs-ssh.visualstudio.com:22/_ssh/bar",
+                "result": "https://foo.visualstudio.com/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster"
+            },
+            "spaces": {
+                "remote": "https://foo.visualstudio.com/_git/bar",
+                "result": "https://foo.visualstudio.com/_git/bar?path=%2Fsrc%2Fpath%20spaces%2Ffile%20spaces.txt&version=GBmaster"
+            },
+            "branch": {
+                "remote": "https://foo.visualstudio.com/_git/bar",
+                "result": "https://foo.visualstudio.com/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBfeature%2Ftest"
+            },
+            "commit": {
+                "remote": "https://foo.visualstudio.com/_git/bar",
+                "result": "https://foo.visualstudio.com/_git/bar?path=%2Fsrc%2Ffile.txt&version=GC{{ commit }}"
+            },
+            "misc": [
+                {
+                    "name": "collection (http)",
+                    "remote": "https://foo.visualstudio.com/DefaultCollection/_git/bar",
+                    "result": "https://foo.visualstudio.com/DefaultCollection/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster"
+                },
+                {
+                    "name": "collection (ssh)",
+                    "remote": "ssh://foo@vs-ssh.visualstudio.com:22/DefaultCollection/_ssh/bar",
+                    "result": "https://foo.visualstudio.com/DefaultCollection/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster"
+                },
+                {
+                    "name": "child collection (http)",
+                    "remote": "https://foo.visualstudio.com/DefaultCollection/Child/_git/bar",
+                    "result": "https://foo.visualstudio.com/DefaultCollection/Child/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster"
+                },
+                {
+                    "name": "child collection (ssh)",
+                    "remote": "ssh://foo@vs-ssh.visualstudio.com:22/DefaultCollection/Child/_ssh/bar",
+                    "result": "https://foo.visualstudio.com/DefaultCollection/Child/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster"
+                }
+            ],
+            "selection": {
+                "remote": "https://foo.visualstudio.com/_git/bar",
+                "point": {
+                    "line": 10,
+                    "result": "https://foo.visualstudio.com/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineEnd=11&lineStartColumn=1&lineEndColumn=1"
+                },
+                "singleLine": {
+                    "line": 10,
+                    "startColumn": 20,
+                    "endColumn": 30,
+                    "result": "https://foo.visualstudio.com/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineStartColumn=20&lineEndColumn=30"
+                },
+                "multipleLines": {
+                    "startLine": 10,
+                    "startColumn": 20,
+                    "endLine": 30,
+                    "endColumn": 40,
+                    "result": "https://foo.visualstudio.com/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineEnd=30&lineStartColumn=20&lineEndColumn=40"
+                }
+            }
+        }
+    }
+}

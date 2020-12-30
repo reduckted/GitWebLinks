@@ -1,0 +1,54 @@
+{
+    "$schema": "../handler-schema.json",
+    "name": "GitLab",
+    "server": {
+        "http": "https://gitlab.com",
+        "ssh": "git@gitlab.com"
+    },
+    "branch": ["rev-parse", "--abbrev-ref"],
+    "url": "{{ base }}/{{ repository }}/-/blob/{{ ref | uri }}/{{ file | uri }}",
+    "selection": "#L{{ startLine }}{% if startLine != endLine %}-{{ endLine }}{% endif %}",
+    "tests": {
+        "createUrl": {
+            "remotes": {
+                "http": "https://gitlab.com/foo/bar.git",
+                "httpWithUsername": "https://username@gitlab.com/foo/bar.git",
+                "ssh": "git@gitlab.com:foo/bar.git",
+                "sshWithProtocol": "ssh://git@gitlab.com:foo/bar.git",
+                "result": "https://gitlab.com/foo/bar/-/blob/master/src/file.txt"
+            },
+            "spaces": {
+                "remote": "https://gitlab.com/foo/bar.git",
+                "result": "https://gitlab.com/foo/bar/-/blob/master/src/path%20spaces/file%20spaces.txt"
+            },
+            "branch": {
+                "remote": "https://gitlab.com/foo/bar.git",
+                "result": "https://gitlab.com/foo/bar/-/blob/feature/test/src/file.txt"
+            },
+            "commit": {
+                "remote": "https://gitlab.com/foo/bar.git",
+                "result": "https://gitlab.com/foo/bar/-/blob/{{ commit }}/src/file.txt"
+            },
+            "selection": {
+                "remote": "https://gitlab.com/foo/bar.git",
+                "point": {
+                    "line": 10,
+                    "result": "https://gitlab.com/foo/bar/-/blob/master/src/file.txt#L10"
+                },
+                "singleLine": {
+                    "line": 10,
+                    "startColumn": 20,
+                    "endColumn": 30,
+                    "result": "https://gitlab.com/foo/bar/-/blob/master/src/file.txt#L10"
+                },
+                "multipleLines": {
+                    "startLine": 10,
+                    "startColumn": 20,
+                    "endLine": 30,
+                    "endColumn": 40,
+                    "result": "https://gitlab.com/foo/bar/-/blob/master/src/file.txt#L10-30"
+                }
+            }
+        }
+    }
+}

@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const webpack = require('webpack');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -27,7 +28,12 @@ const config = {
                 use: [{ loader: 'ts-loader' }]
             }
         ]
-    }
+    },
+    plugins: [
+        new webpack.DefinePlugin({
+            'process.env.WEBPACK': JSON.stringify(true)
+        })
+    ]
 };
 
 module.exports = config;

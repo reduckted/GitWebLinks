@@ -2,7 +2,7 @@
     "name": "vscode-gitweblinks",
     "displayName": "Git Web Links for VS Code",
     "description": "Copy links to files in their online Git repositories",
-    "version": "1.9.0",
+    "version": "2.0.0",
     "publisher": "reduckted",
     "homepage": "https://github.com/reduckted/vscode-gitweblinks",
     "repository": {
@@ -29,42 +29,55 @@
     "license": "MIT",
     "scripts": {
         "vscode:prepublish": "npm run build",
-        "lint": "tslint -p tsconfig.json",
+        "lint": "eslint --ext .ts .",
         "build": "webpack --mode production",
-        "pretest": "tsc -p ./",
+        "pretest:clean": "rimraf ./out",
+        "pretest:build": "tsc -p ./",
+        "pretest:copy-schemas": "cpy ./shared ./out --parents",
+        "pretest": "run-s pretest:clean pretest:build pretest:copy-schemas",
         "test": "node ./out/test/run.js",
         "debug-build": "webpack --mode development",
         "debug-test": "npm run pretest"
     },
     "dependencies": {
-        "spawn-rx": "2.0.12"
+        "liquidjs": "9.19.0",
+        "spawn-rx": "3.0.0"
     },
     "devDependencies": {
-        "@types/chai": "4.2.11",
-        "@types/mocha": "7.0.2",
-        "@types/node": "13.13.5",
+        "@types/chai": "4.2.14",
+        "@types/mocha": "8.2.0",
+        "@types/node": "12.19.3",
         "@types/rimraf": "3.0.0",
-        "@types/sinon": "9.0.0",
-        "@types/sinon-chai": "3.2.4",
-        "@types/uuid": "7.0.3",
-        "@types/vscode": "1.30.0",
+        "@types/sinon": "9.0.10",
+        "@types/sinon-chai": "3.2.5",
+        "@types/uuid": "8.3.0",
+        "@types/vscode": "1.50.0",
+        "@types/webpack-env": "1.16.0",
+        "@typescript-eslint/eslint-plugin": "4.11.1",
+        "@typescript-eslint/parser": "4.11.1",
         "chai": "4.2.0",
-        "mocha": "7.1.2",
-        "prettier": "2.0.5",
+        "cpy-cli": "3.1.1",
+        "eslint": "7.16.0",
+        "eslint-config-prettier": "7.1.0",
+        "eslint-plugin-import": "2.22.1",
+        "eslint-plugin-jest": "24.1.3",
+        "eslint-plugin-jsdoc": "30.7.9",
+        "mocha": "8.2.1",
+        "npm-run-all": "4.1.5",
+        "prettier": "2.2.1",
         "rimraf": "3.0.2",
-        "sinon": "9.0.2",
+        "sinon": "9.2.2",
         "sinon-chai": "3.5.0",
-        "ts-loader": "7.0.2",
-        "tslint": "6.1.2",
-        "typescript": "3.8.3",
-        "uuid": "8.0.0",
-        "vsce": "1.75.0",
-        "vscode-test": "1.3.0",
-        "webpack": "4.43.0",
-        "webpack-cli": "3.3.11"
+        "ts-loader": "8.0.12",
+        "typescript": "4.1.3",
+        "uuid": "8.3.2",
+        "vsce": "1.83.0",
+        "vscode-test": "1.4.1",
+        "webpack": "5.11.1",
+        "webpack-cli": "4.3.0"
     },
     "engines": {
-        "vscode": "^1.30.0"
+        "vscode": "^1.50.0"
     },
     "categories": [
         "Other"
@@ -82,6 +95,21 @@
             {
                 "command": "gitweblinks.copySelection",
                 "title": "Copy Web Link to Selection",
+                "category": "Git Web Links"
+            },
+            {
+                "command": "gitweblinks.copySelectionToDefaultBranch",
+                "title": "Copy Web Link to Selection (on default branch)",
+                "category": "Git Web Links"
+            },
+            {
+                "command": "gitweblinks.copySelectionToBranch",
+                "title": "Copy Web Link to Selection (on current branch)",
+                "category": "Git Web Links"
+            },
+            {
+                "command": "gitweblinks.copySelectionToCommit",
+                "title": "Copy Web Link to Selection (at current commit)",
                 "category": "Git Web Links"
             }
         ],
@@ -113,12 +141,18 @@
             "properties": {
                 "gitweblinks.linkType": {
                     "type": "string",
-                    "description": "The type of links to create:\n - \"hash\": Create a link to the current commit (default).\n - \"branch\": Create a link to the current branch.",
+                    "description": "The type of links to create by default:\n - defaultBranch: Create a link to the default branch.\n - commit: Create a link to the current commit (default).\n - branch: Create a link to the current branch.",
                     "enum": [
-                        "hash",
+                        "defaultBranch",
+                        "commit",
                         "branch"
                     ],
-                    "default": "hash"
+                    "default": "commit"
+                },
+                "gitweblinks.defaultBranch": {
+                    "type": "string",
+                    "description": "The name of the branch to use when creating a link to the default branch.",
+                    "default": "master"
                 },
                 "gitweblinks.azureDevOpsServer": {
                     "type": "array",
@@ -126,18 +160,19 @@
                     "items": {
                         "type": "object",
                         "properties": {
-                            "baseUrl": {
+                            "http": {
                                 "type": "string",
-                                "description": "The base URL for the website."
+                                "description": "The base URL for the website. For example:\nhttp://azure.my-server:8000"
                             },
-                            "sshUrl": {
+                            "ssh": {
                                 "type": "string",
-                                "description": "The SSH URL for remotes."
+                                "description": "The SSH URL for remotes. For example:\nssh://azure.my-server:22"
                             }
                         },
                         "required": [
-                            "baseUrl"
-                        ]
+                            "http"
+                        ],
+                        "additionalProperties": false
                     }
                 },
                 "gitweblinks.bitbucketServer": {
@@ -146,18 +181,19 @@
                     "items": {
                         "type": "object",
                         "properties": {
-                            "baseUrl": {
+                            "http": {
                                 "type": "string",
-                                "description": "The base URL for the website."
+                                "description": "The base URL for the website. For example:\nhttp://my-server:7990/bitbucket"
                             },
-                            "sshUrl": {
+                            "ssh": {
                                 "type": "string",
-                                "description": "The SSH URL for remotes."
+                                "description": "The SSH URL for remotes. For example:\nssh://my-server:7999/bitbucket"
                             }
                         },
                         "required": [
-                            "baseUrl"
-                        ]
+                            "http"
+                        ],
+                        "additionalProperties": false
                     }
                 },
                 "gitweblinks.gitHubEnterprise": {
@@ -166,18 +202,19 @@
                     "items": {
                         "type": "object",
                         "properties": {
-                            "baseUrl": {
+                            "http": {
                                 "type": "string",
-                                "description": "The base URL for the website."
+                                "description": "The base URL for the website. For example:\nhttp://github.my-server:8000"
                             },
-                            "sshUrl": {
+                            "ssh": {
                                 "type": "string",
-                                "description": "The SSH URL for remotes."
+                                "description": "The SSH URL for remotes. For example:\nssh://github.my-server"
                             }
                         },
                         "required": [
-                            "baseUrl"
-                        ]
+                            "http"
+                        ],
+                        "additionalProperties": false
                     }
                 },
                 "gitweblinks.gitLabEnterprise": {
@@ -186,18 +223,19 @@
                     "items": {
                         "type": "object",
                         "properties": {
-                            "baseUrl": {
+                            "http": {
                                 "type": "string",
-                                "description": "The base URL for the website."
+                                "description": "The base URL for the website. For example:\nhttp://gitlab.my-server:8000"
                             },
-                            "sshUrl": {
+                            "ssh": {
                                 "type": "string",
-                                "description": "The SSH URL for remotes."
+                                "description": "The SSH URL for remotes. For example:\nssh://gitlab.my-server"
                             }
                         },
                         "required": [
-                            "baseUrl"
-                        ]
+                            "http"
+                        ],
+                        "additionalProperties": false
                     }
                 }
             }

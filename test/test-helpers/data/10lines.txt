@@ -1,9 +1,0 @@
-foo
-bar
-meep
-bork
-beep
-boop
-ping
-pong
-ding
