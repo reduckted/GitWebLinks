@@ -49,8 +49,14 @@ describe('Command', () => {
         workspaceFolder = { uri: folder, index: 0, name: 'foo' };
         repository = { root: folder.toString(), remote: 'http://example.com' };
 
-        showErrorMessage = sinon.stub(window, 'showErrorMessage');
-        showInformationMessage = sinon.stub(window, 'showInformationMessage');
+        showErrorMessage = sinon
+            .stub(window, 'showErrorMessage')
+            .returns(Promise.resolve(undefined));
+
+        showInformationMessage = sinon
+            .stub(window, 'showInformationMessage')
+            .returns(Promise.resolve(undefined));
+
         createUrl = sinon.stub(handler, 'createUrl');
 
         link = undefined;
@@ -259,7 +265,7 @@ describe('Command', () => {
 
     function expectError(message: string): void {
         expect(link, 'link').to.be.undefined;
-        expect(showErrorMessage).to.have.been.calledWithExactly(message);
+        expect(showErrorMessage).to.have.been.calledWith(message);
     }
 
     function getLinkTypes(): (LinkType | undefined)[] {

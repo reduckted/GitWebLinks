@@ -22,6 +22,9 @@ export const STRINGS = {
         noRemote: (repositoryRoot: string): string =>
             format("The repository '%s' does not have any remotes.", repositoryRoot),
         noHandler: (remote: string): string =>
-            format("The Git remote '%s' is not supported.", remote)
+            format(
+                "The Git remote '%s' is not supported. If this is a private Git server, you may need to add the server address to the settings.",
+                remote
+            )
     }
 };

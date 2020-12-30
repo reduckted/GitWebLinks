@@ -2,6 +2,7 @@ import {
     commands,
     Disposable,
     env,
+    MessageItem,
     TextEditor,
     Uri,
     window,
@@ -138,7 +139,19 @@ export class Command {
 
         if (!workspaceInfo.handler) {
             log("No handler for remote '%s'.", repository.remote);
-            void window.showErrorMessage(STRINGS.command.noHandler(repository.remote));
+            void window
+                .showErrorMessage<ActionMessageItem>(STRINGS.command.noHandler(repository.remote), {
+                    title: 'Open Settings',
+                    action: 'settings'
+                })
+                .then((item) => {
+                    if (item?.action === 'settings') {
+                        void commands.executeCommand(
+                            'workbench.action.openSettings',
+                            'gitweblinks'
+                        );
+                    }
+                });
             return undefined;
         }
 
@@ -273,4 +286,14 @@ interface FileInfo {
      * The link handler for the file.
      */
     readonly handler: LinkHandler;
+}
+
+/**
+ * Defines a message item with an associated action.
+ */
+interface ActionMessageItem extends MessageItem {
+    /**
+     * The action to perform.
+     */
+    action: 'settings';
 }

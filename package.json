@@ -141,7 +141,7 @@
             "properties": {
                 "gitweblinks.linkType": {
                     "type": "string",
-                    "description": "The type of links to create by default:\n - \"defaultBranch\": Create a link to the default branch.\n - \"commit\": Create a link to the current commit (default).\n - \"branch\": Create a link to the current branch.",
+                    "description": "The type of links to create by default:\n - defaultBranch: Create a link to the default branch.\n - commit: Create a link to the current commit (default).\n - branch: Create a link to the current branch.",
                     "enum": [
                         "defaultBranch",
                         "commit",
@@ -162,11 +162,11 @@
                         "properties": {
                             "http": {
                                 "type": "string",
-                                "description": "The base URL for the website."
+                                "description": "The base URL for the website. For example:\nhttp://azure.my-server:8000"
                             },
                             "ssh": {
                                 "type": "string",
-                                "description": "The SSH URL for remotes."
+                                "description": "The SSH URL for remotes. For example:\nssh://azure.my-server:22"
                             }
                         },
                         "required": [
@@ -182,11 +182,11 @@
                         "properties": {
                             "http": {
                                 "type": "string",
-                                "description": "The base URL for the website."
+                                "description": "The base URL for the website. For example:\nhttp://my-server:7990/bitbucket"
                             },
                             "ssh": {
                                 "type": "string",
-                                "description": "The SSH URL for remotes."
+                                "description": "The SSH URL for remotes. For example:\nssh://my-server:7999/bitbucket"
                             }
                         },
                         "required": [
@@ -202,11 +202,11 @@
                         "properties": {
                             "http": {
                                 "type": "string",
-                                "description": "The base URL for the website."
+                                "description": "The base URL for the website. For example:\nhttp://github.my-server:8000"
                             },
                             "ssh": {
                                 "type": "string",
-                                "description": "The SSH URL for remotes."
+                                "description": "The SSH URL for remotes. For example:\nssh://github.my-server"
                             }
                         },
                         "required": [
@@ -222,11 +222,11 @@
                         "properties": {
                             "http": {
                                 "type": "string",
-                                "description": "The base URL for the website."
+                                "description": "The base URL for the website. For example:\nhttp://gitlab.my-server:8000"
                             },
                             "ssh": {
                                 "type": "string",
-                                "description": "The SSH URL for remotes."
+                                "description": "The SSH URL for remotes. For example:\nssh://gitlab.my-server"
                             }
                         },
                         "required": [
