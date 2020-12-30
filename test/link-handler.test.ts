@@ -3,12 +3,14 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as sinon from 'sinon';
 
-import { Directory, setupRepository } from './helpers';
-import { LinkOptions, LinkType, RepositoryWithRemote } from '../src/types';
+import { git } from '../src/git';
 import { LinkHandler } from '../src/link-handler';
 import { HandlerDefinition } from '../src/schema';
 import { Settings } from '../src/settings';
-import { git } from '../src/git';
+import { LinkOptions, LinkType, RepositoryWithRemote } from '../src/types';
+import { isErrorCode } from '../src/utilities';
+
+import { Directory, setupRepository } from './helpers';
 
 describe('LinkHandler', () => {
     let repository: RepositoryWithRemote;
@@ -331,10 +333,10 @@ describe('LinkHandler', () => {
                 await fs.symlink(target, symlinkPath, type);
                 return true;
             } catch (ex) {
-                if (ex.code === 'EPERM') {
+                if (isErrorCode(ex, 'EPERM')) {
                     // Creating symlinks on Windows requires administrator permissions.
                     // We'll return false so that the test can be skipped.
-                    console.warn('Unable to create symlink. Permission denied.'); // tslint:disable-line: no-console
+                    console.warn('Unable to create symlink. Permission denied.'); // eslint-disable-line no-console
                     return false;
                 } else {
                     throw ex;

@@ -6,6 +6,7 @@ import { git } from './git';
 import { log } from './log';
 import { STRINGS } from './strings';
 import { Repository } from './types';
+import { getErrorMessage, isErrorCode } from './utilities';
 
 /**
  * Finds the repository that a workspace belongs to.
@@ -13,6 +14,7 @@ import { Repository } from './types';
 export class RepositoryFinder {
     /**
      * Finds the repository that the specified workspace is within.
+     *
      * @param workspaceRoot The full path of the root of the workspace to find the repository for.
      * @returns The repository that was found; otherwise, `undefined`.
      */
@@ -38,8 +40,8 @@ export class RepositoryFinder {
                 return { root, remote };
             }
         } catch (ex) {
-            log("Error finding Git info for path '%s'. %s", workspaceRoot, ex.message || ex);
-            window.showErrorMessage(STRINGS.repositoryFinder.failure);
+            log("Error finding Git info for path '%s'. %s", workspaceRoot, getErrorMessage(ex));
+            void window.showErrorMessage(STRINGS.repositoryFinder.failure);
         }
 
         return undefined;
@@ -47,6 +49,7 @@ export class RepositoryFinder {
 
     /**
      * Finds the root of the repository that contains the specified directory.
+     *
      * @param startingDirectory The full path of the directory to start searching from.
      * @returns The root of the repository, or `undefined` if the specified directory is not within a repository.
      */
@@ -62,7 +65,7 @@ export class RepositoryFinder {
                     return current;
                 }
             } catch (ex) {
-                if (ex.code !== 'ENOENT') {
+                if (!isErrorCode(ex, 'ENOENT')) {
                     throw ex;
                 }
             }
@@ -76,6 +79,7 @@ export class RepositoryFinder {
 
     /**
      * Finds the remote URL to use for the repository.
+     *
      * @param root The root of the repository.
      * @returns The URL of the "origin" remote if it exists, otherwise the first remote alphabetically, or `undefined` if there are no remotes.
      */
@@ -108,6 +112,7 @@ export class RepositoryFinder {
 
     /**
      * Parses a line from Git that lists a remote.
+     *
      * @param line The line output by Git.
      * @returns The details of the remote.
      */

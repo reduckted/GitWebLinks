@@ -3,6 +3,9 @@ import { DynamicServer, StaticServer } from './schema';
 import { ParsedTemplate, parseTemplate } from './templates';
 import { normalizeRemoteUrl } from './utilities';
 
+/**
+ * Defines a remote server that can be matched to a Git remote URL.
+ */
 export class RemoteServer {
     private readonly matchers: Matcher[];
 
@@ -30,6 +33,7 @@ export class RemoteServer {
 
     /**
      * Tests if this server is a match for the remote URL.
+     *
      * @param remoteUrl The remote URL to test against.
      * @returns The server address if the remote URL is a match; otherwise, `undefined`.
      */
@@ -50,6 +54,7 @@ export class RemoteServer {
 
 /**
  * Creates a matcher function for the given server definition.
+ *
  * @param server The server definition.
  * @returns The matcher function.
  */
@@ -63,7 +68,9 @@ function createMatcher(server: StaticServer | DynamicServer): Matcher {
 
 /**
  * Creates a matcher function for the given dynamic server definition.
+ *
  * @param server The server definition.
+ * @returns The matcher for the server.
  */
 function createDynamicServerMatcher(server: DynamicServer): Matcher {
     let pattern: RegExp;
@@ -104,6 +111,7 @@ function createDynamicServerMatcher(server: DynamicServer): Matcher {
 
 /**
  * Creates a matcher function for the given static server definition.
+ *
  * @param server The server definition.
  * @returns The matcher function.
  */
@@ -113,6 +121,7 @@ function createStaticServerMatcher(server: StaticServer): Matcher {
 
 /**
  * Determines whether the given remote URL matches the given server definition.
+ *
  * @param remote The remote URL.
  * @param server The server definition.
  * @returns True if the remote URL matches the server; otherwise, false.
@@ -133,7 +142,8 @@ function isMatch(remote: string, server: StaticServer): boolean {
 
 /**
  * Creates a matcher function that fetches the static server definitions when invoked.
- * @param server The function to get the server definitions.
+ *
+ * @param factory The function to get the server definitions.
  * @returns The matcher function.
  */
 function createLazyStaticServerMatcher(factory: StaticServerFactory): Matcher {

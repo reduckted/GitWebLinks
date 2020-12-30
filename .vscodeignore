@@ -7,9 +7,9 @@ shared/
 src/
 test/
 
+.eslintrc.json
 .gitignore
 .prettierrc.json
 **/*.map
 tsconfig.json
-tslint.json
 webpack.config.js

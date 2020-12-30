@@ -1,13 +1,13 @@
 import { promises as fs, Stats } from 'fs';
 import * as path from 'path';
 
-import { Settings } from './settings';
 import { git } from './git';
-import { LinkOptions, LinkType, RepositoryWithRemote } from './types';
 import { RemoteServer, ServerAddress } from './remote-server';
 import { HandlerDefinition } from './schema';
+import { Settings } from './settings';
 import { ParsedTemplate, parseTemplate } from './templates';
-import { normalizeRemoteUrl } from './utilities';
+import { LinkOptions, LinkType, RepositoryWithRemote } from './types';
+import { getErrorMessage, normalizeRemoteUrl } from './utilities';
 
 /**
  * Handles the generation of links for a particular type of Git server.
@@ -20,9 +20,10 @@ export class LinkHandler {
 
     /**
      * @constructor
+     *
      * @param definition The details of the handler.
      */
-    public constructor(private readonly definition: HandlerDefinition) {
+    constructor(private readonly definition: HandlerDefinition) {
         this.settings = new Settings();
 
         if ('private' in definition) {
@@ -44,6 +45,7 @@ export class LinkHandler {
 
     /**
      * Determines whether this handler can generate links for the given remote URL.
+     *
      * @param remoteUrl The remote URL to check.
      * @returns True if this handler handles the given remote URL; otherwise, false.
      */
@@ -53,9 +55,11 @@ export class LinkHandler {
 
     /**
      * Creates a link for the specified file.
+     *
      * @param repository The repository that the file is in.
      * @param filePath The full path to the file.
      * @param options The options for creating the link.
+     * @returns The URL.
      */
     public async createUrl(
         repository: RepositoryWithRemote,
@@ -97,10 +101,20 @@ export class LinkHandler {
         return url;
     }
 
+    /**
+     * Gets the server address for the given remote URL.
+     *
+     * @param remote The remote URL.
+     * @returns The server address.
+     */
     private getAddress(remote: string): ServerAddress {
-        let address: ServerAddress;
+        let address: ServerAddress | undefined;
 
-        address = this.server.match(remote)!;
+        address = this.server.match(remote);
+
+        if (!address) {
+            throw new Error('Could not find a matching address.');
+        }
 
         // Normalize the URLs.
         address = {
@@ -119,6 +133,7 @@ export class LinkHandler {
 
     /**
      * Gets the path to the repository at the given server address.
+     *
      * @param remoteUrl The remote URL of the repository.
      * @param address The address of the server.
      * @returns The path to the repository.
@@ -153,6 +168,7 @@ export class LinkHandler {
 
     /**
      * Gets the ref to use when creating the link.
+     *
      * @param type The type of ref to get.
      * @param repositoryRoot The path to the root of the repository.
      * @returns The ref to use.
@@ -172,6 +188,7 @@ export class LinkHandler {
 
     /**
      * Gets the relative path from the specified directory to the specified file.
+     *
      * @param from The directory to get the relative path from.
      * @param to The file to get the relative path to.
      * @returns The relative path of the file.
@@ -193,7 +210,9 @@ export class LinkHandler {
                 // Provide a nicer error message that
                 // explains what we were trying to do.
                 throw new Error(
-                    `Unable to resolve the symbolic link '${to}' to a real path.\n${ex}`
+                    `Unable to resolve the symbolic link '${to}' to a real path.\n${getErrorMessage(
+                        ex
+                    )}`
                 );
             }
         }
@@ -205,6 +224,7 @@ export class LinkHandler {
 
     /**
      * Determines whether the specified file is a symbolic link.
+     *
      * @param filePath The path of the file to check.
      * @param rootDirectory The path to the root of the repository.
      * @returns True if the specified file is a symbolic link within the repository; otherwise, false.

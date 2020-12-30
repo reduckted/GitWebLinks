@@ -82,7 +82,7 @@ describe('Settings', () => {
         });
     });
 
-    function setup(data: Record<string, any>): void {
+    function setup(data: Record<string, unknown>): void {
         sinon
             .stub(workspace, 'getConfiguration')
             .withArgs('gitweblinks')
@@ -90,7 +90,7 @@ describe('Settings', () => {
                 get: (section: string) => data[section],
                 has: () => true,
                 inspect: () => undefined,
-                update: () => Promise.resolve()
+                update: async () => Promise.resolve()
             });
     }
 });

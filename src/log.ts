@@ -1,12 +1,13 @@
-import { OutputChannel, window } from 'vscode';
 import { format } from 'util';
+import { OutputChannel, window } from 'vscode';
 
 let channel: OutputChannel | undefined;
 
 /**
  * Logs a message.
+ *
  * @param message The message to log.
- * @param data Additional data to include with the message.
+ * @param args Additional data to include with the message.
  */
 export function log(message: string, ...args: unknown[]): void {
     if (!channel) {
@@ -20,6 +21,7 @@ export function log(message: string, ...args: unknown[]): void {
 
 /**
  * Formats the current time.
+ *
  * @returns The current time as a string.
  */
 function formatTime(): string {
@@ -40,6 +42,7 @@ function formatTime(): string {
 
 /**
  * Pads the given number with zeros.
+ *
  * @param value The value to pad.
  * @param length The length to pad to.
  * @returns The padded value.

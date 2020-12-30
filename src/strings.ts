@@ -10,17 +10,18 @@ export const STRINGS = {
     },
     command: {
         noFileSelected: 'Cannot copy a link because no file is selected.',
-        linkCopied: (handlerName: string) =>
+        linkCopied: (handlerName: string): string =>
             format('%s link copied to the clipboard.', handlerName),
         error: 'An error occurred while creating the link.',
-        fileNotInWorkspace: (file: Uri) =>
+        fileNotInWorkspace: (file: Uri): string =>
             format("Cannot copy a link to '%s' because it's not in a workspace.", file),
-        noWorkspaceInfo: (folder: Uri) =>
+        noWorkspaceInfo: (folder: Uri): string =>
             format("Could not find the workspace information for '%s'.", folder),
-        notTrackedByGit: (folder: Uri) =>
+        notTrackedByGit: (folder: Uri): string =>
             format("The workspace at '%s' is not tracked by Git.", folder),
-        noRemote: (repositoryRoot: string) =>
+        noRemote: (repositoryRoot: string): string =>
             format("The repository '%s' does not have any remotes.", repositoryRoot),
-        noHandler: (remote: string) => format("The Git remote '%s' is not supported.", remote)
+        noHandler: (remote: string): string =>
+            format("The Git remote '%s' is not supported.", remote)
     }
 };

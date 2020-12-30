@@ -1,10 +1,22 @@
 import { Disposable, Uri, WorkspaceFolder, WorkspaceFoldersChangeEvent } from 'vscode';
 
+/**
+ * Mock implementation of a workspace.
+ */
 export class MockWorkspace {
     private readonly callbacks: ((e: WorkspaceFoldersChangeEvent) => Promise<void>)[] = [];
 
+    /**
+     * The workspace folders.
+     */
     public workspaceFolders: WorkspaceFolder[] | undefined;
 
+    /**
+     * Registeres a callback to be called when the workspace folders are changed.
+     *
+     * @param callback The callback.
+     * @returns A disposable to unregister the callback.
+     */
     public onDidChangeWorkspaceFolders(
         callback: (e: WorkspaceFoldersChangeEvent) => Promise<void>
     ): Disposable {
@@ -12,6 +24,12 @@ export class MockWorkspace {
         return { dispose: () => this.callbacks.splice(this.callbacks.indexOf(callback)) };
     }
 
+    /**
+     * Adds a workspace.
+     *
+     * @param uri The URI of the workspace.
+     * @returns The workspace folder that was added.
+     */
     public async add(uri: Uri): Promise<WorkspaceFolder> {
         let folder: WorkspaceFolder;
 
@@ -30,6 +48,11 @@ export class MockWorkspace {
         return folder;
     }
 
+    /**
+     * Removes a workspace.
+     *
+     * @param uri The URI of the workspace.
+     */
     public async remove(uri: Uri): Promise<void> {
         let index: number;
 

@@ -16,6 +16,7 @@ import { Command } from '../src/command';
 import { LinkHandler } from '../src/link-handler';
 import { STRINGS } from '../src/strings';
 import { LinkType, Repository } from '../src/types';
+
 import { MockWorkspaceManager } from './helpers';
 
 const expect = chai.use(sinonChai).expect;
@@ -53,7 +54,7 @@ describe('Command', () => {
         createUrl = sinon.stub(handler, 'createUrl');
 
         link = undefined;
-        sinon.stub(env.clipboard, 'writeText').callsFake((text) => {
+        sinon.stub(env.clipboard, 'writeText').callsFake(async (text) => {
             link = text;
             return Promise.resolve();
         });
@@ -130,7 +131,7 @@ describe('Command', () => {
         command = new Command(manager.asManager(), 'commit', true);
         await command.execute(file);
 
-        expectError(STRINGS.command.noHandler(repository.remote!));
+        expectError(STRINGS.command.noHandler(repository.remote ?? ''));
     });
 
     it('should not include the selection when not allowed to.', async () => {
@@ -181,7 +182,7 @@ describe('Command', () => {
     });
 
     getLinkTypes().forEach((type) => {
-        it(`should create a link of the specified type (${type}).`, async () => {
+        it(`should create a link of the specified type (${type ?? 'undefined'}).`, async () => {
             useWorkspaceFolder(workspaceFolder);
             useTextEditor(undefined);
 
@@ -249,7 +250,7 @@ describe('Command', () => {
 
         sinon
             .stub(window, 'activeTextEditor')
-            .value(!!uri ? { document: { uri } as TextDocument, selection } : undefined);
+            .value(uri ? { document: { uri } as TextDocument, selection } : undefined);
     }
 
     function useWorkspaceFolder(value: WorkspaceFolder | undefined): void {

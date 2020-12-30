@@ -1,16 +1,17 @@
 import { commands, ExtensionContext, window } from 'vscode';
 
+import { registerCommands } from './command';
 import { CONTEXT } from './constants';
 import { initialize } from './git';
-import { log } from './log';
-import { WorkspaceManager } from './workspace-manager';
-import { RepositoryFinder } from './repository-finder';
-import { registerCommands } from './command';
 import { LinkHandlerSelector } from './link-handler-selector';
+import { log } from './log';
+import { RepositoryFinder } from './repository-finder';
 import { STRINGS } from './strings';
+import { WorkspaceManager } from './workspace-manager';
 
 /**
  * Activates the extension.
+ *
  * @param context The extension's context.
  */
 export async function activate(context: ExtensionContext): Promise<void> {
@@ -19,7 +20,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     log('Activating extension.');
 
     if (!(await initialize())) {
-        window.showErrorMessage(STRINGS.extension.gitNotFound);
+        void window.showErrorMessage(STRINGS.extension.gitNotFound);
         return;
     }
 
@@ -30,7 +31,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
             // When the workspaces change, update the context
             // for our commands. If any workspaces are in a
             // Git repository, then the command is enabled.
-            commands.executeCommand(
+            void commands.executeCommand(
                 'setContext',
                 CONTEXT.canCopy,
                 workspaces.filter((x) => !!x.repository).length > 0

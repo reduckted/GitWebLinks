@@ -1,4 +1,5 @@
-import { Disposable, workspace, WorkspaceFoldersChangeEvent, WorkspaceFolder, Uri } from 'vscode';
+import { Disposable, Uri, workspace, WorkspaceFolder, WorkspaceFoldersChangeEvent } from 'vscode';
+
 import { LinkHandler } from './link-handler';
 import { LinkHandlerSelector } from './link-handler-selector';
 import { log } from './log';
@@ -6,8 +7,11 @@ import { RepositoryFinder } from './repository-finder';
 import { Repository } from './types';
 import { hasRemote } from './utilities';
 
+/**
+ * Tracks the open workspaces and their corresponding repository information.
+ */
 export class WorkspaceManager extends Disposable {
-    private readonly map: Map<string, WorkspaceInfo> = new Map();
+    private readonly map: Map<string, WorkspaceInfo> = new Map<string, WorkspaceInfo>();
     private readonly disposable: Disposable;
 
     /**
@@ -21,7 +25,9 @@ export class WorkspaceManager extends Disposable {
         private readonly handlerSelector: LinkHandlerSelector,
         private readonly onChanged: WorkspacesChangedCallback
     ) {
-        super(() => this.disposable.dispose());
+        super(() => {
+            this.disposable.dispose();
+        });
 
         // Watch for changes to the workspace folders.
         this.disposable = workspace.onDidChangeWorkspaceFolders((e) => {
@@ -37,22 +43,26 @@ export class WorkspaceManager extends Disposable {
 
     /**
      * Handles workspaces being added and removed.
+     *
      * @param e The event arguments.
      */
-    private async onWorkspaceFoldersChanged(e: WorkspaceFoldersChangeEvent): Promise<void> {
+    private onWorkspaceFoldersChanged(e: WorkspaceFoldersChangeEvent): void {
         log('Workspace folders changed: %O', {
             added: e.added.map((x) => x.uri.toString()),
             removed: e.removed.map((x) => x.uri.toString())
         });
 
-        await this.addFolders(e.added).catch((ex) => log('FAILURE: %s', ex));
-        this.removeFolders(e.removed);
-
-        this.onChanged(Array.from(this.map.values()));
+        this.addFolders(e.added)
+            .then(() => {
+                this.removeFolders(e.removed);
+                this.onChanged(Array.from(this.map.values()));
+            })
+            .catch((ex) => log('FAILURE: %s', ex));
     }
 
     /**
      * Adds the given workspaces folders to the map.
+     *
      * @param folders The folders to add.
      */
     private async addFolders(folders: readonly WorkspaceFolder[]): Promise<void> {
@@ -67,6 +77,7 @@ export class WorkspaceManager extends Disposable {
 
     /**
      * Adds the given folder to the map.
+     *
      * @param folder The folder to add.
      */
     private async addFolder(folder: WorkspaceFolder): Promise<void> {
@@ -96,6 +107,7 @@ export class WorkspaceManager extends Disposable {
 
     /**
      * Removes the given folders from the map.
+     *
      * @param folders The folders to remove.
      */
     private removeFolders(folders: readonly WorkspaceFolder[]): void {
@@ -107,6 +119,7 @@ export class WorkspaceManager extends Disposable {
 
     /**
      * Gets the workspace information for the given workspace folder.
+     *
      * @param folder The folder to get the workspace information for.
      * @returns The workspace information if the folder exists; otherwise, `undefined`.
      */
@@ -137,6 +150,7 @@ export interface WorkspaceInfo {
 
 /**
  * A function that is called when workspaces are added or removed.
+ *
  * @param workspaces The current set of workspaces.
  */
 export type WorkspacesChangedCallback = (workspaces: readonly WorkspaceInfo[]) => void;

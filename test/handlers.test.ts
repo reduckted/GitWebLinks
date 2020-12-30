@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 import * as path from 'path';
+import * as sinon from 'sinon';
 import { Uri, workspace } from 'vscode';
 
 import { git } from '../src/git';
@@ -9,6 +9,7 @@ import { LinkHandlerSelector } from '../src/link-handler-selector';
 import { load } from '../src/schema';
 import { parseTemplate } from '../src/templates';
 import { LinkOptions, RepositoryWithRemote, Selection } from '../src/types';
+
 import { Directory, setupRepository } from './helpers';
 import {
     HandlerWithTests,
@@ -219,7 +220,7 @@ describe('Link handlers', () => {
                         get: (section: string) => data[section],
                         has: () => true,
                         inspect: () => undefined,
-                        update: () => Promise.resolve()
+                        update: async () => Promise.resolve()
                     });
             }
         });

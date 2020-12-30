@@ -8,6 +8,7 @@ import {
     workspace,
     WorkspaceFolder
 } from 'vscode';
+
 import { COMMANDS } from './constants';
 import { LinkHandler } from './link-handler';
 import { log } from './log';
@@ -34,9 +35,10 @@ export class Command {
 
     /**
      * Executes the commands.
+     *
      * @param resource The resource that the command was invoked from.
      */
-    public async execute(resource: Uri | undefined): Promise<any> {
+    public async execute(resource: Uri | undefined): Promise<void> {
         let editor: TextEditor | undefined;
         let file: FileInfo | undefined;
 
@@ -54,10 +56,11 @@ export class Command {
 
         if (resource?.scheme !== 'file') {
             log("File URI scheme is '%s'.", resource?.scheme);
-            return window.showErrorMessage(STRINGS.command.noFileSelected);
+            void window.showErrorMessage(STRINGS.command.noFileSelected);
+            return;
         }
 
-        file = await this.getFileInfo(resource);
+        file = this.getFileInfo(resource);
 
         if (file) {
             let selection: Selection | undefined;
@@ -82,15 +85,21 @@ export class Command {
 
                 log('Web link created: %s', link);
                 await env.clipboard.writeText(link);
-                window.showInformationMessage(STRINGS.command.linkCopied(file.handler.name));
+                void window.showInformationMessage(STRINGS.command.linkCopied(file.handler.name));
             } catch (ex) {
                 log('Error while generating a link: %o', ex);
-                window.showErrorMessage(STRINGS.command.error);
+                void window.showErrorMessage(STRINGS.command.error);
             }
         }
     }
 
-    private async getFileInfo(file: Uri): Promise<FileInfo | undefined> {
+    /**
+     * Gets information about the specified file.
+     *
+     * @param file The URI of the file to get the info for.
+     * @returns The file information.
+     */
+    private getFileInfo(file: Uri): FileInfo | undefined {
         let folder: WorkspaceFolder | undefined;
         let workspaceInfo: WorkspaceInfo | undefined;
         let repository: Repository | undefined;
@@ -99,8 +108,8 @@ export class Command {
 
         if (!folder) {
             log("The file '%s' is not in a workspace.", file);
-            window.showErrorMessage(STRINGS.command.fileNotInWorkspace(file));
-            return;
+            void window.showErrorMessage(STRINGS.command.fileNotInWorkspace(file));
+            return undefined;
         }
 
         log("The file '%s' is in the workspace '%s'.", file, folder?.uri);
@@ -109,28 +118,28 @@ export class Command {
 
         if (!workspaceInfo) {
             log('No workspace information found.');
-            window.showErrorMessage(STRINGS.command.noWorkspaceInfo(folder.uri));
-            return;
+            void window.showErrorMessage(STRINGS.command.noWorkspaceInfo(folder.uri));
+            return undefined;
         }
 
         repository = workspaceInfo.repository;
 
         if (!repository) {
             log('File is not tracked by Git.');
-            window.showErrorMessage(STRINGS.command.notTrackedByGit(folder.uri));
-            return;
+            void window.showErrorMessage(STRINGS.command.notTrackedByGit(folder.uri));
+            return undefined;
         }
 
         if (!hasRemote(repository)) {
             log('Repository does not have a remote.');
-            window.showErrorMessage(STRINGS.command.noRemote(repository.root));
-            return;
+            void window.showErrorMessage(STRINGS.command.noRemote(repository.root));
+            return undefined;
         }
 
         if (!workspaceInfo.handler) {
             log("No handler for remote '%s'.", repository.remote);
-            window.showErrorMessage(STRINGS.command.noHandler(repository.remote));
-            return;
+            void window.showErrorMessage(STRINGS.command.noHandler(repository.remote));
+            return undefined;
         }
 
         return {
@@ -142,6 +151,8 @@ export class Command {
 
     /**
      * Gets the range that is selected in the given text editor.
+     *
+     * @param editor The editor to get the selection from.
      * @returns The selection.
      */
     private getLineSelection(editor: TextEditor): Selection {
@@ -158,6 +169,7 @@ export class Command {
 
 /**
  * Registers the commands.
+ *
  * @param subscriptions The subscriptions to add the disposables to.
  * @param workspaceManager The workspace manager.
  */
@@ -207,10 +219,12 @@ export function registerCommands(
 }
 
 /**
+ * Registers a command.
  *
  * @param identifier The command identifier.
  * @param workspaceManager The workspace mamnager for the command to use.
  * @param options The options for registering the command.
+ * @returns A disposable to unregister the command.
  */
 export function register(
     identifier: string,
@@ -221,7 +235,7 @@ export function register(
 
     command = new Command(workspaceManager, options.linkType, options.includeSelection);
 
-    return commands.registerCommand(identifier, command.execute, command);
+    return commands.registerCommand(identifier, async (resource) => command.execute(resource));
 }
 
 /**

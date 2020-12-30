@@ -1,5 +1,6 @@
 import { Liquid, Template as LiquidTemplate } from 'liquidjs';
 import { posix } from 'path';
+
 import { Template } from './schema';
 
 const engine: Liquid = new Liquid();
@@ -10,7 +11,9 @@ engine.filters.set('uri_component', encodeURIComponent);
 
 /**
  * Parses the given template.
+ *
  * @param template The template to parse.
+ * @returns The parsed template.
  */
 export function parseTemplate(template: Template): ParsedTemplate {
     let parsed: LiquidTemplate[];
@@ -26,7 +29,7 @@ export function parseTemplate(template: Template): ParsedTemplate {
     parsed = engine.parse(template);
 
     return {
-        render: (props) => engine.renderSync(parsed, props)
+        render: (props) => engine.renderSync(parsed, props) as string
     };
 }
 
@@ -36,8 +39,9 @@ export function parseTemplate(template: Template): ParsedTemplate {
 export interface ParsedTemplate {
     /**
      * Renders the template.
+     *
      * @param props The properties to make available to the template.
      * @returns The rendered output.
      */
-    render(props: object): string;
+    render(props: object): string; // eslint-disable-line @typescript-eslint/ban-types
 }

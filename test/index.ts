@@ -2,7 +2,12 @@ import * as glob from 'glob';
 import * as Mocha from 'mocha';
 import * as path from 'path';
 
-export function run(): Promise<void> {
+/**
+ * Runs the tests.
+ *
+ * @returns A promise.
+ */
+export async function run(): Promise<void> {
     let mocha: Mocha;
     let root: string;
 
@@ -31,7 +36,7 @@ export function run(): Promise<void> {
                     }
                 });
             } catch (err) {
-                console.error(err); // tslint:disable-line: no-console
+                console.error(err); // eslint-disable-line no-console
                 reject(err);
             }
         });

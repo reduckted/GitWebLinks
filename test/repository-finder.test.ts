@@ -2,6 +2,7 @@ import { expect } from 'chai';
 
 import { git } from '../src/git';
 import { RepositoryFinder } from '../src/repository-finder';
+
 import { Directory } from './helpers';
 
 describe('RepositoryFinder', () => {

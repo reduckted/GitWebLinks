@@ -1,12 +1,14 @@
-import * as sinon from 'sinon';
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 import * as vscode from 'vscode';
+
 import { LinkHandler } from '../src/link-handler';
+import { LinkHandlerSelector } from '../src/link-handler-selector';
+import { RepositoryFinder } from '../src/repository-finder';
 import { Repository, RepositoryWithRemote } from '../src/types';
 import { WorkspaceInfo, WorkspaceManager } from '../src/workspace-manager';
-import { RepositoryFinder } from '../src/repository-finder';
+
 import { Directory, MockWorkspace, tick } from './helpers';
-import { LinkHandlerSelector } from '../src/link-handler-selector';
 
 describe('WorkspaceManager', () => {
     let manager: WorkspaceManager;
@@ -48,7 +50,7 @@ describe('WorkspaceManager', () => {
 
         // Verify that the "changed" callback was called.
         expect(changes).to.exist;
-        expect(changes!.map((x) => x.uri).sort(compareUris)).to.deep.equal([alpha.uri, beta.uri]);
+        expect(changes?.map((x) => x.uri).sort(compareUris)).to.deep.equal([alpha.uri, beta.uri]);
 
         // Verify that each workspace has been stored.
         expect(manager.get(alpha.folder)).to.deep.equal({
@@ -75,7 +77,7 @@ describe('WorkspaceManager', () => {
         beta = await add('beta', true, true);
 
         expect(changes).to.exist;
-        expect(changes!.map((x) => x.uri).sort(compareUris)).to.deep.equal([alpha.uri, beta.uri]);
+        expect(changes?.map((x) => x.uri).sort(compareUris)).to.deep.equal([alpha.uri, beta.uri]);
 
         expect(manager.get(alpha.folder)).to.deep.equal({
             uri: alpha.uri,
@@ -102,7 +104,7 @@ describe('WorkspaceManager', () => {
         await remove(beta);
 
         expect(changes).to.exist;
-        expect(changes!.map((x) => x.uri).sort(compareUris)).to.deep.equal([alpha.uri]);
+        expect(changes?.map((x) => x.uri).sort(compareUris)).to.deep.equal([alpha.uri]);
 
         expect(manager.get(alpha.folder)).to.deep.equal({
             uri: alpha.uri,
@@ -141,7 +143,7 @@ describe('WorkspaceManager', () => {
         });
     });
 
-    async function create() {
+    async function create(): Promise<void> {
         manager = new WorkspaceManager(
             repositoryFinder,
             handlerSelector,

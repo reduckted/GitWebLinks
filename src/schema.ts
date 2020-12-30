@@ -98,6 +98,8 @@ export interface DynamicServer {
 
 /**
  * Loads the handler definitions.
+ *
+ * @returns The handler definitions.
  */
 export function load<T extends HandlerDefinition>(): T[] {
     // If we have been compiled to a webpack bundle, then the definitions
@@ -108,7 +110,7 @@ export function load<T extends HandlerDefinition>(): T[] {
 
         context = require.context('../shared/handlers');
 
-        return context.keys().map((key) => context(key));
+        return context.keys().map((key) => context(key) as T);
     } else {
         let dir: string;
 
@@ -118,6 +120,6 @@ export function load<T extends HandlerDefinition>(): T[] {
             .readdirSync(dir)
             .filter((entry) => path.extname(entry) === '.json')
             .map((file) => fs.readFileSync(path.join(dir, file), { encoding: 'utf-8' }))
-            .map((contents) => JSON.parse(contents));
+            .map((contents) => JSON.parse(contents) as T);
     }
 }

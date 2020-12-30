@@ -10,6 +10,7 @@ import { LinkType } from './types';
 export class Settings {
     /**
      * Gets the server URLs for the specified type of server.
+     *
      * @param type The type of server.
      * @returns The server URLs.
      */
@@ -27,6 +28,7 @@ export class Settings {
 
     /**
      * Gets the link type to use when producing a link when a link type was not specified.
+     *
      * @returns The link type to use by default.
      */
     public getDefaultLinkType(): LinkType {
@@ -45,6 +47,7 @@ export class Settings {
 
     /**
      * Gets the name of the branch to use when producing a link for the default branch.
+     *
      * @returns The name of the default branch.
      */
     public getDefaultBranch(): string {
@@ -53,6 +56,7 @@ export class Settings {
 
     /**
      * Gets the configuration for the workspace.
+     *
      * @returns The configuration.
      */
     private getConfiguration(): WorkspaceConfiguration {
@@ -62,6 +66,7 @@ export class Settings {
 
 /**
  * Converts a server that was defined in the settings to a `StaticServer` object.
+ *
  * @param server The server defined in the settings.
  * @returns The `StaticServer` object.
  */

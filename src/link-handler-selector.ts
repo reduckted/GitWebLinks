@@ -9,6 +9,9 @@ import { RepositoryWithRemote } from './types';
 export class LinkHandlerSelector {
     private readonly handlers: LinkHandler[];
 
+    /**
+     * @constructor
+     */
     constructor() {
         this.handlers = load()
             .sort((x, y) => x.name.localeCompare(y.name))
@@ -17,6 +20,7 @@ export class LinkHandlerSelector {
 
     /**
      * Selects the link handler to generate links for the given repository.
+     *
      * @param repository The repository to select the handler for.
      * @returns The handler to use, or `undefined` if the repository is not supported.
      */
