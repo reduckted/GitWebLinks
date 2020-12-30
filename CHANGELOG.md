@@ -1,74 +1,128 @@
-# Change Log
+# [2.0.0] (2020-12-30)
 
-## 1.9.0
+## New Features
 
--   Added support for Azure DevOps Server.
+-   ⭐ Added the ability to generate links using the default branch name instead of the current branch name.
+-   ⭐ Added commands to generate a link using the current commit hash, current branch name or default branch name (instead of using the link type specified in the settings).
 
-## 1.8.1
+## Changes
 
--   Logging improvements.
+-   ✨ On-premise URL settings have been renamed from `baseUrl`/`sshUrl` to `http`/`ssh`. The existing properties are still supported, but you may see warnings appear when viewing your `settings.json` file.
+-   ✨ The `hash` link type has been renamed to `commit`. The existing value is still supported, but you may see a warning appear when viewing your `settings.json` file.
 
-## 1.8.0
+# [1.9.0] (2020-11-15)
 
--   Logging to the "GitWebLinks" output channel.
+## New Features
 
-## 1.7.0
+-   ⭐ Added support for Azure DevOps Server.
 
--   GitLab support.
+# [1.8.1] (2020-07-12)
 
-## [1.6.0] - 2020-05-17
+## Changes
 
--   Supported getting web links for symlinked files and directories.
+-   ✨ Logging improvements.
 
-## [1.5.2] - 2020-05-06
+# [1.8.0] (2020-07-12)
 
--   Replaced `vscode` dependency with `@types/vscode`.
--   Handled VSTS repositories in sub-directories.
+## New Features
 
-## [1.5.1] - 2020-04-05
+-   ⭐ Logging to the "GitWebLinks" output channel.
 
--   Dependency updates.
+# [1.7.0] (2020-05-24)
 
-## [1.5.0] - 2020-02-12
+## New Features
 
--   Commands can now be run via the command palette or shortcut keys (#2).
--   Shows a notification when a link is copied.
--   Commands are listed under the "Git Web Links" category.
--   Dependency updates.
+-   ⭐ GitLab support.
 
-## [1.4.1] - 2019-11-20
+# [1.6.0] (2020-05-17)
 
--   Fixed selection ranges in Azure DevOps.
+## New Features
 
-## [1.4.0] - 2019-06-29
+-   ⭐ Supported getting web links for symlinked files and directories.
 
--   Added support for Azure DevOps.
+# [1.5.2] (2020-05-06)
 
-## [1.3.1] - 2019-06-09
+## New Features
 
--   Dependency updates.
+-   ⭐ Handled VSTS repositories in sub-directories.
 
-## [1.3.0] - 2018-12-13
+## Maintenance
 
--   Used VS Code's clipboard API. No longer requires `xclip` on Linux!
+-   🔨 Replaced `vscode` dependency with `@types/vscode`.
 
-## [1.2.3] - 2018-11-27
+# [1.5.1] (2020-04-05)
 
--   Dependency updates
+## Maintenance
 
-## [1.2.1] - 2017-12-31
+-   🔨 Dependency updates.
 
--   Added support for Visual Studio Team Services repositories in collections.
+# [1.5.0] (2020-02-12)
 
-## [1.2.0] - 2017-12-08
+## New Features
 
--   Added the ability to generate links using the current branch name of current commit hash.
--   Fixed a bug that would create the wrong URL when there was a space in the file path.
+-   ⭐ A notification is shown when a link is copied.
+-   ⭐ Commands can now be run via the command palette or shortcut keys (#2).
 
-## [1.1.1] - 2017-11-12
+## Changes
 
--   Added support for multi-root workspaces.
+-   ✨ Commands are listed under the "Git Web Links" category.
 
-## [1.0.0] - 2017-08-03
+## Maintenance
 
--   Initial release.
+-   🔨 Dependency updates.
+
+# [1.4.1] (2019-11-20)
+
+## Bug Fixes
+
+-   🐛 Fixed selection ranges in Azure DevOps.
+
+# [1.4.0] (2019-06-29)
+
+## New Features
+
+-   ⭐ Added support for Azure DevOps.
+
+# [1.3.1] (2019-06-09)
+
+## Maintenance
+
+-   🔨 Dependency updates.
+
+# [1.3.0] (2018-12-13)
+
+## Changes
+
+-   ✨ Used VS Code's clipboard API. No longer requires `xclip` on Linux!
+
+# [1.2.3] (2018-11-27)
+
+## Maintenance
+
+-   🔨 Dependency updates
+
+# [1.2.1] (2017-12-31)
+
+## New Features
+
+-   ⭐ Added support for Visual Studio Team Services repositories in collections.
+
+# [1.2.0] (2017-12-08)
+
+## New Features
+
+-   ⭐ Added the ability to generate links using the current branch name of current commit hash.
+
+## Bug Fixes
+
+-   🐛 Fixed a bug that would create the wrong URL when there was a space in the file path.
+
+# [1.1.1] (2017-11-12)
+
+## Added
+
+-   ⭐ Support for multi-root workspaces.
+
+# [1.0.0] (2017-08-03)
+
+-   🎉 Initial release.
