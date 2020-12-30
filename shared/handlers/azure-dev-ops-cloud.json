@@ -1,0 +1,73 @@
+{
+    "$schema": "../handler-schema.json",
+    "name": "Azure Dev Ops Cloud",
+    "server": [
+        {
+            "pattern": "https:\\/\\/(?:.+@)?dev\\.azure\\.com\\/([^\\/]+)\\/([^\\/]+)\\/_git\\/.+",
+            "http": "https://dev.azure.com/{{ match[1] }}/{{ match[2] }}/_git",
+            "ssh": "git@ssh.dev.azure.com:v3/{{ match[1] }}/{{ match[2] }}"
+        },
+        {
+            "pattern": "^(?:git@)?ssh\\.dev\\.azure\\.com:v3\\/([^\\/]+)\\/([^\\/]+)\\/.+$",
+            "http": "https://dev.azure.com/{{ match[1] }}/{{ match[2] }}/_git",
+            "ssh": "git@ssh.dev.azure.com:v3/{{ match[1] }}/{{ match[2] }}"
+        }
+    ],
+    "branch": ["rev-parse", "--abbrev-ref"],
+    "url": "{{ base }}/{{ repository }}?path=%2F{{ file | uri_component }}&version=G{{ type | slice:0,1 | upcase }}{{ ref | uri_component }}",
+    "selection": [
+        "&line={{ startLine }}",
+        "{% if startLine == endLine %}",
+        "{% if startColumn == endColumn %}",
+        "&lineEnd={{ startLine | plus:1 }}&lineStartColumn=1&lineEndColumn=1",
+        "{% else %}",
+        "&lineStartColumn={{ startColumn }}&lineEndColumn={{ endColumn }}",
+        "{% endif %}",
+        "{% else %}",
+        "&lineEnd={{ endLine }}&lineStartColumn={{ startColumn }}&lineEndColumn={{ endColumn }}",
+        "{% endif %}"
+    ],
+    "tests": {
+        "createUrl": {
+            "remotes": {
+                "http": "https://dev.azure.com/user/foo/_git/bar",
+                "httpWithUsername": "https://user@dev.azure.com/user/foo/_git/bar",
+                "ssh": "git@ssh.dev.azure.com:v3/user/foo/bar",
+                "sshWithProtocol": "ssh://git@ssh.dev.azure.com:v3/user/foo/bar",
+                "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster"
+            },
+            "spaces": {
+                "remote": "https://dev.azure.com/user/foo/_git/bar",
+                "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Fpath%20spaces%2Ffile%20spaces.txt&version=GBmaster"
+            },
+            "branch": {
+                "remote": "https://dev.azure.com/user/foo/_git/bar",
+                "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBfeature%2Ftest"
+            },
+            "commit": {
+                "remote": "https://dev.azure.com/user/foo/_git/bar",
+                "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GC{{ commit }}"
+            },
+            "selection": {
+                "remote": "https://dev.azure.com/user/foo/_git/bar",
+                "point": {
+                    "line": 10,
+                    "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineEnd=11&lineStartColumn=1&lineEndColumn=1"
+                },
+                "singleLine": {
+                    "line": 10,
+                    "startColumn": 20,
+                    "endColumn": 30,
+                    "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineStartColumn=20&lineEndColumn=30"
+                },
+                "multipleLines": {
+                    "startLine": 10,
+                    "startColumn": 20,
+                    "endLine": 30,
+                    "endColumn": 40,
+                    "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineEnd=30&lineStartColumn=20&lineEndColumn=40"
+                }
+            }
+        }
+    }
+}

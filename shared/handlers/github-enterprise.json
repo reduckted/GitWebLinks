@@ -1,0 +1,59 @@
+{
+    "$schema": "../handler-schema.json",
+    "name": "GitHub Enterprise",
+    "private": "gitHubEnterprise",
+    "branch": ["rev-parse", "--abbrev-ref"],
+    "url": "{{ base }}/{{ repository }}/blob/{{ ref | uri }}/{{ file | uri }}",
+    "selection": "#L{{ startLine }}{% if startLine != endLine %}-L{{ endLine }}{% endif %}",
+    "tests": {
+        "settings": {
+            "gitHubEnterprise": [
+                {
+                    "http": "https://local-github.server:8080/context",
+                    "ssh": "ssh://git@local-github.server"
+                }
+            ]
+        },
+        "createUrl": {
+            "remotes": {
+                "http": "https://local-github.server:8080/context/foo/bar.git",
+                "httpWithUsername": "https://username@local-github.server:8080/context/foo/bar.git",
+                "ssh": "git@local-github.server:foo/bar.git",
+                "sshWithProtocol": "ssh://git@local-github.server:foo/bar.git",
+                "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt"
+            },
+            "spaces": {
+                "remote": "https://local-github.server:8080/context/foo/bar.git",
+                "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/path%20spaces/file%20spaces.txt"
+            },
+            "branch": {
+                "remote": "https://local-github.server:8080/context/foo/bar.git",
+                "result": "https://local-github.server:8080/context/foo/bar/blob/feature/test/src/file.txt"
+            },
+            "commit": {
+                "remote": "https://local-github.server:8080/context/foo/bar.git",
+                "result": "https://local-github.server:8080/context/foo/bar/blob/{{ commit }}/src/file.txt"
+            },
+            "selection": {
+                "remote": "https://local-github.server:8080/context/foo/bar.git",
+                "point": {
+                    "line": 10,
+                    "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt#L10"
+                },
+                "singleLine": {
+                    "line": 10,
+                    "startColumn": 20,
+                    "endColumn": 30,
+                    "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt#L10"
+                },
+                "multipleLines": {
+                    "startLine": 10,
+                    "startColumn": 20,
+                    "endLine": 30,
+                    "endColumn": 40,
+                    "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt#L10-L30"
+                }
+            }
+        }
+    }
+}

@@ -6,8 +6,7 @@ async function main() {
         await runTests({
             extensionDevelopmentPath: path.resolve(__dirname, '../'),
             extensionTestsPath: path.resolve(__dirname, './index'),
-            launchArgs: ['--disable-extensions'],
-            extensionTestsEnv: { EXTENSION_TESTING: '1' }
+            launchArgs: ['--disable-extensions']
         });
     } catch (err) {
         console.error('Failed to run tests'); // tslint:disable-line: no-console

@@ -1,0 +1,54 @@
+{
+    "$schema": "../handler-schema.json",
+    "name": "Bitbucket Cloud",
+    "server": {
+        "http": "https://bitbucket.org",
+        "ssh": "git@bitbucket.org"
+    },
+    "branch": ["rev-parse", "--abbrev-ref"],
+    "url": "{{ base }}/{{ repository }}/src/{{ commit | uri }}/{{ file | uri }}{% if type != 'commit' %}?at={{ ref | uri_component }}{% endif %}",
+    "selection": "#lines-{{ startLine }}{% if startLine != endLine %}:{{ endLine }}{% endif %}",
+    "tests": {
+        "createUrl": {
+            "remotes": {
+                "http": "https://bitbucket.org/foo/bar.git",
+                "httpWithUsername": "https://username@bitbucket.org/foo/bar.git",
+                "ssh": "git@bitbucket.org:foo/bar.git",
+                "sshWithProtocol": "ssh://git@bitbucket.org:foo/bar.git",
+                "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt?at=master"
+            },
+            "spaces": {
+                "remote": "https://bitbucket.org/foo/bar.git",
+                "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/path%20spaces/file%20spaces.txt?at=master"
+            },
+            "branch": {
+                "remote": "https://bitbucket.org/foo/bar.git",
+                "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt?at=feature%2Ftest"
+            },
+            "commit": {
+                "remote": "https://bitbucket.org/foo/bar.git",
+                "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt"
+            },
+            "selection": {
+                "remote": "https://bitbucket.org/foo/bar.git",
+                "point": {
+                    "line": 10,
+                    "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt?at=master#lines-10"
+                },
+                "singleLine": {
+                    "line": 10,
+                    "startColumn": 20,
+                    "endColumn": 30,
+                    "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt?at=master#lines-10"
+                },
+                "multipleLines": {
+                    "startLine": 10,
+                    "startColumn": 20,
+                    "endLine": 30,
+                    "endColumn": 40,
+                    "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt?at=master#lines-10:30"
+                }
+            }
+        }
+    }
+}

@@ -8,6 +8,7 @@
         "interface-name": [false],
         "trailing-comma": [false],
         "member-ordering": [false],
-        "object-literal-sort-keys": [false]
+        "object-literal-sort-keys": [false],
+        "await-promise": [true, "Thenable"]
     }
 }

@@ -1,0 +1,59 @@
+{
+    "$schema": "../handler-schema.json",
+    "name": "GitLab Enterprise",
+    "private": "gitLabEnterprise",
+    "branch": ["rev-parse", "--abbrev-ref"],
+    "url": "{{ base }}/{{ repository }}/-/blob/{{ ref | uri }}/{{ file | uri }}",
+    "selection": "#L{{ startLine }}{% if startLine != endLine %}-{{ endLine }}{% endif %}",
+    "tests": {
+        "settings": {
+            "gitLabEnterprise": [
+                {
+                    "http": "https://local-gitlab",
+                    "ssh": "git@local-gitlab"
+                }
+            ]
+        },
+        "createUrl": {
+            "remotes": {
+                "http": "https://local-gitlab/foo/bar.git",
+                "httpWithUsername": "https://username@local-gitlab/foo/bar.git",
+                "ssh": "git@local-gitlab:foo/bar.git",
+                "sshWithProtocol": "ssh://git@local-gitlab:foo/bar.git",
+                "result": "https://local-gitlab/foo/bar/-/blob/master/src/file.txt"
+            },
+            "spaces": {
+                "remote": "https://local-gitlab/foo/bar.git",
+                "result": "https://local-gitlab/foo/bar/-/blob/master/src/path%20spaces/file%20spaces.txt"
+            },
+            "branch": {
+                "remote": "https://local-gitlab/foo/bar.git",
+                "result": "https://local-gitlab/foo/bar/-/blob/feature/test/src/file.txt"
+            },
+            "commit": {
+                "remote": "https://local-gitlab/foo/bar.git",
+                "result": "https://local-gitlab/foo/bar/-/blob/{{ commit }}/src/file.txt"
+            },
+            "selection": {
+                "remote": "https://local-gitlab/foo/bar.git",
+                "point": {
+                    "line": 10,
+                    "result": "https://local-gitlab/foo/bar/-/blob/master/src/file.txt#L10"
+                },
+                "singleLine": {
+                    "line": 10,
+                    "startColumn": 20,
+                    "endColumn": 30,
+                    "result": "https://local-gitlab/foo/bar/-/blob/master/src/file.txt#L10"
+                },
+                "multipleLines": {
+                    "startLine": 10,
+                    "startColumn": 20,
+                    "endLine": 30,
+                    "endColumn": 40,
+                    "result": "https://local-gitlab/foo/bar/-/blob/master/src/file.txt#L10-30"
+                }
+            }
+        }
+    }
+}

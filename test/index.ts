@@ -8,7 +8,8 @@ export function run(): Promise<void> {
 
     mocha = new Mocha({
         ui: 'bdd',
-        useColors: true
+        color: true,
+        timeout: 5000
     });
 
     root = __dirname;

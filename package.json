@@ -31,40 +31,47 @@
         "vscode:prepublish": "npm run build",
         "lint": "tslint -p tsconfig.json",
         "build": "webpack --mode production",
-        "pretest": "tsc -p ./",
+        "pretest:clean": "rimraf ./out",
+        "pretest:build": "tsc -p ./",
+        "pretest:copy-schemas": "cpy ./shared ./out --parents",
+        "pretest": "run-s pretest:clean pretest:build pretest:copy-schemas",
         "test": "node ./out/test/run.js",
         "debug-build": "webpack --mode development",
         "debug-test": "npm run pretest"
     },
     "dependencies": {
+        "liquidjs": "9.16.1",
         "spawn-rx": "2.0.12"
     },
     "devDependencies": {
-        "@types/chai": "4.2.11",
-        "@types/mocha": "7.0.2",
-        "@types/node": "13.13.5",
+        "@types/chai": "4.2.14",
+        "@types/mocha": "8.0.3",
+        "@types/node": "12.19.3",
         "@types/rimraf": "3.0.0",
-        "@types/sinon": "9.0.0",
-        "@types/sinon-chai": "3.2.4",
-        "@types/uuid": "7.0.3",
-        "@types/vscode": "1.30.0",
+        "@types/sinon": "9.0.8",
+        "@types/sinon-chai": "3.2.5",
+        "@types/uuid": "8.3.0",
+        "@types/vscode": "1.50.0",
+        "@types/webpack-env": "1.16.0",
         "chai": "4.2.0",
-        "mocha": "7.1.2",
-        "prettier": "2.0.5",
+        "cpy-cli": "3.1.1",
+        "mocha": "8.2.1",
+        "npm-run-all": "4.1.5",
+        "prettier": "2.1.2",
         "rimraf": "3.0.2",
-        "sinon": "9.0.2",
+        "sinon": "9.2.1",
         "sinon-chai": "3.5.0",
-        "ts-loader": "7.0.2",
-        "tslint": "6.1.2",
-        "typescript": "3.8.3",
-        "uuid": "8.0.0",
-        "vsce": "1.75.0",
-        "vscode-test": "1.3.0",
-        "webpack": "4.43.0",
-        "webpack-cli": "3.3.11"
+        "ts-loader": "8.0.9",
+        "tslint": "6.1.3",
+        "typescript": "4.0.5",
+        "uuid": "8.3.1",
+        "vsce": "1.81.1",
+        "vscode-test": "1.4.1",
+        "webpack": "5.4.0",
+        "webpack-cli": "4.2.0"
     },
     "engines": {
-        "vscode": "^1.30.0"
+        "vscode": "^1.50.0"
     },
     "categories": [
         "Other"
@@ -82,6 +89,21 @@
             {
                 "command": "gitweblinks.copySelection",
                 "title": "Copy Web Link to Selection",
+                "category": "Git Web Links"
+            },
+            {
+                "command": "gitweblinks.copySelectionToDefaultBranch",
+                "title": "Copy Web Link to Selection (on default branch)",
+                "category": "Git Web Links"
+            },
+            {
+                "command": "gitweblinks.copySelectionToBranch",
+                "title": "Copy Web Link to Selection (on current branch)",
+                "category": "Git Web Links"
+            },
+            {
+                "command": "gitweblinks.copySelectionToCommit",
+                "title": "Copy Web Link to Selection (at current commit)",
                 "category": "Git Web Links"
             }
         ],
@@ -113,12 +135,18 @@
             "properties": {
                 "gitweblinks.linkType": {
                     "type": "string",
-                    "description": "The type of links to create:\n - \"hash\": Create a link to the current commit (default).\n - \"branch\": Create a link to the current branch.",
+                    "description": "The type of links to create by default:\n - \"defaultBranch\": Create a link to the default branch.\n - \"commit\": Create a link to the current commit (default).\n - \"branch\": Create a link to the current branch.",
                     "enum": [
-                        "hash",
+                        "defaultBranch",
+                        "commit",
                         "branch"
                     ],
-                    "default": "hash"
+                    "default": "commit"
+                },
+                "gitweblinks.defaultBranch": {
+                    "type": "string",
+                    "description": "The name of the branch to use when creating a link to the default branch.",
+                    "default": "master"
                 },
                 "gitweblinks.azureDevOpsServer": {
                     "type": "array",
@@ -126,17 +154,17 @@
                     "items": {
                         "type": "object",
                         "properties": {
-                            "baseUrl": {
+                            "http": {
                                 "type": "string",
                                 "description": "The base URL for the website."
                             },
-                            "sshUrl": {
+                            "ssh": {
                                 "type": "string",
                                 "description": "The SSH URL for remotes."
                             }
                         },
                         "required": [
-                            "baseUrl"
+                            "http"
                         ]
                     }
                 },
@@ -146,17 +174,17 @@
                     "items": {
                         "type": "object",
                         "properties": {
-                            "baseUrl": {
+                            "http": {
                                 "type": "string",
                                 "description": "The base URL for the website."
                             },
-                            "sshUrl": {
+                            "ssh": {
                                 "type": "string",
                                 "description": "The SSH URL for remotes."
                             }
                         },
                         "required": [
-                            "baseUrl"
+                            "http"
                         ]
                     }
                 },
@@ -166,17 +194,17 @@
                     "items": {
                         "type": "object",
                         "properties": {
-                            "baseUrl": {
+                            "http": {
                                 "type": "string",
                                 "description": "The base URL for the website."
                             },
-                            "sshUrl": {
+                            "ssh": {
                                 "type": "string",
                                 "description": "The SSH URL for remotes."
                             }
                         },
                         "required": [
-                            "baseUrl"
+                            "http"
                         ]
                     }
                 },
@@ -186,17 +214,17 @@
                     "items": {
                         "type": "object",
                         "properties": {
-                            "baseUrl": {
+                            "http": {
                                 "type": "string",
                                 "description": "The base URL for the website."
                             },
-                            "sshUrl": {
+                            "ssh": {
                                 "type": "string",
                                 "description": "The SSH URL for remotes."
                             }
                         },
                         "required": [
-                            "baseUrl"
+                            "http"
                         ]
                     }
                 }

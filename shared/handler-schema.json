@@ -1,0 +1,335 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "type": "object",
+    "definitions": {
+        "template": {
+            "anyOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }]
+        },
+        "staticServer": {
+            "type": "object",
+            "properties": {
+                "http": {
+                    "type": "string",
+                    "description": "The HTTP(S) URL of the remote server. This is used to match HTTP remote URLs and also used as the 'base' URL for links to files."
+                },
+                "ssh": {
+                    "type": "string",
+                    "description": "The SSH URL of the remote server. This is used to match SSH remote URLs."
+                }
+            },
+            "required": ["http"],
+            "additionalProperties": false
+        },
+        "dynamicServer": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "pattern": {
+                        "type": "string",
+                        "description": "A regular expression to match on a remote URL. The captured groups are provided to the `http` and `ssh` templates."
+                    },
+                    "http": {
+                        "$ref": "#/definitions/template",
+                        "description": "The template to build the HTTP(S) URL of the remote server.\n\nCaptured groups from `pattern` are made available via the `match` variable."
+                    },
+                    "ssh": {
+                        "$ref": "#/definitions/template",
+                        "description": "The template to build the SSH URL of the remote server.\n\nCaptured groups from `pattern` are made available via the `match` variable."
+                    }
+                },
+                "required": ["pattern", "http", "ssh"],
+                "additionalProperties": false
+            }
+        },
+        "server": {
+            "oneOf": [
+                { "$ref": "#/definitions/staticServer" },
+                { "$ref": "#/definitions/dynamicServer" }
+            ]
+        },
+        "tests": {
+            "type": "object",
+            "properties": {
+                "settings": {
+                    "type": "object",
+                    "description": "Settings to make available during all tests."
+                },
+                "createUrl": {
+                    "type": "object",
+                    "properties": {
+                        "remotes": {
+                            "$ref": "#/definitions/remoteTests",
+                            "description": "Tests for different types of remote URLs."
+                        },
+                        "spaces": {
+                            "$ref": "#/definitions/urlTest",
+                            "description": "A test for a file path that contains spaces.\n\nThe branch is always 'master' and the file is always 'src/path spaces/file spaces.txt'."
+                        },
+                        "misc": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/customTest" },
+                            "description": "(Optional) Additional tests for any scenarios that are not covered by the standard tests."
+                        },
+                        "branch": {
+                            "$ref": "#/definitions/urlTest",
+                            "description": "A test for creating a link using the current branch.\n\nThe branch is always 'feature/test' and the file is always 'src/file.txt'."
+                        },
+                        "commit": {
+                            "$ref": "#/definitions/urlTest",
+                            "description": "A test for creating a link using the current commit hash.\n\nThe commit hash is made available to the template via the `commit` variable, and the file is always 'src/file.txt'."
+                        },
+                        "selection": {
+                            "$ref": "#/definitions/selectionTests",
+                            "description": "Tests for including the selected range in the URL."
+                        }
+                    },
+                    "required": ["remotes", "spaces", "branch", "commit", "selection"],
+                    "additionalProperties": false,
+                    "description": "Defines the test cases for creating URLs."
+                }
+            },
+            "required": ["createUrl"],
+            "additionalProperties": false
+        },
+        "remoteTests": {
+            "type": "object",
+            "properties": {
+                "settings": {
+                    "type": "object",
+                    "description": "Settings to make available during the test."
+                },
+                "http": {
+                    "type": "string",
+                    "description": "The HTTP(S) remote URL to test that does not contain a username."
+                },
+                "httpWithUsername": {
+                    "type": "string",
+                    "description": "The HTTP(S) remote URL to test that contains a username."
+                },
+                "ssh": {
+                    "type": "string",
+                    "description": "The SSH remote URL to test that does not start with 'ssh://'."
+                },
+                "sshWithProtocol": {
+                    "type": "string",
+                    "description": "The SSH remote URL to test that starts with 'ssh://'."
+                },
+                "result": {
+                    "$ref": "#/definitions/template",
+                    "description": "The URL that is expected to be created.\n\nThe current commit hash is available via the `commit` variable."
+                }
+            },
+            "required": ["http", "httpWithUsername", "ssh", "sshWithProtocol", "result"],
+            "additionalProperties": false
+        },
+        "urlTest": {
+            "type": "object",
+            "properties": {
+                "settings": {
+                    "type": "object",
+                    "description": "Settings to make available during the test."
+                },
+                "remote": {
+                    "type": "string",
+                    "description": "The remote URL to test."
+                },
+                "result": {
+                    "$ref": "#/definitions/template",
+                    "description": "The URL that is expected to be created.\n\nThe current commit hash is available via the `commit` variable."
+                }
+            },
+            "required": ["remote", "result"],
+            "additionalProperties": false
+        },
+        "customTest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The name of the test."
+                },
+                "settings": {
+                    "type": "object",
+                    "description": "Settings to make available during the test."
+                },
+                "remote": {
+                    "type": "string",
+                    "description": "The remote URL to test."
+                },
+                "fileName": {
+                    "type": "string",
+                    "description": "The name of the file to test. Defaults to 'src/file.txt' if this property is not specified."
+                },
+                "branch": {
+                    "type": "string",
+                    "description": "The name of the branch to test. Defaults to 'master' if this property is not specified."
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["branch", "commit"],
+                    "description": "The type of link to create. Defaults to 'branch' if this property is not specified."
+                },
+                "selection": {
+                    "$ref": "#/definitions/customTestSelection",
+                    "description": "The selected range to test. Defaults to no selected range if this property is not specified."
+                },
+                "result": {
+                    "type": "string",
+                    "description": "The URL that is expected to be created.\n\nThe current commit hash is available via the `commit` variable."
+                }
+            },
+            "required": ["name", "remote", "result"],
+            "additionalProperties": false
+        },
+        "customTestSelection": {
+            "type": "object",
+            "properties": {
+                "startLine": {
+                    "type": "number",
+                    "description": "The one-based line number that the selection starts on."
+                },
+                "startColumn": {
+                    "type": "number",
+                    "description": "The one-based column number that the selection starts on."
+                },
+                "endLine": {
+                    "type": "number",
+                    "description": "The one-based line number that the selection ends on."
+                },
+                "endColumn": {
+                    "type": "number",
+                    "description": "The one-based column number that the selection ends on."
+                }
+            },
+            "required": ["startLine", "startColumn", "endLine", "endColumn"],
+            "additionalProperties": false
+        },
+        "selectionTests": {
+            "type": "object",
+            "properties": {
+                "settings": {
+                    "type": "object",
+                    "description": "Settings to make available during the test."
+                },
+                "remote": {
+                    "type": "string",
+                    "description": "The remote URL to use in the tests."
+                },
+                "point": {
+                    "$ref": "#/definitions/selectionPointTest",
+                    "description": "A test for the selection having the same start and end point."
+                },
+                "singleLine": {
+                    "$ref": "#/definitions/selectionSingleLineTest",
+                    "description": "A test for the selection having different start and end points, but on the same line."
+                },
+                "multipleLines": {
+                    "$ref": "#/definitions/selectionMultipleLinesTest",
+                    "description": "A test for the selection having different start and end points and on different lines."
+                }
+            },
+            "required": ["remote", "point", "singleLine", "multipleLines"],
+            "additionalProperties": false
+        },
+        "selectionPointTest": {
+            "type": "object",
+            "properties": {
+                "line": {
+                    "type": "number",
+                    "description": "The one-based line number that the selection is on."
+                },
+                "result": {
+                    "type": "string",
+                    "description": "The URL that is expected to be created.\n\nThe start and end columns of the selection are always 1.\n\nThe current commit hash is available via the `commit` variable."
+                }
+            },
+            "required": ["line", "result"],
+            "additionalProperties": false
+        },
+        "selectionSingleLineTest": {
+            "type": "object",
+            "properties": {
+                "line": {
+                    "type": "number",
+                    "description": "The one-based line number that the selection is on."
+                },
+                "startColumn": {
+                    "type": "number",
+                    "description": "The one-based column number that the selection starts at."
+                },
+                "endColumn": {
+                    "type": "number",
+                    "description": "The one-based column number that the selection ends at."
+                },
+                "result": {
+                    "type": "string",
+                    "description": "The URL that is expected to be created.\n\nThe current commit hash is available via the `commit` variable."
+                }
+            },
+            "required": ["line", "startColumn", "endColumn", "result"],
+            "additionalProperties": false
+        },
+        "selectionMultipleLinesTest": {
+            "type": "object",
+            "properties": {
+                "startLine": {
+                    "type": "number",
+                    "description": "The one-based line number that the selection starts on."
+                },
+                "startColumn": {
+                    "type": "number",
+                    "description": "The one-based column number that the selection starts on."
+                },
+                "endLine": {
+                    "type": "number",
+                    "description": "The one-based line number that the selection ends on."
+                },
+                "endColumn": {
+                    "type": "number",
+                    "description": "The one-based column number that the selection ends on."
+                },
+                "result": {
+                    "type": "string",
+                    "description": "The URL that is expected to be created.\n\nThe current commit hash is available via the `commit` variable."
+                }
+            },
+            "required": ["startLine", "startColumn", "endLine", "endColumn", "result"],
+            "additionalProperties": false
+        }
+    },
+    "properties": {
+        "$schema": { "type": "string" },
+        "name": {
+            "type": "string",
+            "description": "The name of the remote server type."
+        },
+        "server": {
+            "$ref": "#/definitions/server",
+            "description": "The public server URLs.\n\nSpecifying this property indicates that the remote server is public."
+        },
+        "private": {
+            "type": "string",
+            "description": "The name of the settings property that defines the private server URLs.\n\nSpecifying this property indicates that the remote server is private."
+        },
+        "branch": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "The arguments to pass to Git to get the name of the current branch."
+        },
+        "url": {
+            "$ref": "#/definitions/template",
+            "description": "The template to build the URL of a file."
+        },
+        "selection": {
+            "$ref": "#/definitions/template",
+            "description": "The template to build the part of the URL that specifies the selection. This is appended to the result of rendering the `url` template."
+        },
+        "tests": {
+            "$ref": "#/definitions/tests",
+            "description": "The test data for the handler."
+        }
+    },
+    "oneOf": [{ "required": ["server"] }, { "required": ["private"] }],
+    "required": ["name", "branch", "url", "selection", "tests"]
+}

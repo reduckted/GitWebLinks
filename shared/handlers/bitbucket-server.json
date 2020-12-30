@@ -1,0 +1,62 @@
+{
+    "$schema": "../handler-schema.json",
+    "name": "Bitbucket Server",
+    "private": "bitbucketServer",
+    "branch": ["symbolic-ref"],
+    "url": [
+        "{% assign segments = repository | split: '/' | reverse %}",
+        "{{ base }}/projects/{{ segments[1] }}/repos/{{ segments[0] }}/browse/{{ file | uri }}?at={{ ref | uri_component }}"
+    ],
+    "selection": "#{{ startLine }}{% if startLine != endLine %}-{{ endLine }}{% endif %}",
+    "tests": {
+        "settings": {
+            "bitbucketServer": [
+                {
+                    "http": "http://local-bitbucket:7990/context",
+                    "ssh": "git@local-bitbucket:7999"
+                }
+            ]
+        },
+        "createUrl": {
+            "remotes": {
+                "http": "http://local-bitbucket:7990/context/foo/bar.git",
+                "httpWithUsername": "http://username@local-bitbucket:7990/context/foo/bar.git",
+                "ssh": "git@local-bitbucket:7999/foo/bar.git",
+                "sshWithProtocol": "ssh://git@local-bitbucket:7999/foo/bar.git",
+                "result": "http://local-bitbucket:7990/context/projects/foo/repos/bar/browse/src/file.txt?at=refs%2Fheads%2Fmaster"
+            },
+            "spaces": {
+                "remote": "http://local-bitbucket:7990/context/foo/bar.git",
+                "result": "http://local-bitbucket:7990/context/projects/foo/repos/bar/browse/src/path%20spaces/file%20spaces.txt?at=refs%2Fheads%2Fmaster"
+            },
+            "branch": {
+                "remote": "http://local-bitbucket:7990/context/foo/bar.git",
+                "result": "http://local-bitbucket:7990/context/projects/foo/repos/bar/browse/src/file.txt?at=refs%2Fheads%2Ffeature%2Ftest"
+            },
+            "commit": {
+                "remote": "http://local-bitbucket:7990/context/foo/bar.git",
+                "result": "http://local-bitbucket:7990/context/projects/foo/repos/bar/browse/src/file.txt?at={{ commit }}"
+            },
+            "selection": {
+                "remote": "http://local-bitbucket:7990/context/foo/bar.git",
+                "point": {
+                    "line": 10,
+                    "result": "http://local-bitbucket:7990/context/projects/foo/repos/bar/browse/src/file.txt?at=refs%2Fheads%2Fmaster#10"
+                },
+                "singleLine": {
+                    "line": 10,
+                    "startColumn": 20,
+                    "endColumn": 30,
+                    "result": "http://local-bitbucket:7990/context/projects/foo/repos/bar/browse/src/file.txt?at=refs%2Fheads%2Fmaster#10"
+                },
+                "multipleLines": {
+                    "startLine": 10,
+                    "startColumn": 20,
+                    "endLine": 30,
+                    "endColumn": 40,
+                    "result": "http://local-bitbucket:7990/context/projects/foo/repos/bar/browse/src/file.txt?at=refs%2Fheads%2Fmaster#10-30"
+                }
+            }
+        }
+    }
+}
