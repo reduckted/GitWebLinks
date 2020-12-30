@@ -171,7 +171,8 @@
                         },
                         "required": [
                             "http"
-                        ]
+                        ],
+                        "additionalProperties": false
                     }
                 },
                 "gitweblinks.bitbucketServer": {
@@ -191,7 +192,8 @@
                         },
                         "required": [
                             "http"
-                        ]
+                        ],
+                        "additionalProperties": false
                     }
                 },
                 "gitweblinks.gitHubEnterprise": {
@@ -211,7 +213,8 @@
                         },
                         "required": [
                             "http"
-                        ]
+                        ],
+                        "additionalProperties": false
                     }
                 },
                 "gitweblinks.gitLabEnterprise": {
@@ -231,7 +234,8 @@
                         },
                         "required": [
                             "http"
-                        ]
+                        ],
+                        "additionalProperties": false
                     }
                 }
             }
