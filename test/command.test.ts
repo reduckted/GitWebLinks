@@ -227,7 +227,8 @@ describe('Command', () => {
         await command.execute(file);
 
         expect(showInformationMessage).to.have.been.calledWithExactly(
-            STRINGS.command.linkCopied(handler.name)
+            STRINGS.command.linkCopied(handler.name),
+            STRINGS.command.openInWeb
         );
     });
 
