@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+import * as fs from 'fs';
 import { dirname, join } from 'path';
 import { window } from 'vscode';
 
@@ -24,7 +24,7 @@ export class RepositoryFinder {
 
             log("Finding root directory of Git repository starting from '%s'...", workspaceRoot);
 
-            root = await this.findRepositoryRoot(workspaceRoot);
+            root = this.findRepositoryRoot(workspaceRoot);
 
             log("Root directory is '%s'.", root ?? '');
 
@@ -53,7 +53,7 @@ export class RepositoryFinder {
      * @param startingDirectory The full path of the directory to start searching from.
      * @returns The root of the repository, or `undefined` if the specified directory is not within a repository.
      */
-    private async findRepositoryRoot(startingDirectory: string): Promise<string | undefined> {
+    private findRepositoryRoot(startingDirectory: string): string | undefined {
         let current: string;
         let previous: string | undefined;
 
@@ -61,7 +61,8 @@ export class RepositoryFinder {
 
         while (current !== previous) {
             try {
-                if ((await fs.stat(join(current, '.git'))).isDirectory()) {
+                // .git will usually be a directory, but for a worktree it will be a file.
+                if (fs.existsSync(join(current, '.git'))) {
                     return current;
                 }
             } catch (ex) {
