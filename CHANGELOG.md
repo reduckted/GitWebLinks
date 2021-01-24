@@ -1,3 +1,13 @@
+# 2.1.0 (2020-01-24)
+
+## New Features
+
+-   ⭐ Added support for Git worktrees (thanks @ecraig12345)
+
+## Changes
+
+-   ✨ Workspaces that contain multiple repositories are now supported.
+
 # 2.0.0 (2020-12-30)
 
 ## New Features
