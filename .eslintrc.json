@@ -8,6 +8,7 @@
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
         "plugin:jsdoc/recommended",
+        "plugin:node/recommended",
         "prettier",
         "prettier/@typescript-eslint"
     ],
@@ -80,6 +81,8 @@
                 }
             }
         ],
+        "node/no-sync": "error",
+        "node/no-unpublished-import": "off",
         "no-console": "error",
         "prefer-const": "off",
         "sort-imports": ["warn", { "ignoreCase": true, "ignoreDeclarationSort": true }]
@@ -97,7 +100,9 @@
             "files": ["*.ts"],
             "rules": {
                 "jsdoc/require-param-type": "off",
-                "jsdoc/require-returns-type": "off"
+                "jsdoc/require-returns-type": "off",
+                "node/no-missing-import": "off",
+                "node/no-unsupported-features/es-syntax": "off"
             }
         },
         {

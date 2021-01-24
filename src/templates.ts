@@ -29,7 +29,7 @@ export function parseTemplate(template: Template): ParsedTemplate {
     parsed = engine.parse(template);
 
     return {
-        render: (props) => engine.renderSync(parsed, props) as string
+        render: (props) => engine.renderSync(parsed, props) as string // eslint-disable-line node/no-sync
     };
 }
 
