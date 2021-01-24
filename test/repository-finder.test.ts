@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { git } from '../src/git';
 import { RepositoryFinder } from '../src/repository-finder';
 
-import { Directory } from './helpers';
+import { Directory, setupRepository } from './helpers';
 
 describe('RepositoryFinder', () => {
     describe('find', () => {
@@ -52,9 +52,9 @@ describe('RepositoryFinder', () => {
             });
         });
 
-        it('should find the info when the workspace is a Git worktree', async () => {
+        it('should find the info when the workspace is a Git worktree.', async () => {
             worktree = await Directory.create();
-            await git(root.path, 'init');
+            await setupRepository(root.path);
             await git(root.path, 'remote', 'add', 'origin', 'https://github.com/example/repo');
             await git(root.path, 'worktree', 'add', worktree.path);
 
