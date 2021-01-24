@@ -13,12 +13,8 @@ export const STRINGS = {
         linkCopied: (handlerName: string): string =>
             format('%s link copied to the clipboard.', handlerName),
         error: 'An error occurred while creating the link.',
-        fileNotInWorkspace: (file: Uri): string =>
-            format("Cannot copy a link to '%s' because it's not in a workspace.", file),
-        noWorkspaceInfo: (folder: Uri): string =>
-            format("Could not find the workspace information for '%s'.", folder),
-        notTrackedByGit: (folder: Uri): string =>
-            format("The workspace at '%s' is not tracked by Git.", folder),
+        notTrackedByGit: (file: Uri): string =>
+            format("The file '%s' is not tracked by Git.", file),
         noRemote: (repositoryRoot: string): string =>
             format("The repository '%s' does not have any remotes.", repositoryRoot),
         noHandler: (remote: string): string =>
