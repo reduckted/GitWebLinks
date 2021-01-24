@@ -3,12 +3,13 @@ import { expect } from 'chai';
 import { git } from '../src/git';
 import { RepositoryFinder } from '../src/repository-finder';
 
-import { Directory } from './helpers';
+import { Directory, setupRepository } from './helpers';
 
 describe('RepositoryFinder', () => {
     describe('find', () => {
         let finder: RepositoryFinder;
         let root: Directory;
+        let worktree: Directory | undefined;
 
         beforeEach(async () => {
             finder = new RepositoryFinder();
@@ -17,6 +18,10 @@ describe('RepositoryFinder', () => {
 
         afterEach(async () => {
             await root.dispose();
+            if (worktree) {
+                await worktree.dispose();
+                worktree = undefined;
+            }
         });
 
         it('should not find the info when the workspace is not in a Git repository.', async () => {
@@ -43,6 +48,18 @@ describe('RepositoryFinder', () => {
 
             expect(await finder.find(child)).to.deep.equal({
                 root: root.path,
+                remote: 'https://github.com/example/repo'
+            });
+        });
+
+        it('should find the info when the workspace is a Git worktree.', async () => {
+            worktree = await Directory.create();
+            await setupRepository(root.path);
+            await git(root.path, 'remote', 'add', 'origin', 'https://github.com/example/repo');
+            await git(root.path, 'worktree', 'add', worktree.path);
+
+            expect(await finder.find(worktree.path)).to.deep.equal({
+                root: worktree.path,
                 remote: 'https://github.com/example/repo'
             });
         });
