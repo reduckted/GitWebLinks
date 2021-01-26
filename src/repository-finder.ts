@@ -157,16 +157,16 @@ export class RepositoryFinder {
     }
 
     /**
-     * Determines whether the specified directory is the root of a repository.
+     * Determines whether the specified path is the root of a repository.
      *
-     * @param dir The directory to check.
-     * @returns True if the directory is the root of a repository; otherwise, false.
+     * @param path The path to check.
+     * @returns True if the path is the root of a repository; otherwise, false.
      */
-    private async isRepositoryRoot(dir: string): Promise<boolean> {
+    private async isRepositoryRoot(path: string): Promise<boolean> {
         try {
             let stats: Stats;
 
-            stats = await fs.stat(join(dir, '.git'));
+            stats = await fs.stat(join(path, '.git'));
 
             // .git will usually be a directory,
             //  but for a worktree it will be a file.
@@ -174,7 +174,11 @@ export class RepositoryFinder {
                 return true;
             }
         } catch (ex) {
-            if (!isErrorCode(ex, 'ENOENT')) {
+            // An "ENOENT" error means the ".git" file/directory doesn't
+            // exist. An "ENOTDIR" error means the given path was a file
+            // and by appending ".git" we are trying to treat that file
+            // path as a directory. We can ignore both of those errors.
+            if (!isErrorCode(ex, 'ENOENT') && !isErrorCode(ex, 'ENOTDIR')) {
                 throw ex;
             }
         }

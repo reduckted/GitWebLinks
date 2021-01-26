@@ -1,4 +1,6 @@
 import { expect } from 'chai';
+import { promises as fs } from 'fs';
+import { join } from 'path';
 
 import { git } from '../src/git';
 import { RepositoryFinder } from '../src/repository-finder';
@@ -86,11 +88,11 @@ describe('RepositoryFinder', () => {
             }
         });
 
-        it('should not find the info when the workspace is not in a Git repository.', async () => {
+        it('should not find the info when the path is not in a Git repository.', async () => {
             expect(await finder.find(root.path)).to.be.undefined;
         });
 
-        it('should find the info when the workspace is at the root of the repository.', async () => {
+        it('should find the info when the path is the root of the repository.', async () => {
             await setupRepository(root.path);
             await git(root.path, 'remote', 'add', 'origin', 'https://github.com/example/repo');
 
@@ -100,7 +102,7 @@ describe('RepositoryFinder', () => {
             });
         });
 
-        it('should find the info when the workspace is below the root of the repository.', async () => {
+        it('should find the info when the path is below the root of the repository.', async () => {
             let child: string;
 
             await setupRepository(root.path);
@@ -114,7 +116,22 @@ describe('RepositoryFinder', () => {
             });
         });
 
-        it('should find the info when the workspace is a Git worktree.', async () => {
+        it('should find the info when starting from a file.', async () => {
+            let file: string;
+
+            await setupRepository(root.path);
+            await git(root.path, 'remote', 'add', 'origin', 'https://github.com/example/repo');
+
+            file = join(root.path, 'file.txt');
+            await fs.writeFile(file, '');
+
+            expect(await finder.find(file)).to.deep.equal({
+                root: root.path,
+                remote: 'https://github.com/example/repo'
+            });
+        });
+
+        it('should find the info when the file is in a Git worktree.', async () => {
             worktree = await Directory.create();
             await setupRepository(root.path);
             await git(root.path, 'remote', 'add', 'origin', 'https://github.com/example/repo');
