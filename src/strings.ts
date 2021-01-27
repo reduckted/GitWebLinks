@@ -10,7 +10,7 @@ export const STRINGS = {
     },
     command: {
         noFileSelected: 'Cannot copy a link because no file is selected.',
-        openInWeb: 'Open in Web',
+        openInBrowser: 'Open in Browser',
         linkCopied: (handlerName: string): string =>
             format('%s link copied to the clipboard.', handlerName),
         error: 'An error occurred while creating the link.',

@@ -25,7 +25,7 @@ export class Command {
         private readonly handlerSelector: LinkHandlerSelector,
         private readonly linkType: LinkType | undefined,
         private readonly includeSelection: boolean
-    ) { }
+    ) {}
 
     /**
      * Executes the commands.
@@ -79,10 +79,16 @@ export class Command {
 
                 log('Web link created: %s', link);
                 await env.clipboard.writeText(link);
-                let clickedItem = await window.showInformationMessage(STRINGS.command.linkCopied(file.handler.name), STRINGS.command.openInWeb);
-                if (clickedItem === STRINGS.command.openInWeb) {
-                    void env.openExternal(Uri.parse(link));
-                }
+
+                void window
+                    .showInformationMessage<ActionMessageItem>(
+                        STRINGS.command.linkCopied(file.handler.name),
+                        {
+                            title: STRINGS.command.openInBrowser,
+                            action: 'open'
+                        }
+                    )
+                    .then((x) => this.onNotificationItemClick(x, link));
             } catch (ex) {
                 log('Error while generating a link: %o', ex);
                 void window.showErrorMessage(STRINGS.command.error);
@@ -123,14 +129,7 @@ export class Command {
                     title: 'Open Settings',
                     action: 'settings'
                 })
-                .then((item) => {
-                    if (item?.action === 'settings') {
-                        void commands.executeCommand(
-                            'workbench.action.openSettings',
-                            'gitweblinks'
-                        );
-                    }
-                });
+                .then((x) => this.onNotificationItemClick(x));
             return undefined;
         }
 
@@ -152,6 +151,25 @@ export class Command {
             startColumn: editor.selection.start.character + 1,
             endColumn: editor.selection.end.character + 1
         };
+    }
+
+    /**
+     * Handles a button on a notification being clicked.
+     *
+     * @param item The item that was clicked on.
+     * @param link The link that has been created.
+     */
+    private onNotificationItemClick(item: ActionMessageItem | undefined, link?: string): void {
+        switch (item?.action) {
+            case 'settings':
+                void commands.executeCommand('workbench.action.openSettings', 'gitweblinks');
+                break;
+
+            case 'open':
+                if (link) {
+                    void env.openExternal(Uri.parse(link));
+                }
+        }
     }
 }
 
@@ -279,5 +297,5 @@ interface ActionMessageItem extends MessageItem {
     /**
      * The action to perform.
      */
-    action: 'settings';
+    action: 'settings' | 'open';
 }

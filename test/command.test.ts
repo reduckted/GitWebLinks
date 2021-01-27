@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import { env, Position, Selection, TextDocument, Uri, window } from 'vscode';
+import { env, MessageItem, Position, Selection, TextDocument, Uri, window } from 'vscode';
 
 import { Command } from '../src/command';
 import { LinkHandler } from '../src/link-handler';
@@ -177,8 +177,26 @@ describe('Command', () => {
 
         expect(showInformationMessage).to.have.been.calledWithExactly(
             STRINGS.command.linkCopied(handler?.name ?? ''),
-            STRINGS.command.openInWeb
+            { title: STRINGS.command.openInBrowser, action: 'open' }
         );
+    });
+
+    it('should open the link in the browser when clicking on the success notification.', async () => {
+        let openItem: MessageItem & Record<string, unknown>;
+        let openExternal: sinon.SinonStub;
+
+        useTextEditor(undefined);
+        createUrl.resolves('http://example.com/foo/bar');
+
+        openExternal = sinon.stub(env, 'openExternal').resolves();
+
+        openItem = { title: STRINGS.command.openInBrowser, action: 'open' };
+        showInformationMessage.resolves(openItem);
+
+        command = new Command(finder, selector, 'commit', true);
+        await command.execute(file);
+
+        expect(openExternal).to.have.been.calledWith(Uri.parse('http://example.com/foo/bar'));
     });
 
     it('should use the active text editor to get the file when no resource was specified.', async () => {
