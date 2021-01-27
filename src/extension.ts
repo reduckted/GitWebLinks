@@ -7,7 +7,7 @@ import { LinkHandlerSelector } from './link-handler-selector';
 import { log } from './log';
 import { RepositoryFinder } from './repository-finder';
 import { STRINGS } from './strings';
-import { WorkspaceManager } from './workspace-manager';
+import { WorkspaceTracker } from './workspace-tracker';
 
 /**
  * Activates the extension.
@@ -15,7 +15,8 @@ import { WorkspaceManager } from './workspace-manager';
  * @param context The extension's context.
  */
 export async function activate(context: ExtensionContext): Promise<void> {
-    let manager: WorkspaceManager;
+    let tracker: WorkspaceTracker;
+    let repositoryFinder: RepositoryFinder;
 
     log('Activating extension.');
 
@@ -24,22 +25,20 @@ export async function activate(context: ExtensionContext): Promise<void> {
         return;
     }
 
-    manager = new WorkspaceManager(
-        new RepositoryFinder(),
-        new LinkHandlerSelector(),
-        (workspaces) => {
-            // When the workspaces change, update the context
-            // for our commands. If any workspaces are in a
-            // Git repository, then the command is enabled.
-            void commands.executeCommand(
-                'setContext',
-                CONTEXT.canCopy,
-                workspaces.filter((x) => !!x.repository).length > 0
-            );
-        }
-    );
+    repositoryFinder = new RepositoryFinder();
 
-    context.subscriptions.push(manager);
+    tracker = new WorkspaceTracker(repositoryFinder, (workspaces) => {
+        // When the workspaces change, update the context
+        // for our commands. If any workspaces contain
+        // Git repositories, then the command is enabled.
+        void commands.executeCommand(
+            'setContext',
+            CONTEXT.canCopy,
+            workspaces.some((x) => x.hasRepositories)
+        );
+    });
 
-    registerCommands(context.subscriptions, manager);
+    context.subscriptions.push(tracker);
+
+    registerCommands(context.subscriptions, repositoryFinder, new LinkHandlerSelector());
 }

@@ -1,23 +1,14 @@
 import * as chai from 'chai';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import {
-    env,
-    Position,
-    Selection,
-    TextDocument,
-    Uri,
-    window,
-    workspace,
-    WorkspaceFolder
-} from 'vscode';
+import { env, Position, Selection, TextDocument, Uri, window } from 'vscode';
 
 import { Command } from '../src/command';
 import { LinkHandler } from '../src/link-handler';
+import { LinkHandlerSelector } from '../src/link-handler-selector';
+import { RepositoryFinder } from '../src/repository-finder';
 import { STRINGS } from '../src/strings';
 import { LinkType, Repository } from '../src/types';
-
-import { MockWorkspaceManager } from './helpers';
 
 const expect = chai.use(sinonChai).expect;
 
@@ -25,17 +16,22 @@ describe('Command', () => {
     let showErrorMessage: sinon.SinonStub;
     let showInformationMessage: sinon.SinonStub;
     let createUrl: sinon.SinonStub;
-    let manager: MockWorkspaceManager;
-    let handler: LinkHandler;
+    let finder: RepositoryFinder;
+    let selector: LinkHandlerSelector;
+    let handler: LinkHandler | undefined;
     let command: Command;
-    let workspaceFolder: WorkspaceFolder;
     let folder: Uri;
     let file: Uri;
-    let repository: Repository;
+    let repository: Repository | undefined;
     let link: string | undefined;
 
     beforeEach(() => {
-        manager = new MockWorkspaceManager();
+        finder = new RepositoryFinder();
+        sinon.stub(finder, 'find').callsFake(async () => Promise.resolve(repository));
+
+        selector = new LinkHandlerSelector();
+        sinon.stub(selector, 'select').callsFake(() => handler);
+
         handler = new LinkHandler({
             name: 'Test',
             server: { http: 'http://example.com', ssh: 'ssh://example.com' },
@@ -46,7 +42,6 @@ describe('Command', () => {
 
         file = Uri.file('/foo/bar');
         folder = Uri.file('/foo');
-        workspaceFolder = { uri: folder, index: 0, name: 'foo' };
         repository = { root: folder.toString(), remote: 'http://example.com' };
 
         showErrorMessage = sinon
@@ -71,7 +66,7 @@ describe('Command', () => {
     });
 
     it('should show an error if the command was invoked for a resource that was not a file.', async () => {
-        command = new Command(manager.asManager(), 'commit', true);
+        command = new Command(finder, selector, 'commit', true);
         await command.execute(Uri.parse('http://example.com'));
 
         expectError(STRINGS.command.noFileSelected);
@@ -80,72 +75,40 @@ describe('Command', () => {
     it('should show an error if the command was not invoked for a resource, and no file is active.', async () => {
         useTextEditor(undefined);
 
-        command = new Command(manager.asManager(), 'commit', true);
+        command = new Command(finder, selector, 'commit', true);
         await command.execute(undefined);
 
         expectError(STRINGS.command.noFileSelected);
     });
 
-    it('should show an error if the file is not in a workspace.', async () => {
-        useWorkspaceFolder(undefined);
-
-        command = new Command(manager.asManager(), 'commit', true);
-        await command.execute(file);
-
-        expectError(STRINGS.command.fileNotInWorkspace(file));
-    });
-
-    it('should show an error if the workspace does not have information.', async () => {
-        useWorkspaceFolder(workspaceFolder);
-
-        command = new Command(manager.asManager(), 'commit', true);
-        await command.execute(file);
-
-        expectError(STRINGS.command.noWorkspaceInfo(folder));
-    });
-
     it('should show an error if the file is not in a repository.', async () => {
-        useWorkspaceFolder(workspaceFolder);
-
-        manager.info = { uri: folder, repository: undefined, handler: undefined };
-        command = new Command(manager.asManager(), 'commit', true);
+        repository = undefined;
+        command = new Command(finder, selector, 'commit', true);
         await command.execute(file);
 
-        expectError(STRINGS.command.notTrackedByGit(folder));
+        expectError(STRINGS.command.notTrackedByGit(file));
     });
 
     it('should show an error if the repository does not have a remote.', async () => {
-        useWorkspaceFolder(workspaceFolder);
+        repository = { root: folder.toString(), remote: undefined };
 
-        manager.info = {
-            uri: folder,
-            repository: { ...repository, remote: undefined },
-            handler: undefined
-        };
-
-        command = new Command(manager.asManager(), 'commit', true);
+        command = new Command(finder, selector, 'commit', true);
         await command.execute(file);
 
         expectError(STRINGS.command.noRemote(folder.toString()));
     });
 
     it('should show an error if the repository does not have a link handler.', async () => {
-        useWorkspaceFolder(workspaceFolder);
+        handler = undefined;
 
-        manager.info = { uri: folder, repository, handler: undefined };
-
-        command = new Command(manager.asManager(), 'commit', true);
+        command = new Command(finder, selector, 'commit', true);
         await command.execute(file);
 
-        expectError(STRINGS.command.noHandler(repository.remote ?? ''));
+        expectError(STRINGS.command.noHandler(repository?.remote ?? ''));
     });
 
     it('should not include the selection when not allowed to.', async () => {
-        useWorkspaceFolder(workspaceFolder);
-
-        manager.info = { uri: folder, repository, handler };
-
-        command = new Command(manager.asManager(), 'commit', false);
+        command = new Command(finder, selector, 'commit', false);
         await command.execute(file);
 
         expect(createUrl).to.have.been.calledWithExactly(repository, file.fsPath, {
@@ -155,15 +118,12 @@ describe('Command', () => {
     });
 
     it('should include the selection when allowed to and the file is in the active editor.', async () => {
-        useWorkspaceFolder(workspaceFolder);
         useTextEditor(file, {
             start: new Position(1, 2),
             end: new Position(3, 4)
         });
 
-        manager.info = { uri: folder, repository, handler };
-
-        command = new Command(manager.asManager(), 'commit', true);
+        command = new Command(finder, selector, 'commit', true);
         await command.execute(file);
 
         expect(createUrl).to.have.been.calledWithExactly(repository, file.fsPath, {
@@ -173,12 +133,9 @@ describe('Command', () => {
     });
 
     it('should not include the selection when allowed to but the file is not in the active editor.', async () => {
-        useWorkspaceFolder(workspaceFolder);
         useTextEditor(undefined);
 
-        manager.info = { uri: folder, repository, handler };
-
-        command = new Command(manager.asManager(), 'commit', true);
+        command = new Command(finder, selector, 'commit', true);
         await command.execute(file);
 
         expect(createUrl).to.have.been.calledWithExactly(repository, file.fsPath, {
@@ -189,12 +146,9 @@ describe('Command', () => {
 
     getLinkTypes().forEach((type) => {
         it(`should create a link of the specified type (${type ?? 'undefined'}).`, async () => {
-            useWorkspaceFolder(workspaceFolder);
             useTextEditor(undefined);
 
-            manager.info = { uri: folder, repository, handler };
-
-            command = new Command(manager.asManager(), type, true);
+            command = new Command(finder, selector, type, true);
             await command.execute(file);
 
             expect(createUrl).to.have.been.calledWithExactly(repository, file.fsPath, {
@@ -205,40 +159,32 @@ describe('Command', () => {
     });
 
     it('should copy the link to the clipboard.', async () => {
-        useWorkspaceFolder(workspaceFolder);
         useTextEditor(undefined);
 
-        manager.info = { uri: folder, repository, handler };
         createUrl.resolves('http://example.com/foo/bar');
 
-        command = new Command(manager.asManager(), 'commit', true);
+        command = new Command(finder, selector, 'commit', true);
         await command.execute(file);
 
         expect(link).to.equal('http://example.com/foo/bar');
     });
 
     it('should show a message when the link is created.', async () => {
-        useWorkspaceFolder(workspaceFolder);
         useTextEditor(undefined);
 
-        manager.info = { uri: folder, repository, handler };
-
-        command = new Command(manager.asManager(), 'commit', true);
+        command = new Command(finder, selector, 'commit', true);
         await command.execute(file);
 
         expect(showInformationMessage).to.have.been.calledWithExactly(
-            STRINGS.command.linkCopied(handler.name),
+            STRINGS.command.linkCopied(handler?.name ?? ''),
             STRINGS.command.openInWeb
         );
     });
 
     it('should use the active text editor to get the file when no resource was specified.', async () => {
-        useWorkspaceFolder(workspaceFolder);
         useTextEditor(file);
 
-        manager.info = { uri: folder, repository, handler };
-
-        command = new Command(manager.asManager(), 'commit', true);
+        command = new Command(finder, selector, 'commit', true);
         await command.execute(undefined);
 
         expect(createUrl).to.have.been.calledWithExactly(repository, file.fsPath, {
@@ -258,10 +204,6 @@ describe('Command', () => {
         sinon
             .stub(window, 'activeTextEditor')
             .value(uri ? { document: { uri } as TextDocument, selection } : undefined);
-    }
-
-    function useWorkspaceFolder(value: WorkspaceFolder | undefined): void {
-        sinon.stub(workspace, 'getWorkspaceFolder').returns(value);
     }
 
     function expectError(message: string): void {

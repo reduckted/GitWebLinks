@@ -116,10 +116,12 @@ export function load<T extends HandlerDefinition>(): T[] {
 
         dir = path.resolve(__dirname, '../shared/handlers');
 
+        /* eslint-disable node/no-sync */
         return fs
             .readdirSync(dir)
             .filter((entry) => path.extname(entry) === '.json')
             .map((file) => fs.readFileSync(path.join(dir, file), { encoding: 'utf-8' }))
             .map((contents) => JSON.parse(contents) as T);
+        /* eslint-enable node/no-sync */
     }
 }

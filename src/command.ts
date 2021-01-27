@@ -1,22 +1,13 @@
-import {
-    commands,
-    Disposable,
-    env,
-    MessageItem,
-    TextEditor,
-    Uri,
-    window,
-    workspace,
-    WorkspaceFolder
-} from 'vscode';
+import { commands, Disposable, env, MessageItem, TextEditor, Uri, window } from 'vscode';
 
 import { COMMANDS } from './constants';
 import { LinkHandler } from './link-handler';
+import { LinkHandlerSelector } from './link-handler-selector';
 import { log } from './log';
+import { RepositoryFinder } from './repository-finder';
 import { STRINGS } from './strings';
 import { LinkType, Repository, RepositoryWithRemote, Selection } from './types';
 import { hasRemote } from './utilities';
-import { WorkspaceInfo, WorkspaceManager } from './workspace-manager';
 
 /**
  * The command to copy a web link to a file.
@@ -24,12 +15,14 @@ import { WorkspaceInfo, WorkspaceManager } from './workspace-manager';
 export class Command {
     /**
      * @constructor
-     * @param workspaces The workspace manager to use for finding repository information.
+     * @param repositoryFinder The repository finder to use for finding repository information for a file.
+     * @param handlerSelector The link handler selector to use for selecing the handler for a file.
      * @param linkType The type of links to generate. A value of `undefined` means the settings will be used to determine the type.
      * @param includeSelection Indicates whether the current selected range should be included in the links.
      */
     constructor(
-        private readonly workspaces: WorkspaceManager,
+        private readonly repositoryFinder: RepositoryFinder,
+        private readonly handlerSelector: LinkHandlerSelector,
         private readonly linkType: LinkType | undefined,
         private readonly includeSelection: boolean
     ) { }
@@ -61,7 +54,7 @@ export class Command {
             return;
         }
 
-        file = this.getFileInfo(resource);
+        file = await this.getFileInfo(resource);
 
         if (file) {
             let selection: Selection | undefined;
@@ -103,34 +96,15 @@ export class Command {
      * @param file The URI of the file to get the info for.
      * @returns The file information.
      */
-    private getFileInfo(file: Uri): FileInfo | undefined {
-        let folder: WorkspaceFolder | undefined;
-        let workspaceInfo: WorkspaceInfo | undefined;
+    private async getFileInfo(file: Uri): Promise<FileInfo | undefined> {
         let repository: Repository | undefined;
+        let handler: LinkHandler | undefined;
 
-        folder = workspace.getWorkspaceFolder(file);
-
-        if (!folder) {
-            log("The file '%s' is not in a workspace.", file);
-            void window.showErrorMessage(STRINGS.command.fileNotInWorkspace(file));
-            return undefined;
-        }
-
-        log("The file '%s' is in the workspace '%s'.", file, folder?.uri);
-
-        workspaceInfo = this.workspaces.get(folder);
-
-        if (!workspaceInfo) {
-            log('No workspace information found.');
-            void window.showErrorMessage(STRINGS.command.noWorkspaceInfo(folder.uri));
-            return undefined;
-        }
-
-        repository = workspaceInfo.repository;
+        repository = await this.repositoryFinder.find(file.fsPath);
 
         if (!repository) {
             log('File is not tracked by Git.');
-            void window.showErrorMessage(STRINGS.command.notTrackedByGit(folder.uri));
+            void window.showErrorMessage(STRINGS.command.notTrackedByGit(file));
             return undefined;
         }
 
@@ -140,7 +114,9 @@ export class Command {
             return undefined;
         }
 
-        if (!workspaceInfo.handler) {
+        handler = this.handlerSelector.select(repository);
+
+        if (!handler) {
             log("No handler for remote '%s'.", repository.remote);
             void window
                 .showErrorMessage<ActionMessageItem>(STRINGS.command.noHandler(repository.remote), {
@@ -158,11 +134,7 @@ export class Command {
             return undefined;
         }
 
-        return {
-            uri: file,
-            repository,
-            handler: workspaceInfo.handler
-        };
+        return { uri: file, repository, handler };
     }
 
     /**
@@ -187,23 +159,25 @@ export class Command {
  * Registers the commands.
  *
  * @param subscriptions The subscriptions to add the disposables to.
- * @param workspaceManager The workspace manager.
+ * @param repositoryFinder The repository finder to use for finding repository information for a file.
+ * @param handlerSelector The link handler selector to use for selecing the handler for a file.
  */
 export function registerCommands(
     subscriptions: Disposable[],
-    workspaceManager: WorkspaceManager
+    repositoryFinder: RepositoryFinder,
+    handlerSelector: LinkHandlerSelector
 ): void {
     // Add the two commands that appear in the menus to
     // copy a link to a file and copy a link to the selection.
     subscriptions.push(
-        register(COMMANDS.copyFile, workspaceManager, {
+        register(COMMANDS.copyFile, repositoryFinder, handlerSelector, {
             linkType: undefined,
             includeSelection: false
         })
     );
 
     subscriptions.push(
-        register(COMMANDS.copySelection, workspaceManager, {
+        register(COMMANDS.copySelection, repositoryFinder, handlerSelector, {
             linkType: undefined,
             includeSelection: true
         })
@@ -213,21 +187,21 @@ export function registerCommands(
     // appear in any menus and can only be run via the command palette (or via shortcut
     // keys). These commands will always include the selection if it's available.
     subscriptions.push(
-        register(COMMANDS.copySelectionToBranch, workspaceManager, {
+        register(COMMANDS.copySelectionToBranch, repositoryFinder, handlerSelector, {
             linkType: 'branch',
             includeSelection: true
         })
     );
 
     subscriptions.push(
-        register(COMMANDS.copySelectionToCommit, workspaceManager, {
+        register(COMMANDS.copySelectionToCommit, repositoryFinder, handlerSelector, {
             linkType: 'commit',
             includeSelection: true
         })
     );
 
     subscriptions.push(
-        register(COMMANDS.copySelectionToDefaultBranch, workspaceManager, {
+        register(COMMANDS.copySelectionToDefaultBranch, repositoryFinder, handlerSelector, {
             linkType: 'defaultBranch',
             includeSelection: true
         })
@@ -238,18 +212,25 @@ export function registerCommands(
  * Registers a command.
  *
  * @param identifier The command identifier.
- * @param workspaceManager The workspace mamnager for the command to use.
+ * @param repositoryFinder The repository finder to use for finding repository information for a file.
+ * @param handlerSelector The link handler selector to use for selecing the handler for a file.
  * @param options The options for registering the command.
  * @returns A disposable to unregister the command.
  */
 export function register(
     identifier: string,
-    workspaceManager: WorkspaceManager,
+    repositoryFinder: RepositoryFinder,
+    handlerSelector: LinkHandlerSelector,
     options: CommandOptions
 ): Disposable {
     let command: Command;
 
-    command = new Command(workspaceManager, options.linkType, options.includeSelection);
+    command = new Command(
+        repositoryFinder,
+        handlerSelector,
+        options.linkType,
+        options.includeSelection
+    );
 
     return commands.registerCommand(identifier, async (resource) => command.execute(resource));
 }

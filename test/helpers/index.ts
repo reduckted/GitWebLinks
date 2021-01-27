@@ -5,7 +5,6 @@ import { git } from '../../src/git';
 
 export * from './directory';
 export * from './mock-workspace';
-export * from './mock-workspace-manager';
 
 /**
  * Sets up a Git repository in the specified directory.

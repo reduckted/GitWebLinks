@@ -1,28 +1,22 @@
 import { Disposable, Uri, workspace, WorkspaceFolder, WorkspaceFoldersChangeEvent } from 'vscode';
 
-import { LinkHandler } from './link-handler';
-import { LinkHandlerSelector } from './link-handler-selector';
 import { log } from './log';
 import { RepositoryFinder } from './repository-finder';
-import { Repository } from './types';
-import { hasRemote } from './utilities';
 
 /**
- * Tracks the open workspaces and their corresponding repository information.
+ * Tracks the open workspaces and whether they contain repositories.
  */
-export class WorkspaceManager extends Disposable {
+export class WorkspaceTracker extends Disposable {
     private readonly map: Map<string, WorkspaceInfo> = new Map<string, WorkspaceInfo>();
     private readonly disposable: Disposable;
 
     /**
      * @constructor
      * @param repositoryFinder The `RepositoryFinder` to use.
-     * @param handlerSelector The `LinkHandlerSelector` to use.
      * @param onChanged The function to call when workspaces are added or removed.
      */
     constructor(
         private readonly repositoryFinder: RepositoryFinder,
-        private readonly handlerSelector: LinkHandlerSelector,
         private readonly onChanged: WorkspacesChangedCallback
     ) {
         super(() => {
@@ -81,27 +75,20 @@ export class WorkspaceManager extends Disposable {
      * @param folder The folder to add.
      */
     private async addFolder(folder: WorkspaceFolder): Promise<void> {
-        let repository: Repository | undefined;
-        let handler: LinkHandler | undefined;
+        let hasRepositories: boolean;
 
         log("Adding workspace folder '%s'.", folder.uri);
 
-        repository = await this.repositoryFinder.find(folder.uri.fsPath);
-
-        if (repository && hasRemote(repository)) {
-            handler = this.handlerSelector.select(repository);
-        }
+        hasRepositories = await this.repositoryFinder.hasRepositories(folder.uri.fsPath);
 
         log('Workspace details: %o', {
             uri: folder.uri.toString(),
-            repository: repository ?? '-',
-            handler: handler?.name ?? '-'
+            hasRepositories
         });
 
         this.map.set(folder.uri.toString(), {
             uri: folder.uri,
-            repository,
-            handler
+            hasRepositories
         });
     }
 
@@ -116,16 +103,6 @@ export class WorkspaceManager extends Disposable {
             this.map.delete(folder.uri.toString());
         }
     }
-
-    /**
-     * Gets the workspace information for the given workspace folder.
-     *
-     * @param folder The folder to get the workspace information for.
-     * @returns The workspace information if the folder exists; otherwise, `undefined`.
-     */
-    public get(folder: WorkspaceFolder): WorkspaceInfo | undefined {
-        return this.map.get(folder.uri.toString());
-    }
 }
 
 /**
@@ -138,14 +115,9 @@ export interface WorkspaceInfo {
     readonly uri: Uri;
 
     /**
-     * The repository that the workspace is in.
+     * Indicates whether the workspace contains one or more repositories.
      */
-    readonly repository: Repository | undefined;
-
-    /**
-     * The link handler for the workspace.
-     */
-    readonly handler: LinkHandler | undefined;
+    readonly hasRepositories: boolean;
 }
 
 /**

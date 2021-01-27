@@ -1,3 +1,19 @@
+# 2.1.1 (2021-01-26)
+
+## Bug Fixes
+
+-   🐛 Fixed "file is not tracked by Git" errors in Linux.
+
+# 2.1.0 (2021-01-24)
+
+## New Features
+
+-   ⭐ Added support for Git worktrees (thanks @ecraig12345).
+
+## Changes
+
+-   ✨ Workspaces that contain multiple repositories are now supported.
+
 # 2.0.0 (2020-12-30)
 
 ## New Features
@@ -14,7 +30,7 @@
 
 ## New Features
 
--   ⭐ Added support for Azure DevOps Server.
+-   ⭐ Added support for Azure DevOps Server (thanks @kvart714).
 
 # 1.8.1 (2020-07-12)
 
