@@ -25,7 +25,7 @@ export class Command {
         private readonly handlerSelector: LinkHandlerSelector,
         private readonly linkType: LinkType | undefined,
         private readonly includeSelection: boolean
-    ) {}
+    ) { }
 
     /**
      * Executes the commands.
@@ -79,7 +79,10 @@ export class Command {
 
                 log('Web link created: %s', link);
                 await env.clipboard.writeText(link);
-                void window.showInformationMessage(STRINGS.command.linkCopied(file.handler.name));
+                let clickedItem = await window.showInformationMessage(STRINGS.command.linkCopied(file.handler.name), STRINGS.command.openInWeb);
+                if (clickedItem === STRINGS.command.openInWeb) {
+                    void env.openExternal(Uri.parse(link));
+                }
             } catch (ex) {
                 log('Error while generating a link: %o', ex);
                 void window.showErrorMessage(STRINGS.command.error);
