@@ -9,6 +9,7 @@ import { Directory, MockWorkspace, tick } from './helpers';
 
 describe('WorkspaceTracker', () => {
     let tracker: WorkspaceTracker;
+    let subscription: vscode.Disposable;
     let repositoryFinder: RepositoryFinder;
     let hasRepositories: sinon.SinonStub<[string], Promise<boolean>>;
     let root: Directory;
@@ -26,7 +27,8 @@ describe('WorkspaceTracker', () => {
     });
 
     afterEach(async () => {
-        await tracker?.dispose();
+        tracker?.dispose();
+        subscription?.dispose();
         await root.dispose();
         sinon.restore();
     });
@@ -87,7 +89,8 @@ describe('WorkspaceTracker', () => {
     });
 
     async function create(): Promise<void> {
-        tracker = new WorkspaceTracker(repositoryFinder, (x) => (changes = [...x]));
+        tracker = new WorkspaceTracker(repositoryFinder);
+        subscription = tracker.onWorkspacesChanged((x) => (changes = [...x]));
         await tick();
     }
 

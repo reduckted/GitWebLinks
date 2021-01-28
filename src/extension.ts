@@ -1,7 +1,7 @@
-import { commands, ExtensionContext, window } from 'vscode';
+import { ExtensionContext, window } from 'vscode';
 
 import { registerCommands } from './command';
-import { CONTEXT } from './constants';
+import { ContextManager } from './context-manager';
 import { initialize } from './git';
 import { LinkHandlerSelector } from './link-handler-selector';
 import { log } from './log';
@@ -15,8 +15,8 @@ import { WorkspaceTracker } from './workspace-tracker';
  * @param context The extension's context.
  */
 export async function activate(context: ExtensionContext): Promise<void> {
-    let tracker: WorkspaceTracker;
     let repositoryFinder: RepositoryFinder;
+    let workspaceTracker: WorkspaceTracker;
 
     log('Activating extension.');
 
@@ -26,19 +26,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }
 
     repositoryFinder = new RepositoryFinder();
+    workspaceTracker = new WorkspaceTracker(repositoryFinder);
 
-    tracker = new WorkspaceTracker(repositoryFinder, (workspaces) => {
-        // When the workspaces change, update the context
-        // for our commands. If any workspaces contain
-        // Git repositories, then the command is enabled.
-        void commands.executeCommand(
-            'setContext',
-            CONTEXT.canCopy,
-            workspaces.some((x) => x.hasRepositories)
-        );
-    });
-
-    context.subscriptions.push(tracker);
+    context.subscriptions.push(new ContextManager(workspaceTracker));
+    context.subscriptions.push(workspaceTracker);
 
     registerCommands(context.subscriptions, repositoryFinder, new LinkHandlerSelector());
 }

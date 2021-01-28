@@ -1,4 +1,12 @@
-import { Disposable, Uri, workspace, WorkspaceFolder, WorkspaceFoldersChangeEvent } from 'vscode';
+import {
+    Disposable,
+    Event,
+    EventEmitter,
+    Uri,
+    workspace,
+    WorkspaceFolder,
+    WorkspaceFoldersChangeEvent
+} from 'vscode';
 
 import { log } from './log';
 import { RepositoryFinder } from './repository-finder';
@@ -8,31 +16,47 @@ import { RepositoryFinder } from './repository-finder';
  */
 export class WorkspaceTracker extends Disposable {
     private readonly map: Map<string, WorkspaceInfo> = new Map<string, WorkspaceInfo>();
+    private readonly workspacesChanged: EventEmitter<readonly WorkspaceInfo[]>;
     private readonly disposable: Disposable;
 
     /**
      * @constructor
      * @param repositoryFinder The `RepositoryFinder` to use.
-     * @param onChanged The function to call when workspaces are added or removed.
      */
-    constructor(
-        private readonly repositoryFinder: RepositoryFinder,
-        private readonly onChanged: WorkspacesChangedCallback
-    ) {
+    constructor(private readonly repositoryFinder: RepositoryFinder) {
         super(() => {
             this.disposable.dispose();
         });
 
-        // Watch for changes to the workspace folders.
-        this.disposable = workspace.onDidChangeWorkspaceFolders((e) => {
-            this.onWorkspaceFoldersChanged(e);
-        });
+        this.workspacesChanged = new EventEmitter();
+
+        this.disposable = Disposable.from(
+            // Watch for changes to the workspace folders.
+            workspace.onDidChangeWorkspaceFolders((e) => {
+                this.onWorkspaceFoldersChanged(e);
+            }),
+            this.workspacesChanged
+        );
 
         // Initialize ourselves with the current workspace folders.
         this.onWorkspaceFoldersChanged({
             added: workspace.workspaceFolders || [],
             removed: []
         });
+    }
+
+    /**
+     * The current workspaces.
+     */
+    public get workspaces(): readonly WorkspaceInfo[] {
+        return Array.from(this.map.values());
+    }
+
+    /**
+     * An event that is emitted after workspace folders are added or removed.
+     */
+    public get onWorkspacesChanged(): Event<readonly WorkspaceInfo[]> {
+        return this.workspacesChanged.event;
     }
 
     /**
@@ -49,7 +73,7 @@ export class WorkspaceTracker extends Disposable {
         this.addFolders(e.added)
             .then(() => {
                 this.removeFolders(e.removed);
-                this.onChanged(Array.from(this.map.values()));
+                this.workspacesChanged.fire(Array.from(this.map.values()));
             })
             .catch((ex) => log('FAILURE: %s', ex));
     }
@@ -119,10 +143,3 @@ export interface WorkspaceInfo {
      */
     readonly hasRepositories: boolean;
 }
-
-/**
- * A function that is called when workspaces are added or removed.
- *
- * @param workspaces The current set of workspaces.
- */
-export type WorkspacesChangedCallback = (workspaces: readonly WorkspaceInfo[]) => void;

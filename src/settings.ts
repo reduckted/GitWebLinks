@@ -55,6 +55,24 @@ export class Settings {
     }
 
     /**
+     * Gets the setting that controls whether the "Copy Link" menu item is visible.
+     *
+     * @returns True if the menu item should be visible; otherwise, false.
+     */
+    public getShowCopy(): boolean {
+        return !!this.getConfiguration().get(CONFIGURATION.showCopy);
+    }
+
+    /**
+     * Gets the setting that controls whether the "Open Link" menu item is visible.
+     *
+     * @returns True if the menu item should be visible; otherwise, false.
+     */
+    public getShowOpen(): boolean {
+        return !!this.getConfiguration().get(CONFIGURATION.showOpen);
+    }
+
+    /**
      * Gets the configuration for the workspace.
      *
      * @returns The configuration.

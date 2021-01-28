@@ -48,6 +48,7 @@
         "@typescript-eslint/no-confusing-non-null-assertion": "error",
         "@typescript-eslint/prefer-readonly": "warn",
         "@typescript-eslint/promise-function-async": "warn",
+        "@typescript-eslint/restrict-template-expressions": "off",
         "import/no-deprecated": "error",
         "import/no-duplicates": "error",
         "import/newline-after-import": "warn",

@@ -92,27 +92,37 @@
         "commands": [
             {
                 "command": "gitweblinks.copyFile",
-                "title": "Copy Web Link to File",
+                "title": "Copy Link to File",
                 "category": "Git Web Links"
             },
             {
                 "command": "gitweblinks.copySelection",
-                "title": "Copy Web Link to Selection",
+                "title": "Copy Link to Selection",
                 "category": "Git Web Links"
             },
             {
                 "command": "gitweblinks.copySelectionToDefaultBranch",
-                "title": "Copy Web Link to Selection (on default branch)",
+                "title": "Copy Link to Selection (on default branch)",
                 "category": "Git Web Links"
             },
             {
                 "command": "gitweblinks.copySelectionToBranch",
-                "title": "Copy Web Link to Selection (on current branch)",
+                "title": "Copy Link to Selection (on current branch)",
                 "category": "Git Web Links"
             },
             {
                 "command": "gitweblinks.copySelectionToCommit",
-                "title": "Copy Web Link to Selection (at current commit)",
+                "title": "Copy Link to Selection (at current commit)",
+                "category": "Git Web Links"
+            },
+            {
+                "command": "gitweblinks.openFile",
+                "title": "Open Link to File",
+                "category": "Git Web Links"
+            },
+            {
+                "command": "gitweblinks.openSelection",
+                "title": "Open Link to Selection",
                 "category": "Git Web Links"
             }
         ],
@@ -121,21 +131,36 @@
                 {
                     "command": "gitweblinks.copySelection",
                     "group": "gitweblinks@1",
-                    "when": "gitweblinks:canCopy"
+                    "when": "gitweblinks:hasRepositories && gitweblinks:canCopy"
+                },
+                {
+                    "command": "gitweblinks.openSelection",
+                    "group": "gitweblinks@2",
+                    "when": "gitweblinks:hasRepositories && gitweblinks:canOpen"
                 }
             ],
             "editor/title/context": [
                 {
                     "command": "gitweblinks.copyFile",
                     "group": "gitweblinks@1",
-                    "when": "gitweblinks:canCopy"
+                    "when": "gitweblinks:hasRepositories && gitweblinks:canCopy"
+                },
+                {
+                    "command": "gitweblinks.openFile",
+                    "group": "gitweblinks@2",
+                    "when": "gitweblinks:hasRepositories && gitweblinks:canOpen"
                 }
             ],
             "explorer/context": [
                 {
                     "command": "gitweblinks.copyFile",
                     "group": "gitweblinks@1",
-                    "when": "gitweblinks:canCopy"
+                    "when": "gitweblinks:hasRepositories && gitweblinks:canCopy"
+                },
+                {
+                    "command": "gitweblinks.openFile",
+                    "group": "gitweblinks@2",
+                    "when": "gitweblinks:hasRepositories && gitweblinks:canOpen"
                 }
             ]
         },
@@ -240,6 +265,16 @@
                         ],
                         "additionalProperties": false
                     }
+                },
+                "gitweblinks.showCopy": {
+                    "type": "boolean",
+                    "description": "Controls the visibility of the 'Copy Link' menu item.",
+                    "default": true
+                },
+                "gitweblinks.showOpen": {
+                    "type": "boolean",
+                    "description": "Controls the visibility of the 'Open Link' menu item.",
+                    "default": false
                 }
             }
         }

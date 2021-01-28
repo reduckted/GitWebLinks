@@ -19,12 +19,14 @@ export class Command {
      * @param handlerSelector The link handler selector to use for selecing the handler for a file.
      * @param linkType The type of links to generate. A value of `undefined` means the settings will be used to determine the type.
      * @param includeSelection Indicates whether the current selected range should be included in the links.
+     * @param action The action that the command should perform with the link.
      */
     constructor(
         private readonly repositoryFinder: RepositoryFinder,
         private readonly handlerSelector: LinkHandlerSelector,
         private readonly linkType: LinkType | undefined,
-        private readonly includeSelection: boolean
+        private readonly includeSelection: boolean,
+        private readonly action: CommandAction
     ) {}
 
     /**
@@ -78,17 +80,26 @@ export class Command {
                 });
 
                 log('Web link created: %s', link);
-                await env.clipboard.writeText(link);
 
-                void window
-                    .showInformationMessage<ActionMessageItem>(
-                        STRINGS.command.linkCopied(file.handler.name),
-                        {
-                            title: STRINGS.command.openInBrowser,
-                            action: 'open'
-                        }
-                    )
-                    .then((x) => this.onNotificationItemClick(x, link));
+                switch (this.action) {
+                    case 'copy':
+                        await env.clipboard.writeText(link);
+
+                        void window
+                            .showInformationMessage<ActionMessageItem>(
+                                STRINGS.command.linkCopied(file.handler.name),
+                                {
+                                    title: STRINGS.command.openInBrowser,
+                                    action: 'open'
+                                }
+                            )
+                            .then((x) => this.onNotificationItemClick(x, link));
+
+                        break;
+
+                    case 'open':
+                        void env.openExternal(Uri.parse(link));
+                }
             } catch (ex) {
                 log('Error while generating a link: %o', ex);
                 void window.showErrorMessage(STRINGS.command.error);
@@ -169,6 +180,7 @@ export class Command {
                 if (link) {
                     void env.openExternal(Uri.parse(link));
                 }
+                break;
         }
     }
 }
@@ -190,14 +202,34 @@ export function registerCommands(
     subscriptions.push(
         register(COMMANDS.copyFile, repositoryFinder, handlerSelector, {
             linkType: undefined,
-            includeSelection: false
+            includeSelection: false,
+            action: 'copy'
         })
     );
 
     subscriptions.push(
         register(COMMANDS.copySelection, repositoryFinder, handlerSelector, {
             linkType: undefined,
-            includeSelection: true
+            includeSelection: true,
+            action: 'copy'
+        })
+    );
+
+    // Add the two commands that appear in the menus to
+    // open a link to the file and open a link to the selection.
+    subscriptions.push(
+        register(COMMANDS.openFile, repositoryFinder, handlerSelector, {
+            linkType: undefined,
+            includeSelection: false,
+            action: 'open'
+        })
+    );
+
+    subscriptions.push(
+        register(COMMANDS.openSelection, repositoryFinder, handlerSelector, {
+            linkType: undefined,
+            includeSelection: true,
+            action: 'open'
         })
     );
 
@@ -207,21 +239,24 @@ export function registerCommands(
     subscriptions.push(
         register(COMMANDS.copySelectionToBranch, repositoryFinder, handlerSelector, {
             linkType: 'branch',
-            includeSelection: true
+            includeSelection: true,
+            action: 'copy'
         })
     );
 
     subscriptions.push(
         register(COMMANDS.copySelectionToCommit, repositoryFinder, handlerSelector, {
             linkType: 'commit',
-            includeSelection: true
+            includeSelection: true,
+            action: 'copy'
         })
     );
 
     subscriptions.push(
         register(COMMANDS.copySelectionToDefaultBranch, repositoryFinder, handlerSelector, {
             linkType: 'defaultBranch',
-            includeSelection: true
+            includeSelection: true,
+            action: 'copy'
         })
     );
 }
@@ -247,11 +282,17 @@ export function register(
         repositoryFinder,
         handlerSelector,
         options.linkType,
-        options.includeSelection
+        options.includeSelection,
+        options.action
     );
 
     return commands.registerCommand(identifier, async (resource) => command.execute(resource));
 }
+
+/**
+ * Indicates whether a command should copy the link or open the link.
+ */
+type CommandAction = 'copy' | 'open';
 
 /**
  * Options for registering a command.
@@ -268,6 +309,11 @@ interface CommandOptions {
      * from the file in the link that is generated.
      */
     includeSelection: boolean;
+
+    /**
+     * The action the command should perform.
+     */
+    action: CommandAction;
 }
 
 /**

@@ -10,11 +10,15 @@ import { Settings } from '../src/settings';
 import { LinkOptions, LinkType, RepositoryWithRemote } from '../src/types';
 import { isErrorCode } from '../src/utilities';
 
-import { Directory, setupRepository } from './helpers';
+import { Directory, markAsSlow, setupRepository } from './helpers';
 
-describe('LinkHandler', () => {
+describe('LinkHandler', function () {
     let repository: RepositoryWithRemote;
     let root: Directory;
+
+    // We need to create repositories, so mark the
+    // tests as being a bit slower than other tests.
+    markAsSlow(this);
 
     beforeEach(async () => {
         root = await Directory.create();

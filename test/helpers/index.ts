@@ -7,6 +7,16 @@ export * from './directory';
 export * from './mock-workspace';
 
 /**
+ * Marks a test suite as being slow.
+ *
+ * @param suite The test suite to mark as slow.
+ */
+export function markAsSlow(suite: Mocha.Suite): void {
+    suite.slow(1000);
+    suite.timeout(10000);
+}
+
+/**
  * Sets up a Git repository in the specified directory.
  *
  * @param root The root directory.

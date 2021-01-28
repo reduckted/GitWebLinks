@@ -10,7 +10,7 @@ import { load } from '../src/schema';
 import { parseTemplate } from '../src/templates';
 import { LinkOptions, RepositoryWithRemote, Selection } from '../src/types';
 
-import { Directory, setupRepository } from './helpers';
+import { Directory, markAsSlow, setupRepository } from './helpers';
 import {
     HandlerWithTests,
     RemoteUrlTests,
@@ -28,9 +28,13 @@ let definitions: HandlerWithTests[];
 
 definitions = load<HandlerWithTests>().sort();
 
-describe('Link handlers', () => {
+describe('Link handlers', function () {
     let selector: LinkHandlerSelector;
     let root: Directory;
+
+    // We need to create repositories, so mark the
+    // tests as being a bit slower than other tests.
+    markAsSlow(this);
 
     before(() => {
         selector = new LinkHandlerSelector();
@@ -47,11 +51,8 @@ describe('Link handlers', () => {
 
     definitions.forEach((definition) => {
         describe(definition.name, () => {
-            describe('createUrl', function () {
-                this.slow(1000);
-
-                beforeEach(async function () {
-                    this.timeout(10000);
+            describe('createUrl', () => {
+                beforeEach(async () => {
                     await setupRepository(root.path);
                 });
 

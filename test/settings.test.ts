@@ -82,6 +82,24 @@ describe('Settings', () => {
         });
     });
 
+    describe('getShowCopy', () => {
+        [true, false].forEach((value) => {
+            it(`should return ${value} when the stored value is ${value}.`, () => {
+                setup({ showCopy: value });
+                expect(settings.getShowCopy()).to.equal(value);
+            });
+        });
+    });
+
+    describe('getShowOpen', () => {
+        [true, false].forEach((value) => {
+            it(`should return ${value} when the stored value is ${value}.`, () => {
+                setup({ showOpen: value });
+                expect(settings.getShowOpen()).to.equal(value);
+            });
+        });
+    });
+
     function setup(data: Record<string, unknown>): void {
         sinon
             .stub(workspace, 'getConfiguration')

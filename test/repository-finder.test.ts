@@ -5,12 +5,16 @@ import { join } from 'path';
 import { git } from '../src/git';
 import { RepositoryFinder } from '../src/repository-finder';
 
-import { Directory, setupRepository } from './helpers';
+import { Directory, markAsSlow, setupRepository } from './helpers';
 
-describe('RepositoryFinder', () => {
+describe('RepositoryFinder', function () {
     let finder: RepositoryFinder;
     let root: Directory;
     let worktree: Directory | undefined;
+
+    // We need to create repositories, so mark the
+    // tests as being a bit slower than other tests.
+    markAsSlow(this);
 
     beforeEach(async () => {
         finder = new RepositoryFinder();

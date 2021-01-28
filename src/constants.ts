@@ -6,11 +6,15 @@ export const EXTENSION = {
 export const CONFIGURATION = {
     section: EXTENSION.id,
     linkType: 'linkType',
-    defaultBranch: 'defaultBranch'
+    defaultBranch: 'defaultBranch',
+    showCopy: 'showCopy',
+    showOpen: 'showOpen'
 };
 
 export const CONTEXT = {
-    canCopy: `${EXTENSION.id}:canCopy`
+    hasRepositories: `${EXTENSION.id}:hasRepositories`,
+    canCopy: `${EXTENSION.id}:canCopy`,
+    canOpen: `${EXTENSION.id}:canOpen`
 };
 
 export const COMMANDS = {
@@ -18,5 +22,7 @@ export const COMMANDS = {
     copySelection: `${EXTENSION.id}.copySelection`,
     copySelectionToDefaultBranch: `${EXTENSION.id}.copySelectionToDefaultBranch`,
     copySelectionToBranch: `${EXTENSION.id}.copySelectionToBranch`,
-    copySelectionToCommit: `${EXTENSION.id}.copySelectionToCommit`
+    copySelectionToCommit: `${EXTENSION.id}.copySelectionToCommit`,
+    openFile: `${EXTENSION.id}.openFile`,
+    openSelection: `${EXTENSION.id}.openSelection`
 };
