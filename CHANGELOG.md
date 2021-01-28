@@ -1,3 +1,10 @@
+# 2.2.0 (2021-01-28)
+
+## New Features
+
+-   ⭐ The notification shown after copying a link contains a button to open the link in the browser (thanks @kvart714).
+-   ⭐ New commands to open links directly in the browser instead of copying to the clipboard (see the readme for the new settings).
+
 # 2.1.1 (2021-01-26)
 
 ## Bug Fixes

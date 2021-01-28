@@ -14,17 +14,17 @@ For on-premise hosts (for example, GitLab CE, Bitbucket Server, etc), there is s
 
 ## Copy a Link to a File
 
-To copy a link to the file, right-click on the file's tab and select _Copy Web Link to File_.
+To copy a link to the file, right-click on the file's tab and select _Copy Link to File_.
 
 ![Copy Link to File](images/copy-file-tab.png)
 
-You can also right-click on a file in Explorer panel and select _Copy Web Link to File_.
+You can also right-click on a file in Explorer panel and select _Copy Link to File_.
 
 ![Copy Link to File](images/copy-file-explorer.png)
 
 ## Copy a Link to the Selection
 
-To copy a link to a particular line in the file, right-click on the line in the editor and select _Copy Web Link to Selection_.
+To copy a link to a particular line in the file, right-click on the line in the editor and select _Copy Link to Selection_.
 
 If you want to copy a link to a range of lines, just select the lines first.
 
@@ -47,6 +47,12 @@ The default branch can be specified using the `gitweblinks.defaultBranch` settin
 In addition to the commands mentioned above, there are three commands available in the _Command Palette_ that allow you to create a link in a specific format, rather than using the default format.
 
 ![Available Commands](images/command-palette.png)
+
+## Open in Browser
+
+You can choose to open the links directly in the browser instead of copying to the clipboard. The menu item is hidden by default. To show this menu item, set the `gitweblinks.showOpen` setting to true.
+
+You can also hide the "Copy Link" menu items by setting the `gitweblinks.showCopy` to false.
 
 ## On-Premise Servers
 
