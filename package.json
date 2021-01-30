@@ -36,6 +36,7 @@
         "pretest:copy-schemas": "cpy ./shared ./out --parents",
         "pretest": "run-s pretest:clean pretest:build pretest:copy-schemas",
         "test": "node ./out/test/run.js",
+        "watch": "webpack --mode development --watch",
         "debug-build": "webpack --mode development",
         "debug-test": "npm run pretest"
     },
