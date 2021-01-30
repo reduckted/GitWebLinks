@@ -113,20 +113,25 @@ describe('Command', () => {
         command = new Command(finder, selector, 'commit', true, 'copy');
         await command.execute(undefined);
 
-        expect(createUrl).to.have.been.calledWithExactly(repository, file.fsPath, {
-            type: 'commit',
-            selection: { startLine: 1, startColumn: 1, endLine: 1, endColumn: 1 }
-        });
+        expect(createUrl).to.have.been.calledWithExactly(
+            repository,
+            {
+                filePath: file.fsPath,
+                selection: { startLine: 1, startColumn: 1, endLine: 1, endColumn: 1 }
+            },
+            { type: 'commit' }
+        );
     });
 
     it('should not include the selection when not allowed to.', async () => {
         command = new Command(finder, selector, 'commit', false, 'copy');
         await command.execute(file);
 
-        expect(createUrl).to.have.been.calledWithExactly(repository, file.fsPath, {
-            type: 'commit',
-            selection: undefined
-        });
+        expect(createUrl).to.have.been.calledWithExactly(
+            repository,
+            { filePath: file.fsPath, selection: undefined },
+            { type: 'commit' }
+        );
     });
 
     it('should include the selection when allowed to and the file is in the active editor.', async () => {
@@ -138,10 +143,14 @@ describe('Command', () => {
         command = new Command(finder, selector, 'commit', true, 'copy');
         await command.execute(file);
 
-        expect(createUrl).to.have.been.calledWithExactly(repository, file.fsPath, {
-            type: 'commit',
-            selection: { startLine: 2, startColumn: 3, endLine: 4, endColumn: 5 }
-        });
+        expect(createUrl).to.have.been.calledWithExactly(
+            repository,
+            {
+                filePath: file.fsPath,
+                selection: { startLine: 2, startColumn: 3, endLine: 4, endColumn: 5 }
+            },
+            { type: 'commit' }
+        );
     });
 
     it('should not include the selection when allowed to but the file is not in the active editor.', async () => {
@@ -150,10 +159,11 @@ describe('Command', () => {
         command = new Command(finder, selector, 'commit', true, 'copy');
         await command.execute(file);
 
-        expect(createUrl).to.have.been.calledWithExactly(repository, file.fsPath, {
-            type: 'commit',
-            selection: undefined
-        });
+        expect(createUrl).to.have.been.calledWithExactly(
+            repository,
+            { filePath: file.fsPath, selection: undefined },
+            { type: 'commit' }
+        );
     });
 
     getLinkTypes().forEach((type) => {
@@ -163,10 +173,11 @@ describe('Command', () => {
             command = new Command(finder, selector, type, true, 'copy');
             await command.execute(file);
 
-            expect(createUrl).to.have.been.calledWithExactly(repository, file.fsPath, {
-                type,
-                selection: undefined
-            });
+            expect(createUrl).to.have.been.calledWithExactly(
+                repository,
+                { filePath: file.fsPath, selection: undefined },
+                { type }
+            );
         });
     });
 

@@ -6,7 +6,7 @@ import { RemoteServer, ServerAddress } from './remote-server';
 import { HandlerDefinition } from './schema';
 import { Settings } from './settings';
 import { ParsedTemplate, parseTemplate } from './templates';
-import { LinkOptions, LinkType, RepositoryWithRemote } from './types';
+import { FileInfo, LinkOptions, LinkType, RepositoryWithRemote } from './types';
 import { getErrorMessage, normalizeRemoteUrl } from './utilities';
 
 /**
@@ -57,13 +57,13 @@ export class LinkHandler {
      * Creates a link for the specified file.
      *
      * @param repository The repository that the file is in.
-     * @param filePath The full path to the file.
+     * @param file The details of the file.
      * @param options The options for creating the link.
      * @returns The URL.
      */
     public async createUrl(
         repository: RepositoryWithRemote,
-        filePath: string,
+        file: FileInfo,
         options: LinkOptions
     ): Promise<string> {
         let remote: string;
@@ -87,14 +87,14 @@ export class LinkHandler {
             repository: this.getRepositoryPath(remote, address),
             ref: await this.getRef(type, repository.root),
             commit: await this.getRef('commit', repository.root),
-            file: await this.getRelativePath(repository.root, filePath),
+            file: await this.getRelativePath(repository.root, file.filePath),
             type: type === 'commit' ? 'commit' : 'branch',
-            ...options.selection
+            ...file.selection
         };
 
         url = this.urlTemplate.render(data);
 
-        if (options.selection) {
+        if (file.selection) {
             url += this.selectionTemplate.render(data);
         }
 

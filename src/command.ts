@@ -36,7 +36,7 @@ export class Command {
      */
     public async execute(resource: Uri | undefined): Promise<void> {
         let editor: TextEditor | undefined;
-        let file: FileInfo | undefined;
+        let info: ResourceInfo | undefined;
 
         log('Executing command.');
 
@@ -56,9 +56,9 @@ export class Command {
             return;
         }
 
-        file = await this.getFileInfo(resource);
+        info = await this.getResourceInfo(resource);
 
-        if (file) {
+        if (info) {
             let selection: Selection | undefined;
 
             if (this.includeSelection) {
@@ -74,10 +74,11 @@ export class Command {
             try {
                 let link: string;
 
-                link = await file.handler.createUrl(file.repository, file.uri.fsPath, {
-                    type: this.linkType,
-                    selection
-                });
+                link = await info.handler.createUrl(
+                    info.repository,
+                    { filePath: info.uri.fsPath, selection },
+                    { type: this.linkType }
+                );
 
                 log('Web link created: %s', link);
 
@@ -87,7 +88,7 @@ export class Command {
 
                         void window
                             .showInformationMessage<ActionMessageItem>(
-                                STRINGS.command.linkCopied(file.handler.name),
+                                STRINGS.command.linkCopied(info.handler.name),
                                 {
                                     title: STRINGS.command.openInBrowser,
                                     action: 'open'
@@ -108,20 +109,20 @@ export class Command {
     }
 
     /**
-     * Gets information about the specified file.
+     * Gets information about a resource.
      *
-     * @param file The URI of the file to get the info for.
-     * @returns The file information.
+     * @param resource The URI of the resource to get the info for.
+     * @returns The resource information.
      */
-    private async getFileInfo(file: Uri): Promise<FileInfo | undefined> {
+    private async getResourceInfo(resource: Uri): Promise<ResourceInfo | undefined> {
         let repository: Repository | undefined;
         let handler: LinkHandler | undefined;
 
-        repository = await this.repositoryFinder.find(file.fsPath);
+        repository = await this.repositoryFinder.find(resource.fsPath);
 
         if (!repository) {
             log('File is not tracked by Git.');
-            void window.showErrorMessage(STRINGS.command.notTrackedByGit(file));
+            void window.showErrorMessage(STRINGS.command.notTrackedByGit(resource));
             return undefined;
         }
 
@@ -144,7 +145,7 @@ export class Command {
             return undefined;
         }
 
-        return { uri: file, repository, handler };
+        return { uri: resource, repository, handler };
     }
 
     /**
@@ -317,21 +318,21 @@ interface CommandOptions {
 }
 
 /**
- * Defines information about a file to generate a web link for.
+ * Defines information about a resource to generate a web link for.
  */
-interface FileInfo {
+interface ResourceInfo {
     /**
-     * The URI of the file.
+     * The URI of the resource.
      */
     uri: Uri;
 
     /**
-     * The repository that the file is in.
+     * The repository that the resource is in.
      */
     readonly repository: RepositoryWithRemote;
 
     /**
-     * The link handler for the file.
+     * The link handler for the resource.
      */
     readonly handler: LinkHandler;
 }

@@ -63,11 +63,19 @@ export interface LinkOptions {
      * A value of `undefined` means the default link type should be used.
      */
     readonly type: LinkType | undefined;
+}
+
+/**
+ * Information about a file.
+ */
+export interface FileInfo {
+    /**
+     * The path of the file from the root of the repository.
+     */
+    filePath: string;
 
     /**
-     * The selection range to include in the link.
-     *
-     * A value of `undefined` means no selection range should be included.
+     * The selected range in the file.
      */
-    readonly selection: Selection | undefined;
+    selection?: Selection;
 }

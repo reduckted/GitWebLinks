@@ -190,11 +190,13 @@ describe('Link handlers', function () {
 
                     link = await handler?.createUrl(
                         repository,
-                        Uri.file(path.join(root.path, options.fileName || TEST_FILE_NAME)).fsPath,
                         {
-                            type: options.type || 'branch',
+                            filePath: Uri.file(
+                                path.join(root.path, options.fileName || TEST_FILE_NAME)
+                            ).fsPath,
                             selection: options.selection
-                        }
+                        },
+                        { type: options.type || 'branch' }
                     );
 
                     expect(link, 'Link does not match the expected result').to.equal(result);
@@ -203,6 +205,7 @@ describe('Link handlers', function () {
                 interface TestOptions extends Partial<LinkOptions> {
                     fileName?: string;
                     branch?: string;
+                    selection?: Selection;
                 }
             });
 

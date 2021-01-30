@@ -310,11 +310,11 @@ describe('LinkHandler', function () {
             options: Partial<LinkOptions>,
             filePath: string = 'file.txt'
         ): Promise<string> {
-            return await createHandler(definition).createUrl(repository, filePath, {
-                selection: undefined,
-                type: 'commit',
-                ...options
-            });
+            return await createHandler(definition).createUrl(
+                repository,
+                { filePath, selection: undefined },
+                { type: 'commit', ...options }
+            );
         }
 
         function createHandler(definition: Partial<HandlerDefinition>): LinkHandler {
