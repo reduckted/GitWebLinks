@@ -15,31 +15,31 @@ export function hasRemote(repository: Repository): repository is RepositoryWithR
 /**
  * Transforms the given remote URL into a standard format.
  *
- * @param remoteUrl The remote URL to normalize.
+ * @param url The remote URL to normalize.
  * @returns The normalized URL.
  */
-export function normalizeRemoteUrl(remoteUrl: string): string {
+export function normalizeUrl(url: string): string {
     let httpMatch: RegExpExecArray | null;
 
     // Remove the SSH prefix if it exists.
-    if (remoteUrl.startsWith('ssh://')) {
-        remoteUrl = remoteUrl.substring(6);
+    if (url.startsWith('ssh://')) {
+        url = url.substring(6);
     }
 
     // Remove the "git@" prefix if it exists.
-    if (remoteUrl.startsWith('git@')) {
-        remoteUrl = remoteUrl.substring(4);
+    if (url.startsWith('git@')) {
+        url = url.substring(4);
     }
 
     // If the URL is an HTTP(S) address, check if there's
     // a username in the URL, and if there is, remove it.
-    httpMatch = /(https?:\/\/)[^@]+@(.+)/.exec(remoteUrl);
+    httpMatch = /(https?:\/\/)[^@]+@(.+)/.exec(url);
 
     if (httpMatch) {
-        remoteUrl = httpMatch[1] + httpMatch[2];
+        url = httpMatch[1] + httpMatch[2];
     }
 
-    return remoteUrl;
+    return url;
 }
 
 /**

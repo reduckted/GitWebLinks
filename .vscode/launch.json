@@ -32,7 +32,8 @@
             ],
             "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
             "sourceMaps": true,
-            "preLaunchTask": "npm: debug-test"
+            "preLaunchTask": "npm: debug-test",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "name": "Run Tests in WSL",

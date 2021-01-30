@@ -48,6 +48,74 @@
                 { "$ref": "#/definitions/dynamicServer" }
             ]
         },
+        "reverse": {
+            "type": "object",
+            "properties": {
+                "pattern": {
+                    "anyOf": [
+                        { "type": "string" },
+                        { "type": "array", "items": { "type": "string" } }
+                    ],
+                    "description": "A regular expression that captures the file name and line selection from a URL."
+                },
+                "file": {
+                    "$ref": "#/definitions/template",
+                    "description": "A template that provides the file name from the URL.\n\nThe regular expression match from 'pattern' is made available via the `match` variable."
+                },
+                "fileMayStartWithBranch": {
+                    "type": "boolean",
+                    "description": "Indicates that the extracted file name may start with the name of a branch because the branch appears as a file path in the URL and the end of the branch and start of the file name cannot be determined."
+                },
+                "server": {
+                    "$ref": "#/definitions/reverseServer",
+                    "description": "The templates that provide the base remote URLs."
+                },
+                "selection": {
+                    "$ref": "#/definitions/reverseSelection",
+                    "description": "The templates that provide the selection range."
+                }
+            },
+            "required": ["pattern", "file", "server", "selection"],
+            "additionalProperties": false
+        },
+        "reverseServer": {
+            "type": "object",
+            "properties": {
+                "http": {
+                    "$ref": "#/definitions/template",
+                    "description": "A template that provides the base HTTP URL for remotes.\n\nThe matching server is made available in the `http` variable, and the regular expression match from 'pattern' is made available via the `match` variable."
+                },
+                "ssh": {
+                    "$ref": "#/definitions/template",
+                    "description": "A template that provides the base SSH URL for remotes.\n\nThe matching server is made available in the `ssh` variable, and the regular expression match from 'pattern' is made available via the `match` variable."
+                }
+            },
+            "required": ["http", "ssh"],
+            "additionalProperties": false
+        },
+        "reverseSelection": {
+            "type": "object",
+            "properties": {
+                "startLine": {
+                    "$ref": "#/definitions/template",
+                    "description": "A template that provides the one-based line number that the selection starts from.\n\nThe regular expression match from 'pattern' is made available via the `match` variable."
+                },
+                "endLine": {
+                    "$ref": "#/definitions/template",
+                    "description": "A template that provides the one-based line number that the selection ends at.\n\nThe regular expression match from 'pattern' is made available via the `match` variable."
+                },
+                "startColumn": {
+                    "$ref": "#/definitions/template",
+                    "description": "A template that provides the one-based column number that the selection starts from.\n\nThe regular expression match from 'pattern' is made available via the `match` variable."
+                },
+                "endColumn": {
+                    "$ref": "#/definitions/template",
+                    "description": "A template that provides the one-based column number that the selection ends at.\n\nThe regular expression match from 'pattern' is made available via the `match` variable."
+                }
+            },
+            "required": ["startLine", "endLine"],
+            "additionalProperties": false
+        },
         "tests": {
             "type": "object",
             "properties": {
@@ -200,6 +268,10 @@
                 "endColumn": {
                     "type": "number",
                     "description": "The one-based column number that the selection ends on."
+                },
+                "reverseRange": {
+                    "$ref": "#/definitions/reverseTestSelectionRange",
+                    "description": "The selection range to expect when parsing the URL to file info."
                 }
             },
             "required": ["startLine", "startColumn", "endLine", "endColumn"],
@@ -242,6 +314,10 @@
                 "result": {
                     "type": "string",
                     "description": "The URL that is expected to be created.\n\nThe start and end columns of the selection are always 1.\n\nThe current commit hash is available via the `commit` variable."
+                },
+                "reverseRange": {
+                    "$ref": "#/definitions/reverseTestSelectionRange",
+                    "description": "The selection range to expect when parsing the URL to file info."
                 }
             },
             "required": ["line", "result"],
@@ -265,6 +341,10 @@
                 "result": {
                     "type": "string",
                     "description": "The URL that is expected to be created.\n\nThe current commit hash is available via the `commit` variable."
+                },
+                "reverseRange": {
+                    "$ref": "#/definitions/reverseTestSelectionRange",
+                    "description": "The selection range to expect when parsing the URL to file info."
                 }
             },
             "required": ["line", "startColumn", "endColumn", "result"],
@@ -292,9 +372,35 @@
                 "result": {
                     "type": "string",
                     "description": "The URL that is expected to be created.\n\nThe current commit hash is available via the `commit` variable."
+                },
+                "reverseRange": {
+                    "$ref": "#/definitions/reverseTestSelectionRange",
+                    "description": "The selection range to expect when parsing the URL to file info."
                 }
             },
             "required": ["startLine", "startColumn", "endLine", "endColumn", "result"],
+            "additionalProperties": false
+        },
+        "reverseTestSelectionRange": {
+            "type": "object",
+            "properties": {
+                "startLine": {
+                    "type": "number",
+                    "description": "The one-based line number that the selection starts on."
+                },
+                "startColumn": {
+                    "type": "number",
+                    "description": "The one-based column number that the selection starts on."
+                },
+                "endLine": {
+                    "type": "number",
+                    "description": "The one-based line number that the selection ends on."
+                },
+                "endColumn": {
+                    "type": "number",
+                    "description": "The one-based column number that the selection ends on."
+                }
+            },
             "additionalProperties": false
         }
     },
@@ -325,11 +431,16 @@
             "$ref": "#/definitions/template",
             "description": "The template to build the part of the URL that specifies the selection. This is appended to the result of rendering the `url` template."
         },
+        "reverse": {
+            "$ref": "#/definitions/reverse",
+            "description": "The settings to convert a URL into a file name."
+        },
         "tests": {
             "$ref": "#/definitions/tests",
             "description": "The test data for the handler."
         }
     },
     "oneOf": [{ "required": ["server"] }, { "required": ["private"] }],
-    "required": ["name", "branch", "url", "selection", "tests"]
+    "required": ["name", "branch", "url", "selection", "reverse", "tests"],
+    "additionalProperties": false
 }

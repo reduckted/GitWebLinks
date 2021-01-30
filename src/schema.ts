@@ -13,7 +13,7 @@ export interface PublicHandlerDefinition extends HandlerDefinitionBase {
     /**
      * The public server URLs.
      */
-    server: Server;
+    readonly server: Server;
 }
 
 /**
@@ -23,7 +23,7 @@ export interface PrivateHandlerDefinition extends HandlerDefinitionBase {
     /**
      * The name of the settings property that defines the private server URLs.
      */
-    private: string;
+    readonly private: string;
 }
 
 /**
@@ -33,22 +33,99 @@ export interface HandlerDefinitionBase {
     /**
      * The name of the remote server type.
      */
-    name: string;
+    readonly name: string;
 
     /**
      * The arguments to pass to Git to get the name of the current branch.
      */
-    branch: string[];
+    readonly branch: string[];
 
     /**
      * The template to build the URL of a file.
      */
-    url: Template;
+    readonly url: Template;
 
     /**
      * The template to build the part of the URL that specifies the selection.
      */
-    selection: Template;
+    readonly selection: Template;
+
+    /**
+     * The settings to convert a URL into a file name.
+     */
+    readonly reverse: ReverseSettings;
+}
+
+/**
+ * The settings to convert a URL into a file name.
+ */
+export interface ReverseSettings {
+    /**
+     * The regular expression pattern to match against the URL.
+     */
+    readonly pattern: string | string[];
+
+    /**
+     * The template to produce a file name.
+     */
+    readonly file: Template;
+
+    /**
+     * Indicates that the extracted file name may start with the name of a
+     * branch because the branch appears as a file path in the URL and the
+     * end of the branch and start of the file name cannot be determined.
+     */
+    readonly fileMayStartWithBranch?: boolean;
+
+    /**
+     * The templates that provide the base remote URLs.
+     */
+    readonly server: ReverseServerSettings;
+
+    /**
+     * The templates that provide the selection range.
+     */
+    readonly selection: ReverseSelectionSettings;
+}
+
+/**
+ * The server settings to convert a URL into a file name.
+ */
+export interface ReverseServerSettings {
+    /**
+     * The template to produce the HTTP server URL.
+     */
+    readonly http: Template;
+
+    /**
+     * The template to produce the SSH server URL.
+     */
+    readonly ssh: Template;
+}
+
+/**
+ * The selection settings to convert a URL into a file name.
+ */
+export interface ReverseSelectionSettings {
+    /**
+     * The template to produce the one-based line number that the selection starts at.
+     */
+    readonly startLine: Template;
+
+    /**
+     * The template to produce the one-based line number that the selection ends at.
+     */
+    readonly endLine: Template;
+
+    /**
+     * The template to produce the one-based column number that the selection starts at.
+     */
+    readonly startColumn?: Template;
+
+    /**
+     * The template to produce the one-based column number that the selection ends at.
+     */
+    readonly endColumn?: Template;
 }
 
 /**
@@ -68,12 +145,12 @@ export interface StaticServer {
     /**
      * The HTTP(S) URL of the remote server.
      */
-    http: string;
+    readonly http: string;
 
     /**
      * The SSH URL of the remote server.
      */
-    ssh: string | undefined;
+    readonly ssh: string | undefined;
 }
 
 /**
@@ -83,17 +160,17 @@ export interface DynamicServer {
     /**
      * A regular expression to match on a remote URL.
      */
-    pattern: string;
+    readonly pattern: string;
 
     /**
      * The template to build the HTTP(S) URL of the remote server.
      */
-    http: Template;
+    readonly http: Template;
 
     /**
      * The template to build the SSH URL of the remote server.
      */
-    ssh: Template;
+    readonly ssh: Template;
 }
 
 /**

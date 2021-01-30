@@ -1,3 +1,5 @@
+import { StaticServer } from './schema';
+
 /**
  * The type of link to generate.
  */
@@ -78,4 +80,24 @@ export interface FileInfo {
      * The selected range in the file.
      */
     selection?: SelectedRange;
+}
+
+/**
+ * Information about a URL.
+ */
+export interface UrlInfo {
+    /**
+     * The path of the file from the root of the repository.
+     */
+    filePath: string;
+
+    /**
+     * The server URLs determined from the URL.
+     */
+    server: StaticServer;
+
+    /**
+     * The selected range in the file.
+     */
+    selection: Partial<SelectedRange>;
 }

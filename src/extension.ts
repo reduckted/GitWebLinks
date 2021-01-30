@@ -3,7 +3,7 @@ import { ExtensionContext, window } from 'vscode';
 import { registerCommands } from './commands';
 import { ContextManager } from './context-manager';
 import { initialize } from './git';
-import { LinkHandlerSelector } from './link-handler-selector';
+import { LinkHandlerProvider } from './link-handler-provider';
 import { log } from './log';
 import { RepositoryFinder } from './repository-finder';
 import { STRINGS } from './strings';
@@ -31,5 +31,5 @@ export async function activate(context: ExtensionContext): Promise<void> {
     context.subscriptions.push(new ContextManager(workspaceTracker));
     context.subscriptions.push(workspaceTracker);
 
-    registerCommands(context.subscriptions, repositoryFinder, new LinkHandlerSelector());
+    registerCommands(context.subscriptions, repositoryFinder, new LinkHandlerProvider());
 }

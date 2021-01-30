@@ -1,10 +1,10 @@
 import { log } from './log';
 import { DynamicServer, StaticServer } from './schema';
 import { ParsedTemplate, parseTemplate } from './templates';
-import { normalizeRemoteUrl } from './utilities';
+import { normalizeUrl } from './utilities';
 
 /**
- * Defines a remote server that can be matched to a Git remote URL.
+ * Defines a remote server that can be matched to a Git server URL.
  */
 export class RemoteServer {
     private readonly matchers: Matcher[];
@@ -32,16 +32,16 @@ export class RemoteServer {
     }
 
     /**
-     * Tests if this server is a match for the remote URL.
+     * Tests if this server is a match for the given URL.
      *
-     * @param remoteUrl The remote URL to test against.
-     * @returns The server address if the remote URL is a match; otherwise, `undefined`.
+     * @param url The URL to test against.
+     * @returns The server address if the URL is a match; otherwise, `undefined`.
      */
-    public match(remoteUrl: string): ServerAddress | undefined {
+    public match(url: string): StaticServer | undefined {
         for (let matcher of this.matchers) {
-            let server: ServerAddress | undefined;
+            let server: StaticServer | undefined;
 
-            server = matcher(remoteUrl);
+            server = matcher(url);
 
             if (server) {
                 return server;
@@ -91,14 +91,14 @@ function createDynamicServerMatcher(server: DynamicServer): Matcher {
     httpTemplate = parseTemplate(server.http);
     sshTemplate = parseTemplate(server.ssh);
 
-    return (remote) => {
+    return (url) => {
         let match: RegExpMatchArray | null;
 
-        match = pattern.exec(remote);
+        match = pattern.exec(url);
 
         if (match) {
-            // The remote URL matched the pattern. Render the templates to get the
-            // HTTP and SSH URLs, making the match available for the templates to use.
+            // The URL matched the pattern. Render the templates to get the HTTP
+            // and SSH URLs, making the match available for the templates to use.
             return {
                 http: httpTemplate.render({ match }),
                 ssh: sshTemplate.render({ match })
@@ -116,24 +116,24 @@ function createDynamicServerMatcher(server: DynamicServer): Matcher {
  * @returns The matcher function.
  */
 function createStaticServerMatcher(server: StaticServer): Matcher {
-    return (remote) => (isMatch(remote, server) ? server : undefined);
+    return (url) => (isMatch(url, server) ? server : undefined);
 }
 
 /**
- * Determines whether the given remote URL matches the given server definition.
+ * Determines whether the given URL matches the given server definition.
  *
- * @param remote The remote URL.
+ * @param url The URL.
  * @param server The server definition.
- * @returns True if the remote URL matches the server; otherwise, false.
+ * @returns True if the URL matches the server; otherwise, false.
  */
-function isMatch(remote: string, server: StaticServer): boolean {
-    remote = normalizeRemoteUrl(remote);
+function isMatch(url: string, server: StaticServer): boolean {
+    url = normalizeUrl(url);
 
-    if (remote.startsWith(normalizeRemoteUrl(server.http))) {
+    if (url.startsWith(normalizeUrl(server.http))) {
         return true;
     }
 
-    if (server.ssh && remote.startsWith(normalizeRemoteUrl(server.ssh))) {
+    if (server.ssh && url.startsWith(normalizeUrl(server.ssh))) {
         return true;
     }
 
@@ -147,13 +147,13 @@ function isMatch(remote: string, server: StaticServer): boolean {
  * @returns The matcher function.
  */
 function createLazyStaticServerMatcher(factory: StaticServerFactory): Matcher {
-    return (remote) => {
+    return (url) => {
         let servers: StaticServer[];
 
         servers = factory();
 
         for (let server of servers) {
-            if (isMatch(remote, server)) {
+            if (isMatch(url, server)) {
                 return server;
             }
         }
@@ -164,19 +164,4 @@ function createLazyStaticServerMatcher(factory: StaticServerFactory): Matcher {
 
 type StaticServerFactory = () => StaticServer[];
 
-type Matcher = (remoteUrl: string) => ServerAddress | undefined;
-
-/**
- * Defines the address of a server.
- */
-export interface ServerAddress {
-    /**
-     * The address of the server for HTTP/HTTPS URLs.
-     */
-    http: string;
-
-    /**
-     * The address of the server for SSH URLs.
-     */
-    ssh: string | undefined;
-}
+type Matcher = (url: string) => StaticServer | undefined;

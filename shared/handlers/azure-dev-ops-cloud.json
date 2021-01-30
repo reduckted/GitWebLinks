@@ -27,6 +27,34 @@
         "&lineEnd={{ endLine }}&lineStartColumn={{ startColumn }}&lineEndColumn={{ endColumn }}",
         "{% endif %}"
     ],
+    "reverse": {
+        "pattern": [
+            "https://dev\\.azure\\.com",
+            "/(?<username>[^/]+)",
+            "/(?<project>[^/]+)",
+            "/_git",
+            "/(?<repository>[^?]+)",
+            "\\?path=%2F(?<file>[^&]+)",
+            "(?:&version=(?:[^&]+))?",
+            "(?:",
+            "&line=(?<startLine>\\d+)",
+            "(?:&lineEnd=(?<endLine>\\d+))?",
+            "(?:&lineStartColumn=(?<startColumn>\\d+))?",
+            "(?:&lineEndColumn=(?<endColumn>\\d+))?",
+            ")?"
+        ],
+        "file": "{{ match.groups.file | decode_uri_component }}",
+        "server": {
+            "http": "https://dev.azure.com/{{ match.groups.username }}/{{ match.groups.project }}/_git/{{ match.groups.repository }}",
+            "ssh": "git@ssh.dev.azure.com:v3/{{ match.groups.username }}/{{ match.groups.project }}/{{ match.groups.repository }}"
+        },
+        "selection": {
+            "startLine": "{{ match.groups.startLine }}",
+            "endLine": "{{ match.groups.endLine }}",
+            "startColumn": "{{ match.groups.startColumn }}",
+            "endColumn": "{{ match.groups.endColumn }}"
+        }
+    },
     "tests": {
         "createUrl": {
             "remotes": {
@@ -52,20 +80,37 @@
                 "remote": "https://dev.azure.com/user/foo/_git/bar",
                 "point": {
                     "line": 10,
-                    "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineEnd=11&lineStartColumn=1&lineEndColumn=1"
+                    "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineEnd=11&lineStartColumn=1&lineEndColumn=1",
+                    "reverseRange": {
+                        "startLine": 10,
+                        "startColumn": 1,
+                        "endLine": 11,
+                        "endColumn": 1
+                    }
                 },
                 "singleLine": {
                     "line": 10,
                     "startColumn": 20,
                     "endColumn": 30,
-                    "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineStartColumn=20&lineEndColumn=30"
+                    "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineStartColumn=20&lineEndColumn=30",
+                    "reverseRange": {
+                        "startLine": 10,
+                        "startColumn": 20,
+                        "endColumn": 30
+                    }
                 },
                 "multipleLines": {
                     "startLine": 10,
                     "startColumn": 20,
                     "endLine": 30,
                     "endColumn": 40,
-                    "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineEnd=30&lineStartColumn=20&lineEndColumn=40"
+                    "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster&line=10&lineEnd=30&lineStartColumn=20&lineEndColumn=40",
+                    "reverseRange": {
+                        "startLine": 10,
+                        "startColumn": 20,
+                        "endLine": 30,
+                        "endColumn": 40
+                    }
                 }
             }
         }

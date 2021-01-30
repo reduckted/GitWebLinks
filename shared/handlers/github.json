@@ -8,6 +8,28 @@
     "branch": ["rev-parse", "--abbrev-ref"],
     "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri }}",
     "selection": "#L{{ startLine }}{% if startLine != endLine %}-L{{ endLine }}{% endif %}",
+    "reverse": {
+        "pattern": [
+            "https://github\\.com",
+            "/(?<username>[^/]+)",
+            "/(?<repository>[^/]+)",
+            "/blob",
+            "/(?:[^/]+)",
+            "/(?<file>[^#]+)",
+            "(?:\\?[^#]*)?",
+            "(?:#L(?<start>\\d+)(?:-L(?<end>\\d+))?)?"
+        ],
+        "file": "{{ match.groups.file | decode_uri }}",
+        "fileMayStartWithBranch": true,
+        "server": {
+            "http": "https://github.com/{{ match.groups.username }}/{{ match.groups.repository }}.git",
+            "ssh": "git@github.com:{{ match.groups.username }}/{{ match.groups.repository }}.git"
+        },
+        "selection": {
+            "startLine": "{{ match.groups.start }}",
+            "endLine": "{{ match.groups.end }}"
+        }
+    },
     "tests": {
         "createUrl": {
             "remotes": {

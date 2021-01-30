@@ -5,10 +5,11 @@ import { Uri, workspace } from 'vscode';
 
 import { git } from '../src/git';
 import { LinkHandler } from '../src/link-handler';
-import { LinkHandlerSelector } from '../src/link-handler-selector';
-import { load } from '../src/schema';
+import { LinkHandlerProvider } from '../src/link-handler-provider';
+import { load, Template } from '../src/schema';
 import { parseTemplate } from '../src/templates';
-import { LinkOptions, RepositoryWithRemote, SelectedRange } from '../src/types';
+import { LinkOptions, RepositoryWithRemote, SelectedRange, UrlInfo } from '../src/types';
+import { normalizeUrl } from '../src/utilities';
 
 import { Directory, markAsSlow, setupRepository } from './helpers';
 import {
@@ -29,7 +30,7 @@ let definitions: HandlerWithTests[];
 definitions = load<HandlerWithTests>().sort();
 
 describe('Link handlers', function () {
-    let selector: LinkHandlerSelector;
+    let provider: LinkHandlerProvider;
     let root: Directory;
 
     // We need to create repositories, so mark the
@@ -37,11 +38,12 @@ describe('Link handlers', function () {
     markAsSlow(this);
 
     before(() => {
-        selector = new LinkHandlerSelector();
+        provider = new LinkHandlerProvider();
     });
 
     beforeEach(async () => {
         root = await Directory.create();
+        await setupRepository(root.path);
     });
 
     afterEach(async () => {
@@ -52,10 +54,6 @@ describe('Link handlers', function () {
     definitions.forEach((definition) => {
         describe(definition.name, () => {
             describe('createUrl', () => {
-                beforeEach(async () => {
-                    await setupRepository(root.path);
-                });
-
                 it('http', async () => {
                     await runRemoteTest('http');
                 });
@@ -124,9 +122,7 @@ describe('Link handlers', function () {
                     }));
                 });
 
-                async function runRemoteTest(
-                    name: keyof Omit<RemoteUrlTests, 'result' | 'settings'>
-                ): Promise<void> {
+                async function runRemoteTest(name: RemoteTestName): Promise<void> {
                     await runTest({
                         settings: definition.tests.createUrl.remotes.settings,
                         remote: definition.tests.createUrl.remotes[name],
@@ -135,15 +131,16 @@ describe('Link handlers', function () {
                 }
 
                 async function runUrlTest(
-                    name: keyof Omit<UrlTests, 'misc' | 'selection' | 'remotes'>,
+                    name: UrlTestName,
                     options: TestOptions = {}
                 ): Promise<void> {
                     await runTest(definition.tests.createUrl[name], options);
                 }
 
-                async function runSelectionTest<
-                    T extends keyof Omit<SelectionTests, 'remote' | 'settings'>
-                >(name: T, selection: (test: SelectionTests[T]) => SelectedRange): Promise<void> {
+                async function runSelectionTest<T extends SelectionTestName>(
+                    name: T,
+                    selection: (test: SelectionTests[T]) => SelectedRange
+                ): Promise<void> {
                     let test: SelectionTests[T];
 
                     test = definition.tests.createUrl.selection[name];
@@ -166,24 +163,14 @@ describe('Link handlers', function () {
                     let handler: LinkHandler | undefined;
                     let link: string | undefined;
 
-                    setupSettings(settings);
-
-                    if (options.branch) {
-                        await git(root.path, 'checkout', '-b', options.branch);
-                    }
-
-                    // Treat the test result as a template and allow
-                    // the current commit hash to be used in the result.
-                    result = parseTemplate(result).render({
-                        commit: (await git(root.path, 'rev-parse', 'HEAD')).trim()
-                    });
+                    result = await prepareTest(settings, result, options);
 
                     repository = {
                         root: root.path,
                         remote
                     };
 
-                    handler = selector.select(repository);
+                    handler = provider.select(repository);
 
                     expect(handler, 'A handler was not found').to.exist;
                     expect(handler?.name).to.equal(definition.name);
@@ -209,6 +196,184 @@ describe('Link handlers', function () {
                 }
             });
 
+            describe('getUrlInfo', () => {
+                it('http', async () => {
+                    // The remote URL is only used to verify the result,
+                    // and is normalized before comparison, so we'll only use
+                    // the normal HTTP URL and not the one with the username in it.
+                    await runTest({
+                        settings: definition.tests.createUrl.remotes.settings,
+                        remote: definition.tests.createUrl.remotes.http,
+                        result: definition.tests.createUrl.remotes.result
+                    });
+                });
+
+                it('ssh', async () => {
+                    // The remote URL is only used to verify the result,
+                    // and is normalized before comparison, so we'll only use
+                    // the normal SSH URL and not the one with the protocol in it.
+                    await runTest({
+                        settings: definition.tests.createUrl.remotes.settings,
+                        remote: definition.tests.createUrl.remotes.ssh,
+                        result: definition.tests.createUrl.remotes.result
+                    });
+                });
+
+                it('spaces', async () => {
+                    await runUrlTest('spaces', { fileName: TEST_FILE_NAME_WITH_SPACES });
+                });
+
+                it('branch', async () => {
+                    await runUrlTest('branch', {
+                        type: 'branch',
+                        branch: TEST_BRANCH_NAME,
+                        fileMayStartWithBranch: definition.reverse?.fileMayStartWithBranch
+                    });
+                });
+
+                it('commit', async () => {
+                    await runUrlTest('commit', { type: 'commit' });
+                });
+
+                definition.tests.createUrl.misc?.forEach((test) => {
+                    it(test.name, async () => {
+                        await runTest(
+                            {
+                                settings: test.settings,
+                                remote: test.remote,
+                                result: test.result
+                            },
+                            test
+                        );
+                    });
+                });
+
+                it('zero-width selection', async () => {
+                    await runSelectionTest('point', (test) => ({
+                        startLine: test.line,
+                        ...test.reverseRange
+                    }));
+                });
+
+                it('single-line selection', async () => {
+                    await runSelectionTest('singleLine', (test) => ({
+                        startLine: test.line,
+                        ...test.reverseRange
+                    }));
+                });
+
+                it('multi-line selection', async () => {
+                    await runSelectionTest('multipleLines', (test) => ({
+                        startLine: test.startLine,
+                        endLine: test.endLine,
+                        ...test.reverseRange
+                    }));
+                });
+
+                async function runUrlTest(
+                    name: UrlTestName,
+                    options: ReverseTestOptions = {}
+                ): Promise<void> {
+                    await runTest(definition.tests.createUrl[name], options);
+                }
+
+                async function runSelectionTest<T extends SelectionTestName>(
+                    name: T,
+                    selection: (test: SelectionTests[T]) => Partial<SelectedRange>
+                ): Promise<void> {
+                    let test: SelectionTests[T];
+
+                    test = definition.tests.createUrl.selection[name];
+
+                    await runTest(
+                        {
+                            settings: definition.tests.createUrl.selection.settings,
+                            remote: definition.tests.createUrl.selection.remote,
+                            result: test.result
+                        },
+                        { selection: selection(test) }
+                    );
+                }
+
+                async function runTest(
+                    { remote, result: url, settings }: UrlTest,
+                    options: ReverseTestOptions = {}
+                ): Promise<void> {
+                    let infos: UrlInfo[];
+                    let info: UrlInfo;
+
+                    if (!options.fileName) {
+                        options.fileName = TEST_FILE_NAME;
+                    }
+
+                    url = await prepareTest(settings, url, options);
+
+                    infos = provider.getUrlInfo(url);
+
+                    expect(infos).to.have.lengthOf(1);
+                    info = infos[0];
+
+                    if (info.filePath !== options.fileName) {
+                        // If the file name can start with the branch
+                        // name, then verify that the file name at
+                        // least ends with the expected file name.
+                        if (options.fileMayStartWithBranch) {
+                            expect(info.filePath.endsWith(`/${options.fileName}`)).to.be.true;
+                        } else {
+                            expect(info.filePath).to.equal(options.fileName);
+                        }
+                    }
+
+                    if (remote.startsWith('http')) {
+                        expect(normalizeUrl(remote)).to.equal(normalizeUrl(info.server.http));
+                    } else if (info.server.ssh) {
+                        expect(normalizeUrl(remote)).to.equal(normalizeUrl(info.server.ssh));
+                    }
+
+                    if (options.selection) {
+                        expect(info.selection).to.deep.equal({
+                            startLine: undefined,
+                            endLine: undefined,
+                            startColumn: undefined,
+                            endColumn: undefined,
+                            ...options.selection
+                        });
+                    } else {
+                        expect(info.selection).to.deep.equal({
+                            startLine: undefined,
+                            endLine: undefined,
+                            startColumn: undefined,
+                            endColumn: undefined
+                        });
+                    }
+                }
+
+                interface ReverseTestOptions extends Partial<LinkOptions> {
+                    fileName?: string;
+                    fileMayStartWithBranch?: boolean;
+                    branch?: string;
+                    selection?: Partial<SelectedRange>;
+                }
+            });
+
+            async function prepareTest(
+                settings: TestSettings | undefined,
+                url: Template,
+                options: { branch?: string }
+            ): Promise<string> {
+                setupSettings(settings);
+
+                if (options.branch) {
+                    await git(root.path, 'checkout', '-b', options.branch);
+                }
+
+                // Treat the test URL as a template and allow
+                // the current commit hash to be used in the result.
+                return parseTemplate(url).render({
+                    commit: (await git(root.path, 'rev-parse', 'HEAD')).trim()
+                });
+            }
+
             function setupSettings(settings: TestSettings | undefined): void {
                 let data: TestSettings;
 
@@ -227,6 +392,10 @@ describe('Link handlers', function () {
                         update: async () => Promise.resolve()
                     });
             }
+
+            type RemoteTestName = keyof Omit<RemoteUrlTests, 'result' | 'settings'>;
+            type UrlTestName = keyof Omit<UrlTests, 'misc' | 'selection' | 'remotes'>;
+            type SelectionTestName = keyof Omit<SelectionTests, 'remote' | 'settings'>;
         });
     });
 });

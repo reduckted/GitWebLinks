@@ -1,7 +1,7 @@
 import { commands, env, MessageItem, TextEditor, Uri, window } from 'vscode';
 
 import { LinkHandler } from '../link-handler';
-import { LinkHandlerSelector } from '../link-handler-selector';
+import { LinkHandlerProvider } from '../link-handler-provider';
 import { log } from '../log';
 import { RepositoryFinder } from '../repository-finder';
 import { STRINGS } from '../strings';
@@ -15,12 +15,12 @@ export class GetLinkCommand {
     /**
      * @constructor
      * @param repositoryFinder The repository finder to use for finding repository information for a file.
-     * @param handlerSelector The link handler selector to use for selecing the handler for a file.
+     * @param handlerProvider The provider of link handlers.
      * @param options The options that control how the command behaves.
      */
     constructor(
         private readonly repositoryFinder: RepositoryFinder,
-        private readonly handlerSelector: LinkHandlerSelector,
+        private readonly handlerProvider: LinkHandlerProvider,
         private readonly options: GetLinkCommandOptions
     ) {}
 
@@ -127,7 +127,7 @@ export class GetLinkCommand {
             return undefined;
         }
 
-        handler = this.handlerSelector.select(repository);
+        handler = this.handlerProvider.select(repository);
 
         if (!handler) {
             log("No handler for remote '%s'.", repository.remote);

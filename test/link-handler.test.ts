@@ -5,9 +5,9 @@ import * as sinon from 'sinon';
 
 import { git } from '../src/git';
 import { LinkHandler } from '../src/link-handler';
-import { HandlerDefinition } from '../src/schema';
+import { HandlerDefinition, ReverseSettings } from '../src/schema';
 import { Settings } from '../src/settings';
-import { LinkOptions, LinkType, RepositoryWithRemote } from '../src/types';
+import { LinkOptions, LinkType, RepositoryWithRemote, UrlInfo } from '../src/types';
 import { isErrorCode } from '../src/utilities';
 
 import { Directory, markAsSlow, setupRepository } from './helpers';
@@ -324,7 +324,13 @@ describe('LinkHandler', function () {
                 branch: ['rev-parse'],
                 url: '',
                 selection: '',
-                ...definition
+                ...definition,
+                reverse: {
+                    pattern: '',
+                    file: '',
+                    server: { http: '', ssh: '' },
+                    selection: { startLine: '', endLine: '' }
+                }
             });
         }
 
@@ -346,6 +352,117 @@ describe('LinkHandler', function () {
                     throw ex;
                 }
             }
+        }
+    });
+
+    describe('getUrlInfo', () => {
+        it('should return undefined in strict mode when the URL does not match the server.', () => {
+            expect(getUrlInfo({ pattern: '.+' }, 'http://different.com/foo/bar.txt', true)).to.be
+                .undefined;
+        });
+
+        it('should return undefined when the pattern does not match the URL in strict mode.', () => {
+            expect(getUrlInfo({ pattern: '^https://.+' }, 'http://example.com/foo/bar.txt', true))
+                .to.be.undefined;
+        });
+
+        it('should return undefined when the pattern does not match the URL in non-strict mode.', () => {
+            expect(getUrlInfo({ pattern: '^https://.+' }, 'http://example.com/foo/bar.txt', false))
+                .to.be.undefined;
+        });
+
+        it('should return the info when the pattern matches the URL.', () => {
+            expect(
+                getUrlInfo(
+                    {
+                        pattern: 'http://example\\.com/[^/]+/(?<file>.+)',
+                        file: '{{ match.groups.file }}',
+                        server: { http: 'http', ssh: 'ssh' },
+                        selection: {
+                            startLine: '10',
+                            startColumn: '20',
+                            endLine: '30',
+                            endColumn: '40'
+                        }
+                    },
+                    'http://example.com/foo/bar.txt',
+                    false
+                )
+            ).to.deep.equal({
+                filePath: 'bar.txt',
+                server: { http: 'http', ssh: 'ssh' },
+                selection: {
+                    startLine: 10,
+                    startColumn: 20,
+                    endLine: 30,
+                    endColumn: 40
+                }
+            });
+        });
+
+        it('should handle invalid selection properties.', () => {
+            expect(
+                getUrlInfo(
+                    {
+                        pattern: 'http://example\\.com/[^/]+/(?<file>.+)',
+                        file: '{{ match.groups.file }}',
+                        server: { http: 'http', ssh: 'ssh' },
+                        selection: {
+                            startLine: '10',
+                            startColumn: 'x',
+                            endLine: ''
+                        }
+                    },
+                    'http://example.com/foo/bar.txt',
+                    false
+                )?.selection
+            ).to.deep.equal({
+                startLine: 10,
+                startColumn: undefined,
+                endLine: undefined,
+                endColumn: undefined
+            });
+        });
+
+        it('should provide the matching server info to the templates.', () => {
+            expect(
+                getUrlInfo(
+                    {
+                        pattern: 'http://example\\.com/.+',
+                        server: { http: '{{ http }}', ssh: '{{ ssh }}' }
+                    },
+                    'http://example.com/foo/bar.txt',
+                    false
+                )?.server
+            ).to.deep.equal({
+                http: 'http://example.com',
+                ssh: 'example.com'
+            });
+        });
+
+        function getUrlInfo(
+            settings: Partial<ReverseSettings>,
+            url: string,
+            strict: boolean
+        ): UrlInfo | undefined {
+            return createHandler(settings).getUrlInfo(url, strict);
+        }
+
+        function createHandler(reverse: Partial<ReverseSettings>): LinkHandler {
+            return new LinkHandler({
+                name: 'Test',
+                server: { http: 'http://example.com', ssh: 'ssh://example.com' },
+                branch: ['rev-parse'],
+                url: '',
+                selection: '',
+                reverse: {
+                    pattern: '',
+                    file: '',
+                    server: { http: '', ssh: '' },
+                    selection: { startLine: '', endLine: '' },
+                    ...reverse
+                }
+            });
         }
     });
 });

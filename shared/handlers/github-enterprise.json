@@ -5,6 +5,27 @@
     "branch": ["rev-parse", "--abbrev-ref"],
     "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri }}",
     "selection": "#L{{ startLine }}{% if startLine != endLine %}-L{{ endLine }}{% endif %}",
+    "reverse": {
+        "pattern": [
+            "/(?<username>[^/]+)",
+            "/(?<repository>[^/]+)",
+            "/blob",
+            "/(?:[^/]+)",
+            "/(?<file>[^#]+)",
+            "(?:\\?[^#]*)?",
+            "(?:#L(?<start>\\d+)(?:-L(?<end>\\d+))?)?"
+        ],
+        "file": "{{ match.groups.file | decode_uri }}",
+        "fileMayStartWithBranch": true,
+        "server": {
+            "http": "{{ http }}/{{ match.groups.username }}/{{ match.groups.repository }}.git",
+            "ssh": "{{ ssh }}:{{ match.groups.username }}/{{ match.groups.repository }}.git"
+        },
+        "selection": {
+            "startLine": "{{ match.groups.start }}",
+            "endLine": "{{ match.groups.end }}"
+        }
+    },
     "tests": {
         "settings": {
             "gitHubEnterprise": [

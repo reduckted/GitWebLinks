@@ -8,6 +8,27 @@
         "{{ base }}/projects/{{ segments[1] }}/repos/{{ segments[0] }}/browse/{{ file | encode_uri }}?at={{ ref | encode_uri_component }}"
     ],
     "selection": "#{{ startLine }}{% if startLine != endLine %}-{{ endLine }}{% endif %}",
+    "reverse": {
+        "pattern": [
+            "/projects",
+            "/(?<project>[^/]+)",
+            "/repos",
+            "/(?<repository>[^/]+)",
+            "/browse",
+            "/(?<file>[^?#]+)",
+            "(?:\\?[^#]*)?",
+            "(?:#(?<start>\\d+)(?:-(?<end>\\d+))?)?"
+        ],
+        "file": "{{ match.groups.file | decode_uri }}",
+        "server": {
+            "http": "{{ http }}/{{ match.groups.project }}/{{ match.groups.repository }}.git",
+            "ssh": "{{ ssh }}/{{ match.groups.project }}/{{ match.groups.repository }}.git"
+        },
+        "selection": {
+            "startLine": "{{ match.groups.start }}",
+            "endLine": "{{ match.groups.end }}"
+        }
+    },
     "tests": {
         "settings": {
             "bitbucketServer": [

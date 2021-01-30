@@ -1,4 +1,5 @@
 import { HandlerDefinition, Template } from '../src/schema';
+import { SelectedRange } from '../src/types';
 
 /**
  * Settings to make available during a test.
@@ -230,6 +231,11 @@ export interface SelectionPointTest {
      * The URL that is expected to be created.
      */
     result: Template;
+
+    /**
+     * The selection range to expect when parsing the URL to file info.
+     */
+    reverseRange?: Partial<SelectedRange>;
 }
 
 /**
@@ -255,6 +261,11 @@ export interface SelectionSingleLineTest {
      * The URL that is expected to be created.
      */
     result: Template;
+
+    /**
+     * The selection range to expect when parsing the URL to file info.
+     */
+    reverseRange?: Partial<SelectedRange>;
 }
 
 /**
@@ -285,4 +296,9 @@ export interface SelectionMultipleLinesTest {
      * The URL that is expected to be created.
      */
     result: Template;
+
+    /**
+     * The selection range to expect when parsing the URL to file info.
+     */
+    reverseRange?: Partial<SelectedRange>;
 }

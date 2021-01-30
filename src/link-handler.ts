@@ -2,12 +2,24 @@ import { promises as fs, Stats } from 'fs';
 import * as path from 'path';
 
 import { git } from './git';
-import { RemoteServer, ServerAddress } from './remote-server';
-import { HandlerDefinition } from './schema';
+import { RemoteServer } from './remote-server';
+import {
+    HandlerDefinition,
+    ReverseSelectionSettings,
+    ReverseServerSettings,
+    StaticServer
+} from './schema';
 import { Settings } from './settings';
 import { ParsedTemplate, parseTemplate } from './templates';
-import { FileInfo, LinkOptions, LinkType, RepositoryWithRemote } from './types';
-import { getErrorMessage, normalizeRemoteUrl } from './utilities';
+import {
+    FileInfo,
+    LinkOptions,
+    LinkType,
+    RepositoryWithRemote,
+    SelectedRange,
+    UrlInfo
+} from './types';
+import { getErrorMessage, normalizeUrl } from './utilities';
 
 /**
  * Handles the generation of links for a particular type of Git server.
@@ -17,6 +29,7 @@ export class LinkHandler {
     private readonly settings: Settings;
     private readonly urlTemplate: ParsedTemplate;
     private readonly selectionTemplate: ParsedTemplate;
+    private readonly reverse: ParsedReverseSettings;
 
     /**
      * @constructor
@@ -34,6 +47,29 @@ export class LinkHandler {
 
         this.urlTemplate = parseTemplate(definition.url);
         this.selectionTemplate = parseTemplate(definition.selection);
+
+        this.reverse = {
+            // The regular expression can be defined as an array of strings.
+            // This is just a convenience to allow the pattern to be
+            // split over multiple lines in the JSON definition file.
+            // Join all of the parts together to create the complete pattern.
+            pattern: new RegExp(
+                typeof definition.reverse.pattern === 'string'
+                    ? definition.reverse.pattern
+                    : definition.reverse.pattern.join('')
+            ),
+            file: parseTemplate(definition.reverse.file),
+            server: {
+                http: parseTemplate(definition.reverse.server.http),
+                ssh: parseTemplate(definition.reverse.server.ssh)
+            },
+            selection: {
+                startLine: parseTemplate(definition.reverse.selection.startLine),
+                endLine: parseTemplate(definition.reverse.selection.endLine),
+                startColumn: parseTemplate(definition.reverse.selection.startColumn),
+                endColumn: parseTemplate(definition.reverse.selection.endColumn)
+            }
+        };
     }
 
     /**
@@ -50,7 +86,7 @@ export class LinkHandler {
      * @returns True if this handler handles the given remote URL; otherwise, false.
      */
     public isMatch(remoteUrl: string): boolean {
-        return this.server.match(normalizeRemoteUrl(remoteUrl)) !== undefined;
+        return this.server.match(normalizeUrl(remoteUrl)) !== undefined;
     }
 
     /**
@@ -67,7 +103,7 @@ export class LinkHandler {
         options: LinkOptions
     ): Promise<string> {
         let remote: string;
-        let address: ServerAddress;
+        let address: StaticServer;
         let type: LinkType;
         let url: string;
         let data: UrlData;
@@ -78,7 +114,7 @@ export class LinkHandler {
 
         // Adjust the remote URL so that it's in a
         // standard format that we can manipulate.
-        remote = normalizeRemoteUrl(repository.remote);
+        remote = normalizeUrl(repository.remote);
 
         address = this.getAddress(remote);
 
@@ -107,8 +143,8 @@ export class LinkHandler {
      * @param remote The remote URL.
      * @returns The server address.
      */
-    private getAddress(remote: string): ServerAddress {
-        let address: ServerAddress | undefined;
+    private getAddress(remote: string): StaticServer {
+        let address: StaticServer | undefined;
 
         address = this.server.match(remote);
 
@@ -116,19 +152,29 @@ export class LinkHandler {
             throw new Error('Could not find a matching address.');
         }
 
-        // Normalize the URLs.
-        address = {
-            http: normalizeRemoteUrl(address.http),
-            ssh: address.ssh ? normalizeRemoteUrl(address.ssh) : undefined
-        };
+        return this.normalizeServerUrls(address);
+    }
 
-        // Remove the trailing slash from the HTTP URL to make it easier
-        // for the templates to use it as the base address.
-        if (address.http.endsWith('/')) {
-            address.http = address.http.slice(0, -1);
+    /**
+     * Normalizes the server URLs to make them consistent for use in the templates.
+     *
+     * @param address The server address to normalize.
+     * @returns The normalized server URLs.
+     */
+    private normalizeServerUrls(address: StaticServer): StaticServer {
+        let http: string;
+        let ssh: string | undefined;
+
+        http = normalizeUrl(address.http);
+        ssh = address.ssh ? normalizeUrl(address.ssh) : undefined;
+
+        // Remove the trailing slash from the HTTP URL to make it
+        // easier for the templates to use it as the base address.
+        if (http.endsWith('/')) {
+            http = address.http.slice(0, -1);
         }
 
-        return address;
+        return { http, ssh };
     }
 
     /**
@@ -138,7 +184,7 @@ export class LinkHandler {
      * @param address The address of the server.
      * @returns The path to the repository.
      */
-    private getRepositoryPath(remoteUrl: string, address: ServerAddress): string {
+    private getRepositoryPath(remoteUrl: string, address: StaticServer): string {
         let repositoryPath: string;
 
         // Remove the server's address from the start of the URL.
@@ -264,6 +310,84 @@ export class LinkHandler {
 
         return false;
     }
+
+    /**
+     * Gets information about the given URL.
+     *
+     * @param url The URL to get the information from.
+     * @param strict Whether to require the URL to match the server address of the handler.
+     * @returns The URL information, or `undefined` if the information could not be determined.
+     */
+    public getUrlInfo(url: string, strict: boolean): UrlInfo | undefined {
+        let address: StaticServer | undefined;
+        let match: RegExpExecArray | null;
+
+        // See if the URL matches the server address for the handler.
+        address = this.server.match(url);
+
+        // If we are performing a strict match, then the
+        // URL must match to this handler's server.
+        if (strict && !address) {
+            return undefined;
+        }
+
+        if (address) {
+            address = this.normalizeServerUrls(address);
+        }
+
+        match = this.reverse.pattern.exec(url);
+
+        if (match) {
+            let data: FileData;
+            let file: string;
+            let server: StaticServer;
+            let selection: Partial<SelectedRange> | undefined;
+
+            data = {
+                match,
+                http: address?.http,
+                ssh: address?.ssh
+            };
+
+            file = this.reverse.file.render(data);
+
+            server = {
+                http: this.reverse.server.http.render(data),
+                ssh: this.reverse.server.ssh.render(data)
+            };
+
+            selection = {
+                startLine: this.tryParseNumber(this.reverse.selection.startLine.render(data)),
+                endLine: this.tryParseNumber(this.reverse.selection.endLine.render(data)),
+                startColumn: this.tryParseNumber(this.reverse.selection.startColumn?.render(data)),
+                endColumn: this.tryParseNumber(this.reverse.selection.endColumn?.render(data))
+            };
+
+            return { filePath: file, server, selection };
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Attempts to parse the given value to a number.
+     *
+     * @param value The value to parse.
+     * @returns The value as a number, or `undefined` if the value could not be parsed.
+     */
+    private tryParseNumber(value: string | undefined): number | undefined {
+        if (value !== undefined) {
+            let num: number;
+
+            num = parseInt(value, 10);
+
+            if (!isNaN(num)) {
+                return num;
+            }
+        }
+
+        return undefined;
+    }
 }
 
 /**
@@ -273,50 +397,88 @@ interface UrlData {
     /**
      * The base URL of the server.
      */
-    base: string;
+    readonly base: string;
 
     /**
      * The path to the repository on the server.
      */
-    repository: string;
+    readonly repository: string;
 
     /**
      * The type of link being generated.
      */
-    type: 'branch' | 'commit';
+    readonly type: 'branch' | 'commit';
 
     /**
      * The Git ref to generate the link to. This will be a branch name or commit hash depending on the link type.
      */
-    ref: string;
+    readonly ref: string;
 
     /**
      * The hash of the current commit.
      */
-    commit: string;
+    readonly commit: string;
 
     /**
      * The file to generate the link for.
      */
-    file: string;
+    readonly file: string;
 
     /**
      * The one-based line number of the start of the selection, if a selection is being included in the link.
      */
-    startLine?: number;
+    readonly startLine?: number;
 
     /**
      * The one-based column number of the start of the selection, if a selection is being included in the link.
      */
-    startColumn?: number;
+    readonly startColumn?: number;
 
     /**
      * The one-based line number of the end of the selection, if a selection is being included in the link.
      */
-    endLine?: number;
+    readonly endLine?: number;
 
     /**
      * The one-based column number of the end of the selection, if a selection is being included in the link.
      */
-    endColumn?: number;
+    readonly endColumn?: number;
 }
+
+interface FileData {
+    readonly match: RegExpMatchArray;
+
+    readonly http?: string;
+
+    readonly ssh?: string;
+}
+
+/**
+ * The parsed settings for getting file information from a URL.
+ */
+interface ParsedReverseSettings {
+    /**
+     * The regular expression pattern to match against the URL.
+     */
+    readonly pattern: RegExp;
+
+    /**
+     * The template to produce a file name.
+     */
+    readonly file: ParsedTemplate;
+
+    /**
+     * The templates that provide the base remote URLs.
+     */
+    readonly server: ParsedTemplates<ReverseServerSettings>;
+
+    /**
+     * The templates that provide the selection range.
+     */
+    readonly selection: ParsedTemplates<ReverseSelectionSettings>;
+}
+
+/**
+ * Parsed templates.
+ */
+type ParsedTemplates<T> = { [K in keyof T]: ParsedTemplate };

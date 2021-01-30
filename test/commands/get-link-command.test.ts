@@ -5,7 +5,7 @@ import { env, MessageItem, Position, Selection, TextDocument, Uri, window } from
 
 import { GetLinkCommand, GetLinkCommandOptions } from '../../src/commands/get-link-command';
 import { LinkHandler } from '../../src/link-handler';
-import { LinkHandlerSelector } from '../../src/link-handler-selector';
+import { LinkHandlerProvider } from '../../src/link-handler-provider';
 import { RepositoryFinder } from '../../src/repository-finder';
 import { STRINGS } from '../../src/strings';
 import { LinkType, Repository } from '../../src/types';
@@ -17,7 +17,7 @@ describe('GetLinkCommand', () => {
     let showInformationMessage: sinon.SinonStub;
     let createUrl: sinon.SinonStub;
     let finder: RepositoryFinder;
-    let selector: LinkHandlerSelector;
+    let provider: LinkHandlerProvider;
     let handler: LinkHandler | undefined;
     let command: GetLinkCommand;
     let folder: Uri;
@@ -29,15 +29,21 @@ describe('GetLinkCommand', () => {
         finder = new RepositoryFinder();
         sinon.stub(finder, 'findRepository').callsFake(async () => Promise.resolve(repository));
 
-        selector = new LinkHandlerSelector();
-        sinon.stub(selector, 'select').callsFake(() => handler);
+        provider = new LinkHandlerProvider();
+        sinon.stub(provider, 'select').callsFake(() => handler);
 
         handler = new LinkHandler({
             name: 'Test',
             server: { http: 'http://example.com', ssh: 'ssh://example.com' },
             branch: ['rev-parse'],
             url: '',
-            selection: ''
+            selection: '',
+            reverse: {
+                pattern: '',
+                file: '',
+                server: { http: '', ssh: '' },
+                selection: { startLine: '', endLine: '' }
+            }
         });
 
         file = Uri.file('/foo/bar');
@@ -241,7 +247,7 @@ describe('GetLinkCommand', () => {
     });
 
     function createCommand(options: GetLinkCommandOptions): GetLinkCommand {
-        return new GetLinkCommand(finder, selector, options);
+        return new GetLinkCommand(finder, provider, options);
     }
 
     function useTextEditor(

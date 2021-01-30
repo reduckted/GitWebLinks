@@ -19,8 +19,28 @@ engine.filters.set('decode_uri_component', decodeURIComponent);
  * @param template The template to parse.
  * @returns The parsed template.
  */
-export function parseTemplate(template: Template): ParsedTemplate {
+export function parseTemplate(template: Template): ParsedTemplate;
+
+/**
+ * Parses the given template.
+ *
+ * @param template The template to parse.
+ * @returns The parsed template.
+ */
+export function parseTemplate(template: Template | undefined): ParsedTemplate | undefined;
+
+/**
+ * Parses the given template.
+ *
+ * @param template The template to parse.
+ * @returns The parsed template.
+ */
+export function parseTemplate(template: Template | undefined): ParsedTemplate | undefined {
     let parsed: LiquidTemplate[];
+
+    if (template === undefined) {
+        return undefined;
+    }
 
     // A template can be defined as an array of strings.
     // This is just a convenience to allow the template to

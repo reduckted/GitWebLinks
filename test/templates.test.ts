@@ -6,6 +6,10 @@ describe('templates', () => {
     describe('parseTemplate', () => {
         let template: ParsedTemplate;
 
+        it('should return undefined for undefined template.', () => {
+            expect(parseTemplate(undefined)).to.be.undefined;
+        });
+
         it('should parse single string.', () => {
             template = parseTemplate('Hello {{ name }}!');
 

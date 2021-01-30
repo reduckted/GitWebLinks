@@ -8,6 +8,28 @@
     "branch": ["rev-parse", "--abbrev-ref"],
     "url": "{{ base }}/{{ repository }}/src/{{ commit | encode_uri }}/{{ file | encode_uri }}{% if type != 'commit' %}?at={{ ref | encode_uri_component }}{% endif %}",
     "selection": "#lines-{{ startLine }}{% if startLine != endLine %}:{{ endLine }}{% endif %}",
+    "reverse": {
+        "pattern": [
+            "https://bitbucket\\.org",
+            "/(?<username>[^/]+)",
+            "/(?<repository>[^/]+)",
+            "/src",
+            "/(?:[^/]+)",
+            "/(?<file>[^?#]+)",
+            "(?:\\?[^#]*)?",
+            "(?:#lines-(?<start>\\d+)(?:\\:(?<end>\\d+))?)?"
+        ],
+        "file": "{{ match.groups.file | decode_uri }}",
+        "fileMayStartWithBranch": true,
+        "server": {
+            "http": "https://bitbucket.org/{{ match.groups.username }}/{{ match.groups.repository }}.git",
+            "ssh": "git@bitbucket.org:{{ match.groups.username }}/{{ match.groups.repository }}.git"
+        },
+        "selection": {
+            "startLine": "{{ match.groups.start }}",
+            "endLine": "{{ match.groups.end }}"
+        }
+    },
     "tests": {
         "createUrl": {
             "remotes": {

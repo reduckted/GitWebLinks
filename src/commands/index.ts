@@ -1,7 +1,7 @@
 import { commands, Disposable } from 'vscode';
 
 import { COMMANDS } from '../constants';
-import { LinkHandlerSelector } from '../link-handler-selector';
+import { LinkHandlerProvider } from '../link-handler-provider';
 import { RepositoryFinder } from '../repository-finder';
 
 import { GetLinkCommand, GetLinkCommandOptions } from './get-link-command';
@@ -11,14 +11,14 @@ import { GetLinkCommand, GetLinkCommandOptions } from './get-link-command';
  *
  * @param subscriptions The subscriptions to add the disposables to.
  * @param repositoryFinder The repository finder to use for finding repository information for a file.
- * @param handlerSelector The link handler selector to use for selecing the handler for a file.
+ * @param handlerProvider The link handler provider to use.
  */
 export function registerCommands(
     subscriptions: Disposable[],
     repositoryFinder: RepositoryFinder,
-    handlerSelector: LinkHandlerSelector
+    handlerProvider: LinkHandlerProvider
 ): void {
-    registerGetLinkCommands(subscriptions, repositoryFinder, handlerSelector);
+    registerGetLinkCommands(subscriptions, repositoryFinder, handlerProvider);
 }
 
 /**
@@ -26,17 +26,17 @@ export function registerCommands(
  *
  * @param subscriptions The subscriptions to add the disposables to.
  * @param repositoryFinder The repository finder to use for finding repository information for a file.
- * @param handlerSelector The link handler selector to use for selecing the handler for a file.
+ * @param handlerProvider The link handler selector to use for selecing the handler for a file.
  */
 export function registerGetLinkCommands(
     subscriptions: Disposable[],
     repositoryFinder: RepositoryFinder,
-    handlerSelector: LinkHandlerSelector
+    handlerProvider: LinkHandlerProvider
 ): void {
     // Add the two commands that appear in the menus to
     // copy a link to a file and copy a link to the selection.
     subscriptions.push(
-        registerGetLinkCommand(COMMANDS.copyFile, repositoryFinder, handlerSelector, {
+        registerGetLinkCommand(COMMANDS.copyFile, repositoryFinder, handlerProvider, {
             linkType: undefined,
             includeSelection: false,
             action: 'copy'
@@ -44,7 +44,7 @@ export function registerGetLinkCommands(
     );
 
     subscriptions.push(
-        registerGetLinkCommand(COMMANDS.copySelection, repositoryFinder, handlerSelector, {
+        registerGetLinkCommand(COMMANDS.copySelection, repositoryFinder, handlerProvider, {
             linkType: undefined,
             includeSelection: true,
             action: 'copy'
@@ -54,7 +54,7 @@ export function registerGetLinkCommands(
     // Add the two commands that appear in the menus to
     // open a link to the file and open a link to the selection.
     subscriptions.push(
-        registerGetLinkCommand(COMMANDS.openFile, repositoryFinder, handlerSelector, {
+        registerGetLinkCommand(COMMANDS.openFile, repositoryFinder, handlerProvider, {
             linkType: undefined,
             includeSelection: false,
             action: 'open'
@@ -62,7 +62,7 @@ export function registerGetLinkCommands(
     );
 
     subscriptions.push(
-        registerGetLinkCommand(COMMANDS.openSelection, repositoryFinder, handlerSelector, {
+        registerGetLinkCommand(COMMANDS.openSelection, repositoryFinder, handlerProvider, {
             linkType: undefined,
             includeSelection: true,
             action: 'open'
@@ -73,7 +73,7 @@ export function registerGetLinkCommands(
     // appear in any menus and can only be run via the command palette (or via shortcut
     // keys). These commands will always include the selection if it's available.
     subscriptions.push(
-        registerGetLinkCommand(COMMANDS.copySelectionToBranch, repositoryFinder, handlerSelector, {
+        registerGetLinkCommand(COMMANDS.copySelectionToBranch, repositoryFinder, handlerProvider, {
             linkType: 'branch',
             includeSelection: true,
             action: 'copy'
@@ -81,7 +81,7 @@ export function registerGetLinkCommands(
     );
 
     subscriptions.push(
-        registerGetLinkCommand(COMMANDS.copySelectionToCommit, repositoryFinder, handlerSelector, {
+        registerGetLinkCommand(COMMANDS.copySelectionToCommit, repositoryFinder, handlerProvider, {
             linkType: 'commit',
             includeSelection: true,
             action: 'copy'
@@ -92,7 +92,7 @@ export function registerGetLinkCommands(
         registerGetLinkCommand(
             COMMANDS.copySelectionToDefaultBranch,
             repositoryFinder,
-            handlerSelector,
+            handlerProvider,
             {
                 linkType: 'defaultBranch',
                 includeSelection: true,
@@ -107,19 +107,19 @@ export function registerGetLinkCommands(
  *
  * @param identifier The command identifier.
  * @param repositoryFinder The repository finder to use for finding repository information for a file.
- * @param handlerSelector The link handler selector to use for selecing the handler for a file.
+ * @param handlerProvider The link handler provider to use.
  * @param options The options for registering the command.
  * @returns A disposable to unregister the command.
  */
 function registerGetLinkCommand(
     identifier: string,
     repositoryFinder: RepositoryFinder,
-    handlerSelector: LinkHandlerSelector,
+    handlerProvider: LinkHandlerProvider,
     options: GetLinkCommandOptions
 ): Disposable {
     let command: GetLinkCommand;
 
-    command = new GetLinkCommand(repositoryFinder, handlerSelector, options);
+    command = new GetLinkCommand(repositoryFinder, handlerProvider, options);
 
     return commands.registerCommand(identifier, async (resource) => command.execute(resource));
 }
