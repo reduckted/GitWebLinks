@@ -1,6 +1,6 @@
 import { ExtensionContext, window } from 'vscode';
 
-import { registerCommands } from './command';
+import { registerCommands } from './commands';
 import { ContextManager } from './context-manager';
 import { initialize } from './git';
 import { LinkHandlerSelector } from './link-handler-selector';

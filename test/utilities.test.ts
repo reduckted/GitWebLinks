@@ -30,11 +30,11 @@ describe('utilities', () => {
             expect(normalizeRemoteUrl('ssh://example.com')).to.equal('example.com');
         });
 
-        it('should remove the "@git" prefix.', () => {
+        it('should remove the "git@" prefix.', () => {
             expect(normalizeRemoteUrl('git@example.com')).to.equal('example.com');
         });
 
-        it('should remove the SSH prefix and the "@git" prefix.', () => {
+        it('should remove the SSH prefix and the "git@" prefix.', () => {
             expect(normalizeRemoteUrl('ssh://git@example.com')).to.equal('example.com');
         });
 

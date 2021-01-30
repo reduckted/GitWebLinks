@@ -3,23 +3,23 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import { env, MessageItem, Position, Selection, TextDocument, Uri, window } from 'vscode';
 
-import { Command } from '../src/command';
-import { LinkHandler } from '../src/link-handler';
-import { LinkHandlerSelector } from '../src/link-handler-selector';
-import { RepositoryFinder } from '../src/repository-finder';
-import { STRINGS } from '../src/strings';
-import { LinkType, Repository } from '../src/types';
+import { GetLinkCommand, GetLinkCommandOptions } from '../../src/commands/get-link-command';
+import { LinkHandler } from '../../src/link-handler';
+import { LinkHandlerSelector } from '../../src/link-handler-selector';
+import { RepositoryFinder } from '../../src/repository-finder';
+import { STRINGS } from '../../src/strings';
+import { LinkType, Repository } from '../../src/types';
 
 const expect = chai.use(sinonChai).expect;
 
-describe('Command', () => {
+describe('GetLinkCommand', () => {
     let showErrorMessage: sinon.SinonStub;
     let showInformationMessage: sinon.SinonStub;
     let createUrl: sinon.SinonStub;
     let finder: RepositoryFinder;
     let selector: LinkHandlerSelector;
     let handler: LinkHandler | undefined;
-    let command: Command;
+    let command: GetLinkCommand;
     let folder: Uri;
     let file: Uri;
     let repository: Repository | undefined;
@@ -66,51 +66,51 @@ describe('Command', () => {
     });
 
     it('should show an error if the command was invoked for a resource that was not a file.', async () => {
-        command = new Command(finder, selector, 'commit', true, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(Uri.parse('http://example.com'));
 
-        expectError(STRINGS.command.noFileSelected);
+        expectError(STRINGS.getLinkCommand.noFileSelected);
     });
 
     it('should show an error if the command was not invoked for a resource, and no file is active.', async () => {
         useTextEditor(undefined);
 
-        command = new Command(finder, selector, 'commit', true, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(undefined);
 
-        expectError(STRINGS.command.noFileSelected);
+        expectError(STRINGS.getLinkCommand.noFileSelected);
     });
 
     it('should show an error if the file is not in a repository.', async () => {
         repository = undefined;
-        command = new Command(finder, selector, 'commit', true, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
-        expectError(STRINGS.command.notTrackedByGit(file));
+        expectError(STRINGS.getLinkCommand.notTrackedByGit(file));
     });
 
     it('should show an error if the repository does not have a remote.', async () => {
         repository = { root: folder.toString(), remote: undefined };
 
-        command = new Command(finder, selector, 'commit', true, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
-        expectError(STRINGS.command.noRemote(folder.toString()));
+        expectError(STRINGS.getLinkCommand.noRemote(folder.toString()));
     });
 
     it('should show an error if the repository does not have a link handler.', async () => {
         handler = undefined;
 
-        command = new Command(finder, selector, 'commit', true, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
-        expectError(STRINGS.command.noHandler(repository?.remote ?? ''));
+        expectError(STRINGS.getLinkCommand.noHandler(repository?.remote ?? ''));
     });
 
     it('should use the active text editor to get the file when no resource was specified.', async () => {
         useTextEditor(file);
 
-        command = new Command(finder, selector, 'commit', true, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(undefined);
 
         expect(createUrl).to.have.been.calledWithExactly(
@@ -124,7 +124,7 @@ describe('Command', () => {
     });
 
     it('should not include the selection when not allowed to.', async () => {
-        command = new Command(finder, selector, 'commit', false, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: false, action: 'copy' });
         await command.execute(file);
 
         expect(createUrl).to.have.been.calledWithExactly(
@@ -140,7 +140,7 @@ describe('Command', () => {
             end: new Position(3, 4)
         });
 
-        command = new Command(finder, selector, 'commit', true, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
         expect(createUrl).to.have.been.calledWithExactly(
@@ -156,7 +156,7 @@ describe('Command', () => {
     it('should not include the selection when allowed to but the file is not in the active editor.', async () => {
         useTextEditor(undefined);
 
-        command = new Command(finder, selector, 'commit', true, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
         expect(createUrl).to.have.been.calledWithExactly(
@@ -166,17 +166,17 @@ describe('Command', () => {
         );
     });
 
-    getLinkTypes().forEach((type) => {
-        it(`should create a link of the specified type (${type ?? 'undefined'}).`, async () => {
+    getLinkTypes().forEach((linkType) => {
+        it(`should create a link of the specified type (${linkType ?? 'undefined'}).`, async () => {
             useTextEditor(undefined);
 
-            command = new Command(finder, selector, type, true, 'copy');
+            command = createCommand({ linkType, includeSelection: true, action: 'copy' });
             await command.execute(file);
 
             expect(createUrl).to.have.been.calledWithExactly(
                 repository,
                 { filePath: file.fsPath, selection: undefined },
-                { type }
+                { type: linkType }
             );
         });
     });
@@ -186,7 +186,7 @@ describe('Command', () => {
 
         createUrl.resolves('http://example.com/foo/bar');
 
-        command = new Command(finder, selector, 'commit', true, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
         expect(link).to.equal('http://example.com/foo/bar');
@@ -195,12 +195,15 @@ describe('Command', () => {
     it('should show a message when the link is created when the command action is "copy".', async () => {
         useTextEditor(undefined);
 
-        command = new Command(finder, selector, 'commit', true, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
         expect(showInformationMessage).to.have.been.calledWithExactly(
-            STRINGS.command.linkCopied(handler?.name ?? ''),
-            { title: STRINGS.command.openInBrowser, action: 'open' }
+            STRINGS.getLinkCommand.linkCopied(handler?.name ?? ''),
+            {
+                title: STRINGS.getLinkCommand.openInBrowser,
+                action: 'open'
+            }
         );
     });
 
@@ -213,10 +216,10 @@ describe('Command', () => {
 
         openExternal = sinon.stub(env, 'openExternal').resolves();
 
-        openItem = { title: STRINGS.command.openInBrowser, action: 'open' };
+        openItem = { title: STRINGS.getLinkCommand.openInBrowser, action: 'open' };
         showInformationMessage.resolves(openItem);
 
-        command = new Command(finder, selector, 'commit', true, 'copy');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
         expect(openExternal).to.have.been.calledWith(Uri.parse('http://example.com/foo/bar'));
@@ -230,12 +233,16 @@ describe('Command', () => {
 
         openExternal = sinon.stub(env, 'openExternal').resolves();
 
-        command = new Command(finder, selector, 'commit', true, 'open');
+        command = createCommand({ linkType: 'commit', includeSelection: true, action: 'open' });
         await command.execute(file);
 
         expect(showInformationMessage).to.have.not.been.called;
         expect(openExternal).to.have.been.calledWith(Uri.parse('http://example.com/foo/bar'));
     });
+
+    function createCommand(options: GetLinkCommandOptions): GetLinkCommand {
+        return new GetLinkCommand(finder, selector, options);
+    }
 
     function useTextEditor(
         uri: Uri | undefined,

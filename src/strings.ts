@@ -8,9 +8,10 @@ export const STRINGS = {
     repositoryFinder: {
         failure: 'Unable to find the repository for the workspace.'
     },
-    command: {
+    getLinkCommand: {
         noFileSelected: 'Cannot copy a link because no file is selected.',
         openInBrowser: 'Open in Browser',
+        openSettings: 'Open Settings',
         linkCopied: (handlerName: string): string =>
             format('%s link copied to the clipboard.', handlerName),
         error: 'An error occurred while creating the link.',

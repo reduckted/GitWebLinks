@@ -1,32 +1,27 @@
-import { commands, Disposable, env, MessageItem, TextEditor, Uri, window } from 'vscode';
+import { commands, env, MessageItem, TextEditor, Uri, window } from 'vscode';
 
-import { COMMANDS } from './constants';
-import { LinkHandler } from './link-handler';
-import { LinkHandlerSelector } from './link-handler-selector';
-import { log } from './log';
-import { RepositoryFinder } from './repository-finder';
-import { STRINGS } from './strings';
-import { LinkType, Repository, RepositoryWithRemote, Selection } from './types';
-import { hasRemote } from './utilities';
+import { LinkHandler } from '../link-handler';
+import { LinkHandlerSelector } from '../link-handler-selector';
+import { log } from '../log';
+import { RepositoryFinder } from '../repository-finder';
+import { STRINGS } from '../strings';
+import { LinkType, Repository, RepositoryWithRemote, Selection } from '../types';
+import { hasRemote } from '../utilities';
 
 /**
- * The command to copy a web link to a file.
+ * The command to get a URL from a file.
  */
-export class Command {
+export class GetLinkCommand {
     /**
      * @constructor
      * @param repositoryFinder The repository finder to use for finding repository information for a file.
      * @param handlerSelector The link handler selector to use for selecing the handler for a file.
-     * @param linkType The type of links to generate. A value of `undefined` means the settings will be used to determine the type.
-     * @param includeSelection Indicates whether the current selected range should be included in the links.
-     * @param action The action that the command should perform with the link.
+     * @param options The options that control how the command behaves.
      */
     constructor(
         private readonly repositoryFinder: RepositoryFinder,
         private readonly handlerSelector: LinkHandlerSelector,
-        private readonly linkType: LinkType | undefined,
-        private readonly includeSelection: boolean,
-        private readonly action: CommandAction
+        private readonly options: GetLinkCommandOptions
     ) {}
 
     /**
@@ -52,7 +47,7 @@ export class Command {
 
         if (resource?.scheme !== 'file') {
             log("File URI scheme is '%s'.", resource?.scheme);
-            void window.showErrorMessage(STRINGS.command.noFileSelected);
+            void window.showErrorMessage(STRINGS.getLinkCommand.noFileSelected);
             return;
         }
 
@@ -61,7 +56,7 @@ export class Command {
         if (info) {
             let selection: Selection | undefined;
 
-            if (this.includeSelection) {
+            if (this.options.includeSelection) {
                 // We are allowed to include the selection, but we can only get the
                 // selection from the active editor, so we'll only include the selection
                 // if the file we are generating the link for is in the active editor.
@@ -77,20 +72,20 @@ export class Command {
                 link = await info.handler.createUrl(
                     info.repository,
                     { filePath: info.uri.fsPath, selection },
-                    { type: this.linkType }
+                    { type: this.options.linkType }
                 );
 
                 log('Web link created: %s', link);
 
-                switch (this.action) {
+                switch (this.options.action) {
                     case 'copy':
                         await env.clipboard.writeText(link);
 
                         void window
                             .showInformationMessage<ActionMessageItem>(
-                                STRINGS.command.linkCopied(info.handler.name),
+                                STRINGS.getLinkCommand.linkCopied(info.handler.name),
                                 {
-                                    title: STRINGS.command.openInBrowser,
+                                    title: STRINGS.getLinkCommand.openInBrowser,
                                     action: 'open'
                                 }
                             )
@@ -103,7 +98,7 @@ export class Command {
                 }
             } catch (ex) {
                 log('Error while generating a link: %o', ex);
-                void window.showErrorMessage(STRINGS.command.error);
+                void window.showErrorMessage(STRINGS.getLinkCommand.error);
             }
         }
     }
@@ -122,13 +117,13 @@ export class Command {
 
         if (!repository) {
             log('File is not tracked by Git.');
-            void window.showErrorMessage(STRINGS.command.notTrackedByGit(resource));
+            void window.showErrorMessage(STRINGS.getLinkCommand.notTrackedByGit(resource));
             return undefined;
         }
 
         if (!hasRemote(repository)) {
             log('Repository does not have a remote.');
-            void window.showErrorMessage(STRINGS.command.noRemote(repository.root));
+            void window.showErrorMessage(STRINGS.getLinkCommand.noRemote(repository.root));
             return undefined;
         }
 
@@ -137,10 +132,13 @@ export class Command {
         if (!handler) {
             log("No handler for remote '%s'.", repository.remote);
             void window
-                .showErrorMessage<ActionMessageItem>(STRINGS.command.noHandler(repository.remote), {
-                    title: 'Open Settings',
-                    action: 'settings'
-                })
+                .showErrorMessage<ActionMessageItem>(
+                    STRINGS.getLinkCommand.noHandler(repository.remote),
+                    {
+                        title: STRINGS.getLinkCommand.openSettings,
+                        action: 'settings'
+                    }
+                )
                 .then((x) => this.onNotificationItemClick(x));
             return undefined;
         }
@@ -187,118 +185,9 @@ export class Command {
 }
 
 /**
- * Registers the commands.
- *
- * @param subscriptions The subscriptions to add the disposables to.
- * @param repositoryFinder The repository finder to use for finding repository information for a file.
- * @param handlerSelector The link handler selector to use for selecing the handler for a file.
+ * Options for controling the behaviouor of the command.
  */
-export function registerCommands(
-    subscriptions: Disposable[],
-    repositoryFinder: RepositoryFinder,
-    handlerSelector: LinkHandlerSelector
-): void {
-    // Add the two commands that appear in the menus to
-    // copy a link to a file and copy a link to the selection.
-    subscriptions.push(
-        register(COMMANDS.copyFile, repositoryFinder, handlerSelector, {
-            linkType: undefined,
-            includeSelection: false,
-            action: 'copy'
-        })
-    );
-
-    subscriptions.push(
-        register(COMMANDS.copySelection, repositoryFinder, handlerSelector, {
-            linkType: undefined,
-            includeSelection: true,
-            action: 'copy'
-        })
-    );
-
-    // Add the two commands that appear in the menus to
-    // open a link to the file and open a link to the selection.
-    subscriptions.push(
-        register(COMMANDS.openFile, repositoryFinder, handlerSelector, {
-            linkType: undefined,
-            includeSelection: false,
-            action: 'open'
-        })
-    );
-
-    subscriptions.push(
-        register(COMMANDS.openSelection, repositoryFinder, handlerSelector, {
-            linkType: undefined,
-            includeSelection: true,
-            action: 'open'
-        })
-    );
-
-    // And add one command for each of the different link types. These commands don't
-    // appear in any menus and can only be run via the command palette (or via shortcut
-    // keys). These commands will always include the selection if it's available.
-    subscriptions.push(
-        register(COMMANDS.copySelectionToBranch, repositoryFinder, handlerSelector, {
-            linkType: 'branch',
-            includeSelection: true,
-            action: 'copy'
-        })
-    );
-
-    subscriptions.push(
-        register(COMMANDS.copySelectionToCommit, repositoryFinder, handlerSelector, {
-            linkType: 'commit',
-            includeSelection: true,
-            action: 'copy'
-        })
-    );
-
-    subscriptions.push(
-        register(COMMANDS.copySelectionToDefaultBranch, repositoryFinder, handlerSelector, {
-            linkType: 'defaultBranch',
-            includeSelection: true,
-            action: 'copy'
-        })
-    );
-}
-
-/**
- * Registers a command.
- *
- * @param identifier The command identifier.
- * @param repositoryFinder The repository finder to use for finding repository information for a file.
- * @param handlerSelector The link handler selector to use for selecing the handler for a file.
- * @param options The options for registering the command.
- * @returns A disposable to unregister the command.
- */
-export function register(
-    identifier: string,
-    repositoryFinder: RepositoryFinder,
-    handlerSelector: LinkHandlerSelector,
-    options: CommandOptions
-): Disposable {
-    let command: Command;
-
-    command = new Command(
-        repositoryFinder,
-        handlerSelector,
-        options.linkType,
-        options.includeSelection,
-        options.action
-    );
-
-    return commands.registerCommand(identifier, async (resource) => command.execute(resource));
-}
-
-/**
- * Indicates whether a command should copy the link or open the link.
- */
-type CommandAction = 'copy' | 'open';
-
-/**
- * Options for registering a command.
- */
-interface CommandOptions {
+export interface GetLinkCommandOptions {
     /**
      * The type of link the command will prodice (`undefined` means
      * the command will use the settings to determine the link type).
@@ -314,7 +203,7 @@ interface CommandOptions {
     /**
      * The action the command should perform.
      */
-    action: CommandAction;
+    action: 'copy' | 'open';
 }
 
 /**
