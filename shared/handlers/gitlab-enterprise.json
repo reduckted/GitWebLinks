@@ -3,7 +3,7 @@
     "name": "GitLab Enterprise",
     "private": "gitLabEnterprise",
     "branch": ["rev-parse", "--abbrev-ref"],
-    "url": "{{ base }}/{{ repository }}/-/blob/{{ ref | uri }}/{{ file | uri }}",
+    "url": "{{ base }}/{{ repository }}/-/blob/{{ ref | encode_uri }}/{{ file | encode_uri }}",
     "selection": "#L{{ startLine }}{% if startLine != endLine %}-{{ endLine }}{% endif %}",
     "tests": {
         "settings": {

@@ -3,7 +3,7 @@
     "name": "GitHub Enterprise",
     "private": "gitHubEnterprise",
     "branch": ["rev-parse", "--abbrev-ref"],
-    "url": "{{ base }}/{{ repository }}/blob/{{ ref | uri }}/{{ file | uri }}",
+    "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri }}",
     "selection": "#L{{ startLine }}{% if startLine != endLine %}-L{{ endLine }}{% endif %}",
     "tests": {
         "settings": {

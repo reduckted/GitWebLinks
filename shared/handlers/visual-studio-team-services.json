@@ -16,8 +16,8 @@
     "branch": ["rev-parse", "--abbrev-ref"],
     "url": [
         "{{ base }}/{{ repository }}",
-        "?path=%2F{{ file | uri_component }}",
-        "&version=G{{ type | slice:0,1 | upcase }}{{ ref | uri_component }}"
+        "?path=%2F{{ file | encode_uri_component }}",
+        "&version=G{{ type | slice:0,1 | upcase }}{{ ref | encode_uri_component }}"
     ],
     "selection": [
         "&line={{ startLine }}",

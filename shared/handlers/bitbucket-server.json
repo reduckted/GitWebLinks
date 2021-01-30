@@ -5,7 +5,7 @@
     "branch": ["symbolic-ref"],
     "url": [
         "{% assign segments = repository | split: '/' | reverse %}",
-        "{{ base }}/projects/{{ segments[1] }}/repos/{{ segments[0] }}/browse/{{ file | uri }}?at={{ ref | uri_component }}"
+        "{{ base }}/projects/{{ segments[1] }}/repos/{{ segments[0] }}/browse/{{ file | encode_uri }}?at={{ ref | encode_uri_component }}"
     ],
     "selection": "#{{ startLine }}{% if startLine != endLine %}-{{ endLine }}{% endif %}",
     "tests": {

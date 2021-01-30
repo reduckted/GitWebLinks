@@ -24,15 +24,27 @@ describe('templates', () => {
         });
 
         it('should support encodeUri().', () => {
-            template = parseTemplate('This{{ " + " | uri }}that');
+            template = parseTemplate('This{{ " + " | encode_uri }}that');
 
             expect(template.render({})).to.equal('This%20+%20that');
         });
 
         it('should support encodeUriComponent().', () => {
-            template = parseTemplate('This{{ " + " | uri_component }}that');
+            template = parseTemplate('This{{ " + " | encode_uri_component }}that');
 
             expect(template.render({})).to.equal('This%20%2B%20that');
+        });
+
+        it('should support decodeUri().', () => {
+            template = parseTemplate('This{{ "%20+%20" | decode_uri }}that');
+
+            expect(template.render({})).to.equal('This + that');
+        });
+
+        it('should support decodeUriComponent().', () => {
+            template = parseTemplate('This{{ "%20%2B%20" | decode_uri_component }}that');
+
+            expect(template.render({})).to.equal('This + that');
         });
 
         it('should support path.basename().', () => {

@@ -3,11 +3,15 @@ import { posix } from 'path';
 
 import { Template } from './schema';
 
-const engine: Liquid = new Liquid();
+const engine: Liquid = new Liquid({
+    strictFilters: true
+});
 
 engine.filters.set('filename', posix.basename);
-engine.filters.set('uri', encodeURI);
-engine.filters.set('uri_component', encodeURIComponent);
+engine.filters.set('encode_uri', encodeURI);
+engine.filters.set('encode_uri_component', encodeURIComponent);
+engine.filters.set('decode_uri', decodeURI);
+engine.filters.set('decode_uri_component', decodeURIComponent);
 
 /**
  * Parses the given template.

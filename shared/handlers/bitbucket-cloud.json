@@ -6,7 +6,7 @@
         "ssh": "git@bitbucket.org"
     },
     "branch": ["rev-parse", "--abbrev-ref"],
-    "url": "{{ base }}/{{ repository }}/src/{{ commit | uri }}/{{ file | uri }}{% if type != 'commit' %}?at={{ ref | uri_component }}{% endif %}",
+    "url": "{{ base }}/{{ repository }}/src/{{ commit | encode_uri }}/{{ file | encode_uri }}{% if type != 'commit' %}?at={{ ref | encode_uri_component }}{% endif %}",
     "selection": "#lines-{{ startLine }}{% if startLine != endLine %}:{{ endLine }}{% endif %}",
     "tests": {
         "createUrl": {
