@@ -8,7 +8,7 @@ import { LinkHandler } from '../src/link-handler';
 import { LinkHandlerSelector } from '../src/link-handler-selector';
 import { load } from '../src/schema';
 import { parseTemplate } from '../src/templates';
-import { LinkOptions, RepositoryWithRemote, Selection } from '../src/types';
+import { LinkOptions, RepositoryWithRemote, SelectedRange } from '../src/types';
 
 import { Directory, markAsSlow, setupRepository } from './helpers';
 import {
@@ -143,7 +143,7 @@ describe('Link handlers', function () {
 
                 async function runSelectionTest<
                     T extends keyof Omit<SelectionTests, 'remote' | 'settings'>
-                >(name: T, selection: (test: SelectionTests[T]) => Selection): Promise<void> {
+                >(name: T, selection: (test: SelectionTests[T]) => SelectedRange): Promise<void> {
                     let test: SelectionTests[T];
 
                     test = definition.tests.createUrl.selection[name];
@@ -205,7 +205,7 @@ describe('Link handlers', function () {
                 interface TestOptions extends Partial<LinkOptions> {
                     fileName?: string;
                     branch?: string;
-                    selection?: Selection;
+                    selection?: SelectedRange;
                 }
             });
 

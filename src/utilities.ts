@@ -1,4 +1,6 @@
-import { Repository, RepositoryWithRemote } from './types';
+import { Position, Selection } from 'vscode';
+
+import { Repository, RepositoryWithRemote, SelectedRange } from './types';
 
 /**
  * Determines whether the given repository has a remote.
@@ -87,4 +89,36 @@ function hasCode(err: unknown): err is { code: string } {
  */
 function hasMessage(err: unknown): err is { message: string } {
     return typeof err === 'object' && err !== null && 'message' in err;
+}
+
+/**
+ * Converts a `Selection` to a `SelectedRange`.
+ *
+ * @param selection The selection to convert.
+ * @returns The selected range.
+ */
+export function toSelectedRange(selection: Selection): SelectedRange {
+    // The line numbers are zero-based in the editor,
+    // but we need them to be one-based for URLs.
+    return {
+        startLine: selection.start.line + 1,
+        endLine: selection.end.line + 1,
+        startColumn: selection.start.character + 1,
+        endColumn: selection.end.character + 1
+    };
+}
+
+/**
+ * Converts a `SelectedRange` to a `Selection`.
+ *
+ * @param selectedRange The selected range to convert.
+ * @returns The selection.
+ */
+export function toSelection(selectedRange: SelectedRange): Selection {
+    // The line numbers are one-based in the range,
+    // but the editor needs them to be zero-based.
+    return new Selection(
+        new Position(selectedRange.startLine - 1, selectedRange.startColumn - 1),
+        new Position(selectedRange.endLine - 1, selectedRange.endColumn - 1)
+    );
 }

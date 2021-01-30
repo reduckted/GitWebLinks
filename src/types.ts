@@ -31,7 +31,7 @@ export type RepositoryWithRemote = Omit<Repository, 'remote'> & {
 /**
  * Defines a selected range in a file.
  */
-export interface Selection {
+export interface SelectedRange {
     /**
      * The one-based line number that the selection starts at.
      */
@@ -77,5 +77,5 @@ export interface FileInfo {
     /**
      * The selected range in the file.
      */
-    selection?: Selection;
+    selection?: SelectedRange;
 }

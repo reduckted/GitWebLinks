@@ -5,8 +5,8 @@ import { LinkHandlerSelector } from '../link-handler-selector';
 import { log } from '../log';
 import { RepositoryFinder } from '../repository-finder';
 import { STRINGS } from '../strings';
-import { LinkType, Repository, RepositoryWithRemote, Selection } from '../types';
-import { hasRemote } from '../utilities';
+import { LinkType, Repository, RepositoryWithRemote, SelectedRange } from '../types';
+import { hasRemote, toSelectedRange } from '../utilities';
 
 /**
  * The command to get a URL from a file.
@@ -54,14 +54,14 @@ export class GetLinkCommand {
         info = await this.getResourceInfo(resource);
 
         if (info) {
-            let selection: Selection | undefined;
+            let selection: SelectedRange | undefined;
 
             if (this.options.includeSelection) {
                 // We are allowed to include the selection, but we can only get the
                 // selection from the active editor, so we'll only include the selection
                 // if the file we are generating the link for is in the active editor.
                 if (resource.toString() === editor?.document.uri.toString()) {
-                    selection = this.getLineSelection(editor);
+                    selection = toSelectedRange(editor.selection);
                     log('Line selection: %o', selection);
                 }
             }
@@ -144,23 +144,6 @@ export class GetLinkCommand {
         }
 
         return { uri: resource, repository, handler };
-    }
-
-    /**
-     * Gets the range that is selected in the given text editor.
-     *
-     * @param editor The editor to get the selection from.
-     * @returns The selection.
-     */
-    private getLineSelection(editor: TextEditor): Selection {
-        // The line numbers are zero-based in the
-        // editor, but we need them to be one-based.
-        return {
-            startLine: editor.selection.start.line + 1,
-            endLine: editor.selection.end.line + 1,
-            startColumn: editor.selection.start.character + 1,
-            endColumn: editor.selection.end.character + 1
-        };
     }
 
     /**
