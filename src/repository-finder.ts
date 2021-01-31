@@ -1,10 +1,8 @@
 import { promises as fs, Stats } from 'fs';
 import { dirname, join } from 'path';
-import { window } from 'vscode';
 
 import { git } from './git';
 import { log } from './log';
-import { STRINGS } from './strings';
 import { Repository } from './types';
 import { getErrorMessage, isErrorCode } from './utilities';
 
@@ -21,27 +19,58 @@ export class RepositoryFinder {
      * @returns True if the specified workspace contains one or more Git repositories; otherwise, false.
      */
     public async hasRepositories(workspace: string): Promise<boolean> {
+        for await (let root of this.internalFindRepositories(workspace)) {
+            log("Found a repository at '%s'.", root);
+            return true;
+        }
+
+        log('No repositories found.');
+        return false;
+    }
+
+    /**
+     * Finds repositories in the specified workspace.
+     *
+     * @param workspace The root of the workspace to search in.
+     * @returns An async iteration of the repositories.
+     */
+    public async *findRepositories(workspace: string): AsyncIterable<Repository> {
+        for await (let root of this.internalFindRepositories(workspace)) {
+            yield await this.createRepository(root);
+        }
+    }
+
+    /**
+     * Finds repositories in the specified workspace.
+     *
+     * @param workspace The root of the workspace to search in.
+     * @returns An async iteration of the repository roots.
+     */
+    private async *internalFindRepositories(workspace: string): AsyncIterable<string> {
+        log("Searching for Git repositories in workspace '%s'...", workspace);
+
         try {
-            log("Searching for Git repositories in workspace '%s'...", workspace);
+            let root: string | undefined;
 
             // The most common case is the workspace is the same as
             // the root of the repository, or it's within a repository,
             // so start by searching up from the workspace directory.
             log('Searching up from the workspace root...');
-            if ((await this.findRepositoryRoot(workspace)) !== undefined) {
-                log('Found a repository.');
-                return true;
+            root = await this.findRepositoryRoot(workspace);
+
+            if (root !== undefined) {
+                yield root;
+                return;
             }
 
-            // The workspace could also contan multiple repositories, which means
+            // The workspace could also contain multiple repositories, which means
             // we need to search down into the directories within the workspace.
             log('Searching within the workspace...');
 
             // If there are repositories within the workspace, they will most likely
             // be near the root of the workspace, so we won't traverse too deeply.
-            if (await this.searchForRepositories(workspace, 2)) {
-                log('Found a repository.');
-                return true;
+            for await (let repository of this.searchForRepositories(workspace)) {
+                yield repository;
             }
         } catch (ex) {
             log(
@@ -50,20 +79,17 @@ export class RepositoryFinder {
                 getErrorMessage(ex)
             );
         }
-
-        log('No repositories found.');
-        return false;
     }
 
     /**
      * Searches for Git repositories within the specified directory.
      *
      * @param dir The directory to search within.
-     * @param depthLimit The number of directories to step down into.
      * @returns True if a repository was found; otherwise, false.
      */
-    private async searchForRepositories(dir: string, depthLimit: number): Promise<boolean> {
+    private async *searchForRepositories(dir: string): AsyncIterable<string> {
         let children: string[];
+        let descendInto: string[];
 
         // Find all child directories, but filter out some special
         // cases that shouldn't ever contain Git repositories.
@@ -76,25 +102,23 @@ export class RepositoryFinder {
             )
             .map((entry) => join(dir, entry.name));
 
-        // Check if any of the child directories are a repository first.
+        descendInto = [];
+
+        // Yield any direct child that is a repository root. Any other directories
+        // can be descended into, but we'll look at all direct children first.
         for (let child of children) {
             if (await this.isRepositoryRoot(child)) {
-                return true;
+                yield child;
+            } else {
+                descendInto.push(child);
             }
         }
 
-        // None of the direct child directories are a
-        // repository, so as long as we haven't reached
-        // the depth limit, step down into each directory.
-        if (depthLimit > 0) {
-            for (let child of children) {
-                if (await this.searchForRepositories(child, depthLimit - 1)) {
-                    return true;
-                }
+        for (let child of descendInto) {
+            for await (let repository of this.searchForRepositories(child)) {
+                yield repository;
             }
         }
-
-        return false;
     }
 
     /**
@@ -103,7 +127,7 @@ export class RepositoryFinder {
      * @param path The full path of the file or directory to find the repository for.
      * @returns The repository that was found; otherwise, `undefined`.
      */
-    public async find(path: string): Promise<Repository | undefined> {
+    public async findRepository(path: string): Promise<Repository | undefined> {
         try {
             let root: string | undefined;
 
@@ -114,22 +138,31 @@ export class RepositoryFinder {
             log("Root directory is '%s'.", root ?? '');
 
             if (root) {
-                let remote: string | undefined;
-
-                log('Finding remote URL...');
-
-                remote = await this.findRemote(root);
-
-                log("Remote URL is '%s'.", remote ?? '');
-
-                return { root, remote };
+                return await this.createRepository(root);
             }
         } catch (ex) {
-            log("Error finding Git info for path '%s'. %s", path, getErrorMessage(ex));
-            void window.showErrorMessage(STRINGS.repositoryFinder.failure);
+            log("Error finding repository for path '%s'. %s", path, getErrorMessage(ex));
         }
 
         return undefined;
+    }
+
+    /**
+     * Creates a `Repository` from the given root directory.
+     *
+     * @param root The root of the repository.
+     * @returns The `Repository` object.
+     */
+    private async createRepository(root: string): Promise<Repository> {
+        let remote: string | undefined;
+
+        log("Finding remote URL for '%s'...", root);
+
+        remote = await this.findRemote(root);
+
+        log("Remote URL is '%s'.", remote ?? '');
+
+        return { root, remote };
     }
 
     /**

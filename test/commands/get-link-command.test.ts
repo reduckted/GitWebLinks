@@ -27,7 +27,7 @@ describe('GetLinkCommand', () => {
 
     beforeEach(() => {
         finder = new RepositoryFinder();
-        sinon.stub(finder, 'find').callsFake(async () => Promise.resolve(repository));
+        sinon.stub(finder, 'findRepository').callsFake(async () => Promise.resolve(repository));
 
         selector = new LinkHandlerSelector();
         sinon.stub(selector, 'select').callsFake(() => handler);

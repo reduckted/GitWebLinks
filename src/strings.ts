@@ -5,10 +5,8 @@ export const STRINGS = {
     extension: {
         gitNotFound: 'Could not find Git. Make sure Git is installed and in the PATH.'
     },
-    repositoryFinder: {
-        failure: 'Unable to find the repository for the workspace.'
-    },
     getLinkCommand: {
+        failure: 'Unable to find the repository for the file.',
         noFileSelected: 'Cannot copy a link because no file is selected.',
         openInBrowser: 'Open in Browser',
         openSettings: 'Open Settings',

@@ -113,7 +113,7 @@ export class GetLinkCommand {
         let repository: Repository | undefined;
         let handler: LinkHandler | undefined;
 
-        repository = await this.repositoryFinder.find(resource.fsPath);
+        repository = await this.repositoryFinder.findRepository(resource.fsPath);
 
         if (!repository) {
             log('File is not tracked by Git.');
