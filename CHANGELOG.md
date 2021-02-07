@@ -1,3 +1,13 @@
+# 2.3.0 (2021-02-07)
+
+## New Features
+
+-   ⭐ Go to the file that a URL points to using the _Go To File_ command.
+
+## Maintenance
+
+-   🔨 Dependency updates.
+
 # 2.2.0 (2021-01-28)
 
 ## New Features
