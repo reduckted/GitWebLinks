@@ -32,7 +32,7 @@ export class RepositoryFinder {
      * Finds repositories in the specified workspace.
      *
      * @param workspace The root of the workspace to search in.
-     * @returns An async iteration of the repositories.
+     * @yields Each repository in the workspace.
      */
     public async *findRepositories(workspace: string): AsyncIterable<Repository> {
         for await (let root of this.internalFindRepositories(workspace)) {
@@ -44,7 +44,7 @@ export class RepositoryFinder {
      * Finds repositories in the specified workspace.
      *
      * @param workspace The root of the workspace to search in.
-     * @returns An async iteration of the repository roots.
+     * @yields Each repository in the workspace.
      */
     private async *internalFindRepositories(workspace: string): AsyncIterable<string> {
         log("Searching for Git repositories in workspace '%s'...", workspace);
@@ -85,7 +85,7 @@ export class RepositoryFinder {
      * Searches for Git repositories within the specified directory.
      *
      * @param dir The directory to search within.
-     * @returns True if a repository was found; otherwise, false.
+     * @yields Each repository within the given directory.
      */
     private async *searchForRepositories(dir: string): AsyncIterable<string> {
         let children: string[];
