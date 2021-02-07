@@ -30,6 +30,14 @@ If you want to copy a link to a range of lines, just select the lines first.
 
 ![Copy Link to Selection](images/copy-selection.png)
 
+## Open the File from a Link
+
+You can also go in the opposite direction. Starting from a link, you can navigate to the file that the link refers to using the _Go To File_ command.
+
+![Go To File](images/go-to-file.png)
+
+Run the command then paste the link into the prompt to navigate to the file.
+
 ## Default Link Format
 
 The commands above will create links using either the current commit hash, the current branch name or the default branch name.
