@@ -24,5 +24,6 @@ export const COMMANDS = {
     copySelectionToBranch: `${EXTENSION.id}.copySelectionToBranch`,
     copySelectionToCommit: `${EXTENSION.id}.copySelectionToCommit`,
     openFile: `${EXTENSION.id}.openFile`,
-    openSelection: `${EXTENSION.id}.openSelection`
+    openSelection: `${EXTENSION.id}.openSelection`,
+    goToFile: `${EXTENSION.id}.goToFile`
 };

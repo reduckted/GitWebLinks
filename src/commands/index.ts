@@ -5,6 +5,7 @@ import { LinkHandlerProvider } from '../link-handler-provider';
 import { RepositoryFinder } from '../repository-finder';
 
 import { GetLinkCommand, GetLinkCommandOptions } from './get-link-command';
+import { GoToFileCommand } from './go-to-file-command';
 
 /**
  * Registers the commands.
@@ -19,6 +20,7 @@ export function registerCommands(
     handlerProvider: LinkHandlerProvider
 ): void {
     registerGetLinkCommands(subscriptions, repositoryFinder, handlerProvider);
+    registerGoToFileCommand(subscriptions, repositoryFinder, handlerProvider);
 }
 
 /**
@@ -122,4 +124,23 @@ function registerGetLinkCommand(
     command = new GetLinkCommand(repositoryFinder, handlerProvider, options);
 
     return commands.registerCommand(identifier, async (resource) => command.execute(resource));
+}
+
+/**
+ * Registers the command to go to the file represented by a URL.
+ *
+ * @param subscriptions The subscriptions to add the disposables to.
+ * @param repositoryFinder The repository finder to use for finding repository information for a URL.
+ * @param handlerProvider The link handler provider to use.
+ */
+function registerGoToFileCommand(
+    subscriptions: Disposable[],
+    repositoryFinder: RepositoryFinder,
+    handlerProvider: LinkHandlerProvider
+): void {
+    let command: GoToFileCommand;
+
+    command = new GoToFileCommand(repositoryFinder, handlerProvider);
+
+    subscriptions.push(commands.registerCommand(COMMANDS.goToFile, async () => command.execute()));
 }

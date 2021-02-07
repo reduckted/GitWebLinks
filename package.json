@@ -125,6 +125,11 @@
                 "command": "gitweblinks.openSelection",
                 "title": "Open Link to Selection",
                 "category": "Git Web Links"
+            },
+            {
+                "command": "gitweblinks.goToFile",
+                "title": "Go To File...",
+                "category": "Git Web Links"
             }
         ],
         "menus": {
