@@ -272,6 +272,27 @@
                         "additionalProperties": false
                     }
                 },
+                "gitweblinks.gerrit": {
+                    "type": "array",
+                    "description": "The URLs of your Gerrit instances.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "http": {
+                                "type": "string",
+                                "description": "The base URL for the website. For example:\nhttps://git.mygerrit.com:1367/plugins/gitiles/"
+                            },
+                            "ssh": {
+                                "type": "string",
+                                "description": "The SSH URL for remotes. For example:\nssh://gitlab.my-server"
+                            }
+                        },
+                        "required": [
+                            "http"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
                 "gitweblinks.showCopy": {
                     "type": "boolean",
                     "description": "Controls the visibility of the 'Copy Link' menu item.",
