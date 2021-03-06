@@ -280,11 +280,11 @@
                         "properties": {
                             "http": {
                                 "type": "string",
-                                "description": "The base URL for the website. For example:\nhttps://git.mygitilies.com:8080/plugins/gitiles"
+                                "description": "The base URL for the website. For example:\nhttps://git.mygitiles.com:8080/plugins/gitiles"
                             },
                             "ssh": {
                                 "type": "string",
-                                "description": "The SSH URL for remotes. For example:\nssh://git.mygitilies.com:29418"
+                                "description": "The SSH URL for remotes. For example:\nssh://git.mygitiles.com:29418"
                             }
                         },
                         "required": [
