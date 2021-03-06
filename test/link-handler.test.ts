@@ -83,7 +83,7 @@ describe('LinkHandler', function () {
             );
         });
 
-        it('should handle the matching server address ending with a slash.', async () => {
+        it('should handle the matching server HTTP address ending with a slash.', async () => {
             repository = { ...repository, remote: 'http://example.com/foo/bar' };
 
             await setupRepository(root.path);
@@ -99,7 +99,7 @@ describe('LinkHandler', function () {
             ).to.equal('http://example.com | foo/bar');
         });
 
-        it('should handle the matching server address not ending with a slash.', async () => {
+        it('should handle the matching server HTTP address not ending with a slash.', async () => {
             repository = { ...repository, remote: 'http://example.com/foo/bar' };
 
             await setupRepository(root.path);
@@ -107,7 +107,7 @@ describe('LinkHandler', function () {
             expect(
                 await createUrl(
                     {
-                        server: { http: 'http://example.com/', ssh: '' },
+                        server: { http: 'http://example.com', ssh: '' },
                         url: '{{ base }} | {{ repository }}'
                     },
                     {}
@@ -115,7 +115,39 @@ describe('LinkHandler', function () {
             ).to.equal('http://example.com | foo/bar');
         });
 
-        it('should handle the matching server address not ending with a colon.', async () => {
+        it('should handle the matching server SSH address ending with a slash.', async () => {
+            repository = { ...repository, remote: 'ssh://git@example.com:foo/bar' };
+
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl(
+                    {
+                        server: { http: 'http://example.com', ssh: 'ssh://git@example.com/' },
+                        url: '{{ base }} | {{ repository }}'
+                    },
+                    {}
+                )
+            ).to.equal('http://example.com | foo/bar');
+        });
+
+        it('should handle the matching server SSH address not ending with a slash.', async () => {
+            repository = { ...repository, remote: 'ssh://git@example.com:foo/bar' };
+
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl(
+                    {
+                        server: { http: 'http://example.com', ssh: 'ssh://git@example.com' },
+                        url: '{{ base }} | {{ repository }}'
+                    },
+                    {}
+                )
+            ).to.equal('http://example.com | foo/bar');
+        });
+
+        it('should handle the matching server SSH address not ending with a colon.', async () => {
             repository = { ...repository, remote: 'ssh://git@example.com:foo/bar' };
 
             await setupRepository(root.path);
@@ -131,7 +163,7 @@ describe('LinkHandler', function () {
             ).to.equal('http://example.com | foo/bar');
         });
 
-        it('should handle the matching server address ending with a colon.', async () => {
+        it('should handle the matching server SSH address ending with a colon.', async () => {
             repository = { ...repository, remote: 'ssh://git@example.com:foo/bar' };
 
             await setupRepository(root.path);

@@ -168,12 +168,6 @@ export class LinkHandler {
         http = normalizeUrl(address.http);
         ssh = address.ssh ? normalizeUrl(address.ssh) : undefined;
 
-        // Remove the trailing slash from the HTTP URL to make it
-        // easier for the templates to use it as the base address.
-        if (http.endsWith('/')) {
-            http = address.http.slice(0, -1);
-        }
-
         return { http, ssh };
     }
 

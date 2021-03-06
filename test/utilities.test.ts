@@ -41,5 +41,13 @@ describe('utilities', () => {
         it('should not change the SSH URL if it does not contain the SSH prefix.', () => {
             expect(normalizeUrl('example.com')).to.equal('example.com');
         });
+
+        it('should remove the trailing slash from HTTP URLs.', () => {
+            expect(normalizeUrl('http://example.com/')).to.equal('http://example.com');
+        });
+
+        it('should remove the trailing slash from SSH URLs.', () => {
+            expect(normalizeUrl('ssh://example.com/')).to.equal('example.com');
+        });
     });
 });

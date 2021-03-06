@@ -39,6 +39,10 @@ export function normalizeUrl(url: string): string {
         url = httpMatch[1] + httpMatch[2];
     }
 
+    if (url.endsWith('/')) {
+        url = url.slice(0, -1);
+    }
+
     return url;
 }
 
