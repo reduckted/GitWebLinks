@@ -61,9 +61,11 @@ describe('GetLinkCommand', () => {
         createUrl = sinon.stub(handler, 'createUrl');
 
         link = undefined;
-        sinon.stub(env.clipboard, 'writeText').callsFake(async (text) => {
-            link = text;
-            return Promise.resolve();
+        sinon.stub(env, 'clipboard').value({
+            writeText: async (text: string) => {
+                link = text;
+                return Promise.resolve();
+            }
         });
     });
 

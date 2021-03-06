@@ -96,7 +96,7 @@ describe('GoToFileLinkCommand', () => {
         sinon.stub(window, 'showTextDocument').resolves(editor);
 
         clipboard = '';
-        sinon.stub(env.clipboard, 'readText').callsFake(async () => Promise.resolve(clipboard));
+        sinon.stub(env, 'clipboard').value({ readText: async () => Promise.resolve(clipboard) });
 
         command = new GoToFileCommand(finder, provider);
     });
