@@ -272,19 +272,19 @@
                         "additionalProperties": false
                     }
                 },
-                "gitweblinks.gerrit": {
+                "gitweblinks.gitiles": {
                     "type": "array",
-                    "description": "The URLs of your Gerrit instances.",
+                    "description": "The URLs of your Gitiles instances.",
                     "items": {
                         "type": "object",
                         "properties": {
                             "http": {
                                 "type": "string",
-                                "description": "The base URL for the website. For example:\nhttps://git.mygerrit.com:1367/plugins/gitiles/"
+                                "description": "The base URL for the website. For example:\nhttps://git.mygitilies.com:8080/plugins/gitiles"
                             },
                             "ssh": {
                                 "type": "string",
-                                "description": "The SSH URL for remotes. For example:\nssh://gitlab.my-server"
+                                "description": "The SSH URL for remotes. For example:\nssh://git.mygitilies.com:29418"
                             }
                         },
                         "required": [
