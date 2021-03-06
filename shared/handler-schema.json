@@ -113,7 +113,7 @@
                     "description": "A template that provides the one-based column number that the selection ends at.\n\nThe regular expression match from 'pattern' is made available via the `match` variable."
                 }
             },
-            "required": ["startLine", "endLine"],
+            "required": ["startLine"],
             "additionalProperties": false
         },
         "tests": {

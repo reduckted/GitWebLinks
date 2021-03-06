@@ -358,7 +358,7 @@ export class LinkHandler {
 
             selection = {
                 startLine: this.tryParseNumber(this.reverse.selection.startLine.render(data)),
-                endLine: this.tryParseNumber(this.reverse.selection.endLine.render(data)),
+                endLine: this.tryParseNumber(this.reverse.selection.endLine?.render(data)),
                 startColumn: this.tryParseNumber(this.reverse.selection.startColumn?.render(data)),
                 endColumn: this.tryParseNumber(this.reverse.selection.endColumn?.render(data))
             };
