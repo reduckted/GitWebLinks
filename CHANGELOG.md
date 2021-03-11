@@ -1,3 +1,9 @@
+# 2.4.0 (2021-03-11)
+
+## New Features
+
+-   ⭐ Added support for Gitiles (thanks @csm10495).
+
 # 2.3.0 (2021-02-07)
 
 ## New Features

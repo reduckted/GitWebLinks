@@ -7,6 +7,7 @@ Works with:
 -   Azure DevOps Cloud and Server
 -   Bitbucket Cloud and Server
 -   GitHub and GitHub Enterprise
+-   Gitiles (Gerrit)
 -   GitLab (SaaS, Community Edition and Enterprise Edition)
 -   Visual Studio Team Services
 
@@ -68,24 +69,13 @@ If you use an on-premise server, you will need to specify the URLs of those serv
 
 Make sure you include any port numbers (if it's not port 80) and context paths.
 
-### GitHub Enterprise
+### Azure DevOps Server
 
 ```json
-"gitweblinks.gitHubEnterprise": [
+"gitweblinks.azureDevOpsServer": [
     {
-        "http": "https://local-github",
-        "ssh": "git@local-github"
-    }
-]
-```
-
-### GitLab Enterprise/Community Edition
-
-```json
-"gitweblinks.gitLabEnterprise": [
-    {
-        "http": "https://local-gitlab",
-        "ssh": "git@local-gitlab"
+        "http": "https://local-devops",
+        "ssh": "git@local-devops"
     }
 ]
 ```
@@ -101,13 +91,35 @@ Make sure you include any port numbers (if it's not port 80) and context paths.
 ]
 ```
 
-### Azure DevOps Server
+### GitHub Enterprise
 
 ```json
-"gitweblinks.azureDevOpsServer": [
+"gitweblinks.gitHubEnterprise": [
     {
-        "http": "https://local-devops",
-        "ssh": "git@local-devops"
+        "http": "https://local-github",
+        "ssh": "git@local-github"
+    }
+]
+```
+
+### Gitiles
+
+```json
+"gitweblinks.gitiles": [
+    {
+        "http": "https://git.mygitiles.com:8080/plugins/gitiles",
+        "ssh": "ssh://git.mygitiles.com:29418"
+    }
+]
+```
+
+### GitLab Enterprise/Community Edition
+
+```json
+"gitweblinks.gitLabEnterprise": [
+    {
+        "http": "https://local-gitlab",
+        "ssh": "git@local-gitlab"
     }
 ]
 ```
