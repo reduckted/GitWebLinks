@@ -1,0 +1,85 @@
+{
+    "$schema": "../handler-schema.json",
+    "name": "Gitiles",
+    "private": "gitiles",
+    "branch": ["rev-parse", "--abbrev-ref"],
+    "url": "{{ base }}/{{ repository }}/+/{{ ref | encode_uri }}/{{ file | encode_uri }}",
+    "selection": "#{{ startLine }}",
+    "reverse": {
+        "pattern": [
+            "plugins/gitiles",
+            "/(?<repository>.+)",
+            "/\\+",
+            "/(?:[^/]+)",
+            "/(?<file>[^#]+)",
+            "(?:\\?[^#]*)?",
+            "(?:#(?<start>\\d+))?"
+        ],
+        "file": "{{ match.groups.file | decode_uri }}",
+        "fileMayStartWithBranch": true,
+        "server": {
+            "http": "{{ http }}/{{ match.groups.repository }}.git",
+            "ssh": "{{ ssh }}/{{ match.groups.repository }}.git"
+        },
+        "selection": {
+            "startLine": "{{ match.groups.start }}"
+        }
+    },
+    "tests": {
+        "settings": {
+            "gitiles": [
+                {
+                    "http": "https://git.company.com:1368/plugins/gitiles",
+                    "ssh": "ssh://git.company.com:29419"
+                }
+            ]
+        },
+        "createUrl": {
+            "remotes": {
+                "http": "https://git.company.com:1368/plugins/gitiles/foo/bar.git",
+                "httpWithUsername": "https://username@git.company.com:1368/plugins/gitiles/foo/bar.git",
+                "ssh": "ssh://git.company.com:29419/foo/bar.git",
+                "sshWithProtocol": "ssh://git@git.company.com:29419/foo/bar.git",
+                "result": "https://git.company.com:1368/plugins/gitiles/foo/bar/+/master/src/file.txt"
+            },
+            "spaces": {
+                "remote": "https://git.company.com:1368/plugins/gitiles/foo/bar.git",
+                "result": "https://git.company.com:1368/plugins/gitiles/foo/bar/+/master/src/path%20spaces/file%20spaces.txt"
+            },
+            "branch": {
+                "remote": "https://git.company.com:1368/plugins/gitiles/foo/bar.git",
+                "result": "https://git.company.com:1368/plugins/gitiles/foo/bar/+/feature/test/src/file.txt"
+            },
+            "commit": {
+                "remote": "https://git.company.com:1368/plugins/gitiles/foo/bar.git",
+                "result": "https://git.company.com:1368/plugins/gitiles/foo/bar/+/{{ commit }}/src/file.txt"
+            },
+            "selection": {
+                "remote": "https://git.company.com:1368/plugins/gitiles/foo/bar.git",
+                "point": {
+                    "line": 10,
+                    "result": "https://git.company.com:1368/plugins/gitiles/foo/bar/+/master/src/file.txt#10"
+                },
+                "singleLine": {
+                    "line": 10,
+                    "startColumn": 20,
+                    "endColumn": 30,
+                    "result": "https://git.company.com:1368/plugins/gitiles/foo/bar/+/master/src/file.txt#10",
+                    "reverseRange": {
+                        "startLine": 10
+                    }
+                },
+                "multipleLines": {
+                    "startLine": 10,
+                    "startColumn": 20,
+                    "endLine": 30,
+                    "endColumn": 40,
+                    "result": "https://git.company.com:1368/plugins/gitiles/foo/bar/+/master/src/file.txt#10",
+                    "reverseRange": {
+                        "startLine": 10
+                    }
+                }
+            }
+        }
+    }
+}

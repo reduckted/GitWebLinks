@@ -115,7 +115,7 @@ export interface ReverseSelectionSettings {
     /**
      * The template to produce the one-based line number that the selection ends at.
      */
-    readonly endLine: Template;
+    readonly endLine?: Template;
 
     /**
      * The template to produce the one-based column number that the selection starts at.

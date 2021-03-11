@@ -249,25 +249,28 @@ describe('Link handlers', function () {
                 });
 
                 it('zero-width selection', async () => {
-                    await runSelectionTest('point', (test) => ({
-                        startLine: test.line,
-                        ...test.reverseRange
-                    }));
+                    await runSelectionTest(
+                        'point',
+                        (test) => test.reverseRange ?? { startLine: test.line }
+                    );
                 });
 
                 it('single-line selection', async () => {
-                    await runSelectionTest('singleLine', (test) => ({
-                        startLine: test.line,
-                        ...test.reverseRange
-                    }));
+                    await runSelectionTest(
+                        'singleLine',
+                        (test) => test.reverseRange ?? { startLine: test.line }
+                    );
                 });
 
                 it('multi-line selection', async () => {
-                    await runSelectionTest('multipleLines', (test) => ({
-                        startLine: test.startLine,
-                        endLine: test.endLine,
-                        ...test.reverseRange
-                    }));
+                    await runSelectionTest(
+                        'multipleLines',
+                        (test) =>
+                            test.reverseRange ?? {
+                                startLine: test.startLine,
+                                endLine: test.endLine
+                            }
+                    );
                 });
 
                 async function runUrlTest(
