@@ -3,9 +3,19 @@
     "name": "Azure Dev Ops Cloud",
     "server": [
         {
-            "pattern": "https:\\/\\/(?:.+@)?dev\\.azure\\.com\\/([^\\/]+)\\/([^\\/]+)\\/_git\\/.+",
-            "http": "https://dev.azure.com/{{ match[1] }}/{{ match[2] }}/_git",
-            "ssh": "git@ssh.dev.azure.com:v3/{{ match[1] }}/{{ match[2] }}"
+            "pattern": "http(s)?:\\/\\/(?:.+@)?dev\\.azure\\.com\\/([^\\/]+)\\/([^\\/]+)\\/_git\\/.+",
+            "http": "http{{ match[1] }}://dev.azure.com/{{ match[2] }}/{{ match[3] }}/_git",
+            "ssh": "git@ssh.dev.azure.com:v3/{{ match[2] }}/{{ match[3] }}"
+        },
+        {
+            "pattern": "http(s)?:\\/\\/([^\\/]+)\\/tfs\\/([^\\/]+)\\/([^\\/]+)\\/_git\\/.+",
+            "http": "http{{ match[1] }}://{{ match[2] }}/tfs/{{ match[3] }}/{{ match[4] }}/_git",
+            "ssh": ""
+        },
+        {
+            "pattern": "http(s)?:\\/\\/tfs\\.([^\\/]+)\\/([^\\/]+)\\/([^\\/]+)\\/_git\\/.+",
+            "http": "http{{ match[1] }}://tfs.{{ match[2] }}/{{ match[3] }}/{{ match[4] }}/_git",
+            "ssh": ""
         },
         {
             "pattern": "^(?:git@)?ssh\\.dev\\.azure\\.com:v3\\/([^\\/]+)\\/([^\\/]+)\\/.+$",
