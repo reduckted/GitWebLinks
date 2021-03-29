@@ -645,7 +645,7 @@ describe('GoToFileLinkCommand', () => {
         }
 
         if (folder.repository) {
-            currentRepository = { root: path, remote: folder.repository };
+            currentRepository = { root: path, remote: folder.repository, remoteName: 'origin' };
 
             if (currentWorkspace) {
                 let workspaceRepositories: Repository[];

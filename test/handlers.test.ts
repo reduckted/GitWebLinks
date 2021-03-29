@@ -167,7 +167,8 @@ describe('Link handlers', function () {
 
                     repository = {
                         root: root.path,
-                        remote
+                        remote,
+                        remoteName: 'origin'
                     };
 
                     handler = provider.select(repository);

@@ -48,7 +48,7 @@ describe('GetLinkCommand', () => {
 
         file = Uri.file('/foo/bar');
         folder = Uri.file('/foo');
-        repository = { root: folder.toString(), remote: 'http://example.com' };
+        repository = { root: folder.toString(), remote: 'http://example.com', remoteName: 'origin' };
 
         showErrorMessage = sinon
             .stub(window, 'showErrorMessage')
@@ -98,7 +98,7 @@ describe('GetLinkCommand', () => {
     });
 
     it('should show an error if the repository does not have a remote.', async () => {
-        repository = { root: folder.toString(), remote: undefined };
+        repository = { root: folder.toString(), remote: undefined, remoteName: undefined };
 
         command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
@@ -271,6 +271,6 @@ describe('GetLinkCommand', () => {
     }
 
     function getLinkTypes(): (LinkType | undefined)[] {
-        return ['commit', 'branch', 'defaultBranch', undefined];
+        return ['commit', 'branch', 'defaultBranch', 'customBranch', undefined];
     }
 });

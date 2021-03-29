@@ -94,6 +94,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(root.path)).to.deep.equal({
                 root: root.path,
+                remoteName: 'origin',
                 remote: 'https://github.com/example/repo'
             });
         });
@@ -108,6 +109,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(child)).to.deep.equal({
                 root: root.path,
+                remoteName: 'origin',
                 remote: 'https://github.com/example/repo'
             });
         });
@@ -123,6 +125,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(file)).to.deep.equal({
                 root: root.path,
+                remoteName: 'origin',
                 remote: 'https://github.com/example/repo'
             });
         });
@@ -135,6 +138,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(worktree.path)).to.deep.equal({
                 root: worktree.path,
+                remoteName: 'origin',
                 remote: 'https://github.com/example/repo'
             });
         });
@@ -147,6 +151,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(root.path)).to.deep.equal({
                 root: root.path,
+                remoteName: 'origin',
                 remote: 'https://github.com/example/repo'
             });
         });
@@ -159,6 +164,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(root.path)).to.deep.equal({
                 root: root.path,
+                remoteName: 'alpha',
                 remote: 'https://github.com/example/alpha'
             });
         });
@@ -268,9 +274,9 @@ describe('RepositoryFinder', function () {
             repositories.sort((x, y) => x.root.localeCompare(y.root));
 
             expect(repositories).to.deep.equal([
-                { root: alpha, remote: 'https://github.com/example/alpha' },
-                { root: beta, remote: undefined },
-                { root: gamma, remote: 'https://github.com/example/gamma' }
+                { root: alpha, remoteName: 'origin', remote: 'https://github.com/example/alpha' },
+                { root: beta, remoteName: undefined, remote: undefined },
+                { root: gamma, remoteName: 'origin', remote: 'https://github.com/example/gamma' }
             ]);
         });
 

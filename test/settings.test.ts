@@ -70,15 +70,15 @@ describe('Settings', () => {
         });
     });
 
-    describe('getDefaultBranch', () => {
+    describe('getCustomBranch', () => {
         it('should return "master" if there is no stored value.', () => {
-            setup({ defaultBranch: undefined });
-            expect(settings.getDefaultBranch()).to.equal('master');
+            setup({ customBranch: undefined });
+            expect(settings.getCustomBranch()).to.equal('master');
         });
 
         it('should return the stored value when it exists.', () => {
-            setup({ defaultBranch: 'foo' });
-            expect(settings.getDefaultBranch()).to.equal('foo');
+            setup({ customBranch: 'foo' });
+            expect(settings.getCustomBranch()).to.equal('foo');
         });
     });
 

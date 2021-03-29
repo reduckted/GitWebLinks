@@ -25,7 +25,8 @@ describe('LinkHandler', function () {
 
         repository = {
             root: root.path,
-            remote: 'http://example.com'
+            remote: 'http://example.com',
+            remoteName: 'origin'
         };
     });
 
@@ -73,12 +74,12 @@ describe('LinkHandler', function () {
             ).to.equal('foo');
         });
 
-        it('should use the default branch name as the "ref" value when the link type is "defaultBranch".', async () => {
-            sinon.stub(Settings.prototype, 'getDefaultBranch').returns('bar');
+        it('should use the custom branch name as the "ref" value when the link type is "customBranch".', async () => {
+            sinon.stub(Settings.prototype, 'getCustomBranch').returns('bar');
 
             await setupRepository(root.path);
 
-            expect(await createUrl({ url: '{{ ref }}' }, { type: 'defaultBranch' })).to.equal(
+            expect(await createUrl({ url: '{{ ref }}' }, { type: 'customBranch' })).to.equal(
                 'bar'
             );
         });
@@ -322,7 +323,8 @@ describe('LinkHandler', function () {
 
             repository = {
                 root: link,
-                remote: 'http://example.com'
+                remote: 'http://example.com',
+                remoteName: 'origin'
             };
 
             foo = path.join(real, 'foo.js');

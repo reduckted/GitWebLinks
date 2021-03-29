@@ -121,8 +121,8 @@ export class LinkHandler {
         data = {
             base: address.http,
             repository: this.getRepositoryPath(remote, address),
-            ref: await this.getRef(type, repository.root),
-            commit: await this.getRef('commit', repository.root),
+            ref: await this.getRef(type, repository.root, repository.remoteName),
+            commit: await this.getRef('commit', repository.root, repository.remoteName),
             file: await this.getRelativePath(repository.root, file.filePath),
             type: type === 'commit' ? 'commit' : 'branch',
             ...file.selection
@@ -211,9 +211,12 @@ export class LinkHandler {
      *
      * @param type The type of ref to get.
      * @param repositoryRoot The path to the root of the repository.
+     * @param remoteName The name of default remote.
      * @returns The ref to use.
      */
-    private async getRef(type: LinkType, repositoryRoot: string): Promise<string> {
+    private async getRef(type: LinkType, repositoryRoot: string, remoteName: string): Promise<string> {
+        const remoteBranch = new RegExp(`^${remoteName}/`);
+
         switch (type) {
             case 'branch':
                 return (await git(repositoryRoot, ...this.definition.branch, 'HEAD')).trim();
@@ -221,8 +224,11 @@ export class LinkHandler {
             case 'commit':
                 return (await git(repositoryRoot, 'rev-parse', 'HEAD')).trim();
 
+            case 'defaultBranch':
+                return (await git(repositoryRoot, ...this.definition.branch, remoteName)).replace(remoteBranch, '').trim()
+
             default:
-                return this.settings.getDefaultBranch();
+                return this.settings.getCustomBranch();
         }
     }
 

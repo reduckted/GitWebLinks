@@ -154,15 +154,14 @@ export class RepositoryFinder {
      * @returns The `Repository` object.
      */
     private async createRepository(root: string): Promise<Repository> {
-        let remote: string | undefined;
 
         log("Finding remote URL for '%s'...", root);
 
-        remote = await this.findRemote(root);
+        let remote = await this.findRemote(root);
 
         log("Remote URL is '%s'.", remote ?? '');
 
-        return { root, remote };
+        return { root, remoteName: remote?.name, remote: remote?.url };
     }
 
     /**
@@ -225,7 +224,7 @@ export class RepositoryFinder {
      * @param root The root of the repository.
      * @returns The URL of the "origin" remote if it exists, otherwise the first remote alphabetically, or `undefined` if there are no remotes.
      */
-    private async findRemote(root: string): Promise<string | undefined> {
+    private async findRemote(root: string): Promise<Remote | undefined> {
         let data: string;
         let remotes: Remote[];
         let remote: Remote;
@@ -249,7 +248,7 @@ export class RepositoryFinder {
             remote = remotes.sort((x, y) => x.name.localeCompare(y.name))[0];
         }
 
-        return remote?.url;
+        return remote;
     }
 
     /**

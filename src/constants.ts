@@ -6,7 +6,7 @@ export const EXTENSION = {
 export const CONFIGURATION = {
     section: EXTENSION.id,
     linkType: 'linkType',
-    defaultBranch: 'defaultBranch',
+    customBranch: 'customBranch',
     showCopy: 'showCopy',
     showOpen: 'showOpen'
 };

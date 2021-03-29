@@ -3,7 +3,7 @@ import { StaticServer } from './schema';
 /**
  * The type of link to generate.
  */
-export type LinkType = 'commit' | 'branch' | 'defaultBranch';
+export type LinkType = 'commit' | 'branch' | 'defaultBranch' | 'customBranch';
 
 /**
  * Information about a Git repository.
@@ -18,6 +18,11 @@ export interface Repository {
      * The URL to the default remote, or `undefined` if the repository has no remotes.
      */
     readonly remote: string | undefined;
+
+    /**
+     * The name of the default remote.
+     */
+    readonly remoteName: string | undefined;
 }
 
 /**
@@ -28,6 +33,11 @@ export type RepositoryWithRemote = Omit<Repository, 'remote'> & {
      * The URL of the default remote.
      */
     readonly remote: string;
+
+    /**
+     * The name of the default remote.
+     */
+    readonly remoteName: string;
 };
 
 /**

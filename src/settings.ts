@@ -40,18 +40,21 @@ export class Settings {
             case 'defaultBranch':
                 return 'defaultBranch';
 
+            case 'customBranch':
+                return 'customBranch';
+
             default:
                 return 'commit';
         }
     }
 
     /**
-     * Gets the name of the branch to use when producing a link for the default branch.
+     * Gets the name of the branch to use when producing a link for the custom branch.
      *
-     * @returns The name of the default branch.
+     * @returns The name of the custom branch.
      */
-    public getDefaultBranch(): string {
-        return this.getConfiguration().get<string>(CONFIGURATION.defaultBranch) ?? 'master';
+    public getCustomBranch(): string {
+        return this.getConfiguration().get<string>(CONFIGURATION.customBranch) ?? 'master';
     }
 
     /**
