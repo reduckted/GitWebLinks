@@ -9,8 +9,7 @@
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
         "plugin:jsdoc/recommended",
         "plugin:node/recommended",
-        "prettier",
-        "prettier/@typescript-eslint"
+        "prettier"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
