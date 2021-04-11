@@ -1,3 +1,13 @@
+# 2.5.0 (2021-04-11)
+
+## Changes
+
+-   ✨ The default branch is discovered using the the remote's `HEAD` ref (thanks @kvart714).
+
+## Maintenance
+
+-   🔨 Dependency updates.
+
 # 2.4.0 (2021-03-11)
 
 ## New Features

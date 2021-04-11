@@ -49,7 +49,7 @@ The current commit hash is the default format. This can be changed using the `gi
 "gitweblinks.linkType": "commit"
 ```
 
-The default branch can be specified using the `gitweblinks.defaultBranch` setting. The default value is "master".
+The default branch is found by using the remote's `HEAD` ref (for example, `origin/HEAD`), but you can specify a specific branch name to use as the default by using the `gitweblinks.defaultBranch` setting.
 
 ## Specifying a Link Format
 
