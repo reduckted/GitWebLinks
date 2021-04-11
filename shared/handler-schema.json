@@ -418,10 +418,10 @@
             "type": "string",
             "description": "The name of the settings property that defines the private server URLs.\n\nSpecifying this property indicates that the remote server is private."
         },
-        "branch": {
-            "type": "array",
-            "items": { "type": "string" },
-            "description": "The arguments to pass to Git to get the name of the current branch."
+        "branchRef": {
+            "type": "string",
+            "enum": ["abbreviated", "symbolic"],
+            "description": "The type of ref that is used for branch names."
         },
         "url": {
             "$ref": "#/definitions/template",

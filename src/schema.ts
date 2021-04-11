@@ -36,9 +36,9 @@ export interface HandlerDefinitionBase {
     readonly name: string;
 
     /**
-     * The arguments to pass to Git to get the name of the current branch.
+     * The type of ref used for branch names.
      */
-    readonly branch: string[];
+    readonly branchRef: 'abbreviated' | 'symbolic';
 
     /**
      * The template to build the URL of a file.

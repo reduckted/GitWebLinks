@@ -3,7 +3,7 @@ import { dirname, join } from 'path';
 
 import { git } from './git';
 import { log } from './log';
-import { Repository } from './types';
+import { Remote, Repository } from './types';
 import { getErrorMessage, isErrorCode } from './utilities';
 
 const IGNORED_DIRECTORIES: Set<string> = new Set(['node_modules', 'bin', 'obj']);
@@ -154,7 +154,7 @@ export class RepositoryFinder {
      * @returns The `Repository` object.
      */
     private async createRepository(root: string): Promise<Repository> {
-        let remote: string | undefined;
+        let remote: Remote | undefined;
 
         log("Finding remote URL for '%s'...", root);
 
@@ -223,9 +223,9 @@ export class RepositoryFinder {
      * Finds the remote URL to use for the repository.
      *
      * @param root The root of the repository.
-     * @returns The URL of the "origin" remote if it exists, otherwise the first remote alphabetically, or `undefined` if there are no remotes.
+     * @returns The details of the "origin" remote if it exists, otherwise the first remote alphabetically, or `undefined` if there are no remotes.
      */
-    private async findRemote(root: string): Promise<string | undefined> {
+    private async findRemote(root: string): Promise<Remote | undefined> {
         let data: string;
         let remotes: Remote[];
         let remote: Remote;
@@ -249,7 +249,7 @@ export class RepositoryFinder {
             remote = remotes.sort((x, y) => x.name.localeCompare(y.name))[0];
         }
 
-        return remote?.url;
+        return remote;
     }
 
     /**
@@ -268,19 +268,4 @@ export class RepositoryFinder {
 
         return { name, url };
     }
-}
-
-/**
- * A Git remote.
- */
-interface Remote {
-    /**
-     * The name of the remote.
-     */
-    name: string;
-
-    /**
-     * The URL of the remote.
-     */
-    url: string;
 }

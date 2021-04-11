@@ -13,7 +13,7 @@
             "ssh": "git@ssh.dev.azure.com:v3/{{ match[1] }}/{{ match[2] }}"
         }
     ],
-    "branch": ["rev-parse", "--abbrev-ref"],
+    "branchRef": "abbreviated",
     "url": "{{ base }}/{{ repository }}?path=%2F{{ file | encode_uri_component }}&version=G{{ type | slice:0,1 | upcase }}{{ ref | encode_uri_component }}",
     "selection": [
         "&line={{ startLine }}",

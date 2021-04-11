@@ -3,7 +3,9 @@ import * as path from 'path';
 
 import { git } from '../../src/git';
 
-export * from './directory';
+import { Directory } from './directory';
+
+export { Directory };
 export * from './mock-workspace';
 
 /**
@@ -33,6 +35,30 @@ export async function setupRepository(root: string): Promise<string> {
     await git(root, 'commit', '-m', '"initial"');
 
     return root;
+}
+
+/**
+ * Sets up a remote for a Git repository.
+ *
+ * @param root The root directory of the Git repository.
+ * @param name The name of the remote.
+ * @returns The `Directory` that the remote was created in.
+ */
+export async function setupRemote(root: string, name: string): Promise<Directory> {
+    let remote: Directory;
+
+    remote = await Directory.create();
+
+    try {
+        await git(remote.path, 'init', '--bare');
+        await git(root, 'remote', 'add', name, remote.path);
+        await git(root, 'push', name, 'master');
+
+        return remote;
+    } catch (ex) {
+        await remote.dispose();
+        throw ex;
+    }
 }
 
 /**

@@ -2,7 +2,7 @@
     "$schema": "../handler-schema.json",
     "name": "Gitiles",
     "private": "gitiles",
-    "branch": ["rev-parse", "--abbrev-ref"],
+    "branchRef": "abbreviated",
     "url": "{{ base }}/{{ repository }}/+/{{ ref | encode_uri }}/{{ file | encode_uri }}",
     "selection": "#{{ startLine }}",
     "reverse": {

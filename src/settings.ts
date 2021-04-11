@@ -48,10 +48,10 @@ export class Settings {
     /**
      * Gets the name of the branch to use when producing a link for the default branch.
      *
-     * @returns The name of the default branch.
+     * @returns The name of the default branch, or `undefined` if the default branch should be discovered automatically.
      */
-    public getDefaultBranch(): string {
-        return this.getConfiguration().get<string>(CONFIGURATION.defaultBranch) ?? 'master';
+    public getDefaultBranch(): string | undefined {
+        return this.getConfiguration().get<string>(CONFIGURATION.defaultBranch);
     }
 
     /**

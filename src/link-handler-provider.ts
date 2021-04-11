@@ -25,12 +25,12 @@ export class LinkHandlerProvider {
      * @returns The handler to use, or `undefined` if the repository is not supported.
      */
     public select(repository: RepositoryWithRemote): LinkHandler | undefined {
-        log("Finding a handler for repository '%s'.", repository.remote);
+        log('Finding a handler for repository %O.', repository.remote);
 
         for (let handler of this.handlers) {
             log("Testing '%s'.", handler.name);
 
-            if (handler.isMatch(repository.remote)) {
+            if (handler.isMatch(repository.remote.url)) {
                 log("Handler '%s' is a match.", handler.name);
                 return handler;
             }

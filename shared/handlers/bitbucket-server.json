@@ -2,7 +2,7 @@
     "$schema": "../handler-schema.json",
     "name": "Bitbucket Server",
     "private": "bitbucketServer",
-    "branch": ["symbolic-ref"],
+    "branchRef": "symbolic",
     "url": [
         "{% assign segments = repository | split: '/' | reverse %}",
         "{{ base }}/projects/{{ segments[1] }}/repos/{{ segments[0] }}/browse/{{ file | encode_uri }}?at={{ ref | encode_uri_component }}"

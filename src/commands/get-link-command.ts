@@ -3,6 +3,7 @@ import { commands, env, MessageItem, TextEditor, Uri, window } from 'vscode';
 import { LinkHandler } from '../link-handler';
 import { LinkHandlerProvider } from '../link-handler-provider';
 import { log } from '../log';
+import { NoRemoteHeadError } from '../no-remote-head-error';
 import { RepositoryFinder } from '../repository-finder';
 import { STRINGS } from '../strings';
 import { LinkType, Repository, RepositoryWithRemote, SelectedRange } from '../types';
@@ -98,7 +99,17 @@ export class GetLinkCommand {
                 }
             } catch (ex) {
                 log('Error while generating a link: %o', ex);
-                void window.showErrorMessage(STRINGS.getLinkCommand.error);
+
+                if (ex instanceof NoRemoteHeadError) {
+                    void window.showErrorMessage(
+                        STRINGS.getLinkCommand.noRemoteHead(
+                            info.repository.root,
+                            info.repository.remote.name
+                        )
+                    );
+                } else {
+                    void window.showErrorMessage(STRINGS.getLinkCommand.error);
+                }
             }
         }
     }
@@ -133,7 +144,7 @@ export class GetLinkCommand {
             log("No handler for remote '%s'.", repository.remote);
             void window
                 .showErrorMessage<ActionMessageItem>(
-                    STRINGS.getLinkCommand.noHandler(repository.remote),
+                    STRINGS.getLinkCommand.noHandler(repository.remote.url),
                     {
                         title: STRINGS.getLinkCommand.openSettings,
                         action: 'settings'

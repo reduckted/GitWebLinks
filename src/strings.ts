@@ -17,6 +17,13 @@ export const STRINGS = {
             format("The file '%s' is not tracked by Git.", file),
         noRemote: (repositoryRoot: string): string =>
             format("The repository '%s' does not have any remotes.", repositoryRoot),
+        noRemoteHead: (repositoryRoot: string, remoteName: string): string =>
+            format(
+                "The repository '%s' does not have a 'HEAD' ref for the '%s' remote. You can fix this by running the command: git remote set-head %s --auto",
+                repositoryRoot,
+                remoteName,
+                remoteName
+            ),
         noHandler: (remote: string): string =>
             format(
                 "The Git remote '%s' is not supported. If this is a private Git server, you may need to add the server address to the settings.",

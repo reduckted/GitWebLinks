@@ -5,7 +5,7 @@
         "http": "https://bitbucket.org",
         "ssh": "git@bitbucket.org"
     },
-    "branch": ["rev-parse", "--abbrev-ref"],
+    "branchRef": "abbreviated",
     "url": "{{ base }}/{{ repository }}/src/{{ commit | encode_uri }}/{{ file | encode_uri }}{% if type != 'commit' %}?at={{ ref | encode_uri_component }}{% endif %}",
     "selection": "#lines-{{ startLine }}{% if startLine != endLine %}:{{ endLine }}{% endif %}",
     "reverse": {

@@ -5,12 +5,13 @@ import * as sinon from 'sinon';
 
 import { git } from '../src/git';
 import { LinkHandler } from '../src/link-handler';
+import { NoRemoteHeadError } from '../src/no-remote-head-error';
 import { HandlerDefinition, ReverseSettings } from '../src/schema';
 import { Settings } from '../src/settings';
 import { LinkOptions, LinkType, RepositoryWithRemote, UrlInfo } from '../src/types';
 import { isErrorCode } from '../src/utilities';
 
-import { Directory, markAsSlow, setupRepository } from './helpers';
+import { Directory, markAsSlow, setupRemote, setupRepository } from './helpers';
 
 describe('LinkHandler', function () {
     let repository: RepositoryWithRemote;
@@ -25,7 +26,7 @@ describe('LinkHandler', function () {
 
         repository = {
             root: root.path,
-            remote: 'http://example.com'
+            remote: { url: 'http://example.com', name: 'origin' }
         };
     });
 
@@ -66,14 +67,14 @@ describe('LinkHandler', function () {
                 await createUrl(
                     {
                         url: '{{ ref }}',
-                        branch: ['rev-parse', '--abbrev-ref']
+                        branchRef: 'abbreviated'
                     },
                     { type: 'branch' }
                 )
             ).to.equal('foo');
         });
 
-        it('should use the default branch name as the "ref" value when the link type is "defaultBranch".', async () => {
+        it('should use the default branch name as the "ref" value when the link type is "defaultBranch" and a default branch is specified.', async () => {
             sinon.stub(Settings.prototype, 'getDefaultBranch').returns('bar');
 
             await setupRepository(root.path);
@@ -83,8 +84,55 @@ describe('LinkHandler', function () {
             );
         });
 
+        it('should throw an error when the link type is "defaultBranch" and the remote does not have a HEAD ref.', async () => {
+            let origin: Directory;
+
+            sinon.stub(Settings.prototype, 'getDefaultBranch').returns('');
+
+            await setupRepository(root.path);
+            origin = await setupRemote(root.path, 'origin');
+
+            try {
+                try {
+                    await createUrl({ url: '{{ ref }}' }, { type: 'defaultBranch' });
+                    expect.fail('Expected an error to be thrown.');
+                } catch (ex) {
+                    expect(ex).to.be.instanceOf(NoRemoteHeadError);
+                }
+            } finally {
+                await origin.dispose();
+            }
+        });
+
+        it('should use the default branch of the remote as the "ref" value when the link type is "defaultBranch", a default branch is not specified and the remote has a HEAD ref.', async () => {
+            let origin: Directory;
+
+            sinon.stub(Settings.prototype, 'getDefaultBranch').returns('');
+
+            await setupRepository(root.path);
+            await git(root.path, 'checkout', '-b', 'foo');
+
+            origin = await setupRemote(root.path, 'origin');
+
+            try {
+                await git(root.path, 'remote', 'set-head', 'origin', 'master');
+
+                expect(
+                    await createUrl(
+                        { url: '{{ ref }}', branchRef: 'abbreviated' },
+                        { type: 'defaultBranch' }
+                    )
+                ).to.equal('master');
+            } finally {
+                await origin.dispose();
+            }
+        });
+
         it('should handle the matching server HTTP address ending with a slash.', async () => {
-            repository = { ...repository, remote: 'http://example.com/foo/bar' };
+            repository = {
+                ...repository,
+                remote: { url: 'http://example.com/foo/bar', name: 'origin' }
+            };
 
             await setupRepository(root.path);
 
@@ -100,7 +148,10 @@ describe('LinkHandler', function () {
         });
 
         it('should handle the matching server HTTP address not ending with a slash.', async () => {
-            repository = { ...repository, remote: 'http://example.com/foo/bar' };
+            repository = {
+                ...repository,
+                remote: { url: 'http://example.com/foo/bar', name: 'origin' }
+            };
 
             await setupRepository(root.path);
 
@@ -116,7 +167,10 @@ describe('LinkHandler', function () {
         });
 
         it('should handle the matching server SSH address ending with a slash.', async () => {
-            repository = { ...repository, remote: 'ssh://git@example.com:foo/bar' };
+            repository = {
+                ...repository,
+                remote: { url: 'ssh://git@example.com:foo/bar', name: 'origin' }
+            };
 
             await setupRepository(root.path);
 
@@ -132,7 +186,10 @@ describe('LinkHandler', function () {
         });
 
         it('should handle the matching server SSH address not ending with a slash.', async () => {
-            repository = { ...repository, remote: 'ssh://git@example.com:foo/bar' };
+            repository = {
+                ...repository,
+                remote: { url: 'ssh://git@example.com:foo/bar', name: 'origin' }
+            };
 
             await setupRepository(root.path);
 
@@ -148,7 +205,10 @@ describe('LinkHandler', function () {
         });
 
         it('should handle the matching server SSH address not ending with a colon.', async () => {
-            repository = { ...repository, remote: 'ssh://git@example.com:foo/bar' };
+            repository = {
+                ...repository,
+                remote: { url: 'ssh://git@example.com:foo/bar', name: 'origin' }
+            };
 
             await setupRepository(root.path);
 
@@ -164,7 +224,10 @@ describe('LinkHandler', function () {
         });
 
         it('should handle the matching server SSH address ending with a colon.', async () => {
-            repository = { ...repository, remote: 'ssh://git@example.com:foo/bar' };
+            repository = {
+                ...repository,
+                remote: { url: 'ssh://git@example.com:foo/bar', name: 'origin' }
+            };
 
             await setupRepository(root.path);
 
@@ -180,7 +243,10 @@ describe('LinkHandler', function () {
         });
 
         it('should trim ".git" from the end of the repository path.', async () => {
-            repository = { ...repository, remote: 'http://example.com/foo/bar.git' };
+            repository = {
+                ...repository,
+                remote: { url: 'http://example.com/foo/bar.git', name: 'origin' }
+            };
 
             await setupRepository(root.path);
 
@@ -196,7 +262,10 @@ describe('LinkHandler', function () {
         });
 
         it('should handle SSH URL with a protocol.', async () => {
-            repository = { ...repository, remote: 'git@example.com:foo/bar' };
+            repository = {
+                ...repository,
+                remote: { url: 'git@example.com:foo/bar', name: 'origin' }
+            };
 
             await setupRepository(root.path);
 
@@ -212,7 +281,10 @@ describe('LinkHandler', function () {
         });
 
         it('should handle SSH URL without a protocol.', async () => {
-            repository = { ...repository, remote: 'git@example.com:foo/bar' };
+            repository = {
+                ...repository,
+                remote: { url: 'git@example.com:foo/bar', name: 'origin' }
+            };
 
             await setupRepository(root.path);
 
@@ -228,7 +300,10 @@ describe('LinkHandler', function () {
         });
 
         it('should handle SSH with "git@".', async () => {
-            repository = { ...repository, remote: 'git@example.com:foo/bar' };
+            repository = {
+                ...repository,
+                remote: { url: 'git@example.com:foo/bar', name: 'origin' }
+            };
 
             await setupRepository(root.path);
 
@@ -244,7 +319,10 @@ describe('LinkHandler', function () {
         });
 
         it('should handle SSH without "git@".', async () => {
-            repository = { ...repository, remote: 'git@example.com:foo/bar' };
+            repository = {
+                ...repository,
+                remote: { url: 'git@example.com:foo/bar', name: 'origin' }
+            };
 
             await setupRepository(root.path);
 
@@ -322,7 +400,7 @@ describe('LinkHandler', function () {
 
             repository = {
                 root: link,
-                remote: 'http://example.com'
+                remote: { url: 'http://example.com', name: 'origin' }
             };
 
             foo = path.join(real, 'foo.js');
@@ -353,7 +431,7 @@ describe('LinkHandler', function () {
             return new LinkHandler({
                 name: 'Test',
                 server: { http: 'http://example.com', ssh: 'ssh://example.com' },
-                branch: ['rev-parse'],
+                branchRef: 'abbreviated',
                 url: '',
                 selection: '',
                 ...definition,
@@ -484,7 +562,7 @@ describe('LinkHandler', function () {
             return new LinkHandler({
                 name: 'Test',
                 server: { http: 'http://example.com', ssh: 'ssh://example.com' },
-                branch: ['rev-parse'],
+                branchRef: 'abbreviated',
                 url: '',
                 selection: '',
                 reverse: {

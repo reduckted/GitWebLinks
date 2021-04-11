@@ -2,6 +2,7 @@ import { promises as fs, Stats } from 'fs';
 import * as path from 'path';
 
 import { git } from './git';
+import { NoRemoteHeadError } from './no-remote-head-error';
 import { RemoteServer } from './remote-server';
 import {
     HandlerDefinition,
@@ -114,15 +115,15 @@ export class LinkHandler {
 
         // Adjust the remote URL so that it's in a
         // standard format that we can manipulate.
-        remote = normalizeUrl(repository.remote);
+        remote = normalizeUrl(repository.remote.url);
 
         address = this.getAddress(remote);
 
         data = {
             base: address.http,
             repository: this.getRepositoryPath(remote, address),
-            ref: await this.getRef(type, repository.root),
-            commit: await this.getRef('commit', repository.root),
+            ref: await this.getRef(type, repository),
+            commit: await this.getRef('commit', repository),
             file: await this.getRelativePath(repository.root, file.filePath),
             type: type === 'commit' ? 'commit' : 'branch',
             ...file.selection
@@ -210,19 +211,96 @@ export class LinkHandler {
      * Gets the ref to use when creating the link.
      *
      * @param type The type of ref to get.
-     * @param repositoryRoot The path to the root of the repository.
+     * @param repository The repository.
      * @returns The ref to use.
      */
-    private async getRef(type: LinkType, repositoryRoot: string): Promise<string> {
+    private async getRef(type: LinkType, repository: RepositoryWithRemote): Promise<string> {
         switch (type) {
             case 'branch':
-                return (await git(repositoryRoot, ...this.definition.branch, 'HEAD')).trim();
-
+                return (
+                    await git(
+                        repository.root,
+                        'rev-parse',
+                        this.getRevParseOutputArgument(),
+                        'HEAD'
+                    )
+                ).trim();
             case 'commit':
-                return (await git(repositoryRoot, 'rev-parse', 'HEAD')).trim();
+                return (await git(repository.root, 'rev-parse', 'HEAD')).trim();
 
             default:
-                return this.settings.getDefaultBranch();
+                // Use the default branch if one is specified in the settings; otherwise find the
+                // name of the default branch by getting the name of the "remote_name/HEAD" ref.
+                return (
+                    this.settings.getDefaultBranch() ||
+                    (await this.getDefaultRemoteBranch(repository))
+                );
+        }
+    }
+
+    /**
+     * Gets the name of the default branch in the remote.
+     *
+     * @param repository The repository.
+     * @returns The name of the default branch.
+     */
+    private async getDefaultRemoteBranch(repository: RepositoryWithRemote): Promise<string> {
+        let branch: string;
+
+        try {
+            branch = (
+                await git(
+                    repository.root,
+                    'rev-parse',
+                    this.getRevParseOutputArgument(),
+                    `${repository.remote.name}/HEAD`
+                )
+            ).trim();
+        } catch (ex) {
+            throw new NoRemoteHeadError(getErrorMessage(ex));
+        }
+
+        switch (this.definition.branchRef) {
+            case 'abbreviated':
+                // The branch name will be "remote_name/branch_name",
+                // but we only want the "branch_name" part.
+                return branch.slice(repository.remote.name.length + 1);
+
+            case 'symbolic':
+                // The branch name will be "refs/remotes/remote_name/branch_name",
+                // but we want it to be "refs/heads/branch_name".
+                return branch.replace(
+                    new RegExp(`^refs\\/remotes\\/${this.escapeRegExp(repository.remote.name)}\\/`),
+                    'refs/heads/'
+                );
+
+            default:
+                return branch;
+        }
+    }
+
+    /**
+     * Escapes a value that can then be used in a Regular Expression.
+     *
+     * @param value The value to escape.
+     * @returns The escaped value.
+     */
+    private escapeRegExp(value: string): string {
+        return value.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
+
+    /**
+     * Gets the argument to use with `git rev-parse` to specify the output.
+     *
+     * @returns The argument to use.
+     */
+    private getRevParseOutputArgument(): string {
+        switch (this.definition.branchRef) {
+            case 'symbolic':
+                return '--symbolic-full-name';
+
+            default:
+                return '--abbrev-ref';
         }
     }
 

@@ -274,7 +274,7 @@ export class GoToFileCommand {
      */
     private isMatchingRepository(repository: Repository, server: StaticServer): boolean {
         if (repository.remote) {
-            if (new RemoteServer(server).match(repository.remote)) {
+            if (new RemoteServer(server).match(repository.remote.url)) {
                 return true;
             }
         }

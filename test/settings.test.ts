@@ -71,9 +71,9 @@ describe('Settings', () => {
     });
 
     describe('getDefaultBranch', () => {
-        it('should return "master" if there is no stored value.', () => {
+        it('should return undefined if there is no stored value.', () => {
             setup({ defaultBranch: undefined });
-            expect(settings.getDefaultBranch()).to.equal('master');
+            expect(settings.getDefaultBranch()).to.be.undefined;
         });
 
         it('should return the stored value when it exists.', () => {

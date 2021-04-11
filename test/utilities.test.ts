@@ -5,7 +5,7 @@ import { hasRemote, normalizeUrl } from '../src/utilities';
 describe('utilities', () => {
     describe('hasRemote', () => {
         it('returns true when repository has a remote.', () => {
-            expect(hasRemote({ remote: 'a', root: 'b' })).to.be.true;
+            expect(hasRemote({ remote: { url: 'a', name: 'origin' }, root: 'b' })).to.be.true;
         });
 
         it('returns false when repository does not have a remote.', () => {

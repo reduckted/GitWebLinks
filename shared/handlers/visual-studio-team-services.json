@@ -13,7 +13,7 @@
             "ssh": "{{ match[1] }}@vs-ssh.visualstudio.com:22{% if match[2] %}/{{ match[2] }}{% endif %}/_ssh"
         }
     ],
-    "branch": ["rev-parse", "--abbrev-ref"],
+    "branchRef": "abbreviated",
     "url": [
         "{{ base }}/{{ repository }}",
         "?path=%2F{{ file | encode_uri_component }}",

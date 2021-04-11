@@ -17,7 +17,7 @@ export interface Repository {
     /**
      * The URL to the default remote, or `undefined` if the repository has no remotes.
      */
-    readonly remote: string | undefined;
+    readonly remote: Remote | undefined;
 }
 
 /**
@@ -27,8 +27,23 @@ export type RepositoryWithRemote = Omit<Repository, 'remote'> & {
     /**
      * The URL of the default remote.
      */
-    readonly remote: string;
+    readonly remote: Remote;
 };
+
+/**
+ * A Git remote.
+ */
+export interface Remote {
+    /**
+     * The name of the remote.
+     */
+    readonly name: string;
+
+    /**
+     * The URL of the remote.
+     */
+    readonly url: string;
+}
 
 /**
  * Defines a selected range in a file.

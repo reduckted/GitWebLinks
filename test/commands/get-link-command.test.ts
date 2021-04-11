@@ -35,7 +35,7 @@ describe('GetLinkCommand', () => {
         handler = new LinkHandler({
             name: 'Test',
             server: { http: 'http://example.com', ssh: 'ssh://example.com' },
-            branch: ['rev-parse'],
+            branchRef: 'abbreviated',
             url: '',
             selection: '',
             reverse: {
@@ -48,7 +48,10 @@ describe('GetLinkCommand', () => {
 
         file = Uri.file('/foo/bar');
         folder = Uri.file('/foo');
-        repository = { root: folder.toString(), remote: 'http://example.com' };
+        repository = {
+            root: folder.toString(),
+            remote: { url: 'http://example.com', name: 'origin' }
+        };
 
         showErrorMessage = sinon
             .stub(window, 'showErrorMessage')
@@ -112,7 +115,7 @@ describe('GetLinkCommand', () => {
         command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
-        expectError(STRINGS.getLinkCommand.noHandler(repository?.remote ?? ''));
+        expectError(STRINGS.getLinkCommand.noHandler(repository?.remote?.url ?? ''));
     });
 
     it('should use the active text editor to get the file when no resource was specified.', async () => {

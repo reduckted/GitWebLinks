@@ -5,7 +5,7 @@
         "http": "https://github.com",
         "ssh": "git@github.com"
     },
-    "branch": ["rev-parse", "--abbrev-ref"],
+    "branchRef": "abbreviated",
     "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri }}",
     "selection": "#L{{ startLine }}{% if startLine != endLine %}-L{{ endLine }}{% endif %}",
     "reverse": {

@@ -94,7 +94,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(root.path)).to.deep.equal({
                 root: root.path,
-                remote: 'https://github.com/example/repo'
+                remote: { url: 'https://github.com/example/repo', name: 'origin' }
             });
         });
 
@@ -108,7 +108,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(child)).to.deep.equal({
                 root: root.path,
-                remote: 'https://github.com/example/repo'
+                remote: { url: 'https://github.com/example/repo', name: 'origin' }
             });
         });
 
@@ -123,7 +123,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(file)).to.deep.equal({
                 root: root.path,
-                remote: 'https://github.com/example/repo'
+                remote: { url: 'https://github.com/example/repo', name: 'origin' }
             });
         });
 
@@ -135,7 +135,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(worktree.path)).to.deep.equal({
                 root: worktree.path,
-                remote: 'https://github.com/example/repo'
+                remote: { url: 'https://github.com/example/repo', name: 'origin' }
             });
         });
 
@@ -147,7 +147,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(root.path)).to.deep.equal({
                 root: root.path,
-                remote: 'https://github.com/example/repo'
+                remote: { url: 'https://github.com/example/repo', name: 'origin' }
             });
         });
 
@@ -159,7 +159,7 @@ describe('RepositoryFinder', function () {
 
             expect(await finder.findRepository(root.path)).to.deep.equal({
                 root: root.path,
-                remote: 'https://github.com/example/alpha'
+                remote: { url: 'https://github.com/example/alpha', name: 'alpha' }
             });
         });
     });
@@ -268,9 +268,12 @@ describe('RepositoryFinder', function () {
             repositories.sort((x, y) => x.root.localeCompare(y.root));
 
             expect(repositories).to.deep.equal([
-                { root: alpha, remote: 'https://github.com/example/alpha' },
+                {
+                    root: alpha,
+                    remote: { url: 'https://github.com/example/alpha', name: 'origin' }
+                },
                 { root: beta, remote: undefined },
-                { root: gamma, remote: 'https://github.com/example/gamma' }
+                { root: gamma, remote: { url: 'https://github.com/example/gamma', name: 'origin' } }
             ]);
         });
 

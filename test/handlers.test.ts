@@ -11,7 +11,7 @@ import { parseTemplate } from '../src/templates';
 import { LinkOptions, RepositoryWithRemote, SelectedRange, UrlInfo } from '../src/types';
 import { normalizeUrl } from '../src/utilities';
 
-import { Directory, markAsSlow, setupRepository } from './helpers';
+import { Directory, markAsSlow, setupRemote, setupRepository } from './helpers';
 import {
     HandlerWithTests,
     RemoteUrlTests,
@@ -32,6 +32,7 @@ definitions = load<HandlerWithTests>().sort();
 describe('Link handlers', function () {
     let provider: LinkHandlerProvider;
     let root: Directory;
+    let remote: Directory | undefined;
 
     // We need to create repositories, so mark the
     // tests as being a bit slower than other tests.
@@ -49,6 +50,10 @@ describe('Link handlers', function () {
     afterEach(async () => {
         sinon.restore();
         await root.dispose();
+
+        if (remote) {
+            await remote.dispose();
+        }
     });
 
     definitions.forEach((definition) => {
@@ -80,6 +85,22 @@ describe('Link handlers', function () {
 
                 it('commit', async () => {
                     await runUrlTest('commit', { type: 'commit' });
+                });
+
+                it('default branch', async () => {
+                    await runTest(
+                        {
+                            settings: definition.tests.createUrl.remotes.settings,
+                            remote: definition.tests.createUrl.remotes.http,
+                            result: definition.tests.createUrl.remotes.result
+                        },
+                        {
+                            type: 'defaultBranch',
+                            remoteName: 'origin',
+                            // Run with a different branch to confirm that the remote's default branch is used.
+                            branch: TEST_BRANCH_NAME
+                        }
+                    );
                 });
 
                 definition.tests.createUrl.misc?.forEach((test) => {
@@ -167,7 +188,7 @@ describe('Link handlers', function () {
 
                     repository = {
                         root: root.path,
-                        remote
+                        remote: { url: remote, name: 'origin' }
                     };
 
                     handler = provider.select(repository);
@@ -193,6 +214,7 @@ describe('Link handlers', function () {
                     fileName?: string;
                     branch?: string;
                     selection?: SelectedRange;
+                    remoteName?: string;
                 }
             });
 
@@ -362,12 +384,17 @@ describe('Link handlers', function () {
             async function prepareTest(
                 settings: TestSettings | undefined,
                 url: Template,
-                options: { branch?: string }
+                options: { branch?: string; remoteName?: string }
             ): Promise<string> {
                 setupSettings(settings);
 
                 if (options.branch) {
                     await git(root.path, 'checkout', '-b', options.branch);
+                }
+
+                if (options.remoteName) {
+                    remote = await setupRemote(root.path, options.remoteName);
+                    await git(root.path, 'remote', 'set-head', options.remoteName, 'master');
                 }
 
                 // Treat the test URL as a template and allow
