@@ -146,7 +146,7 @@ This is good if you only need the link to be useful for a short period of time (
 
 ### `defaultBranch`
 
-This will create a link using the name of the default branch, rather than the name of the branch that is currently checked out. The name of the default branch can be set using the `gitweblinks.defaultBranch` setting (the default is "master").
+This will create a link using the name of the default branch, rather than the name of the branch that is currently checked out. The name of the default branch is discovered using the remote's `HEAD` ref, but you can also choose a specific branch name to use by setting the `gitweblinks.defaultBranch` setting.
 
 Like the "branch" type, this type of link is also useful for sharing via email or instant messaging, but because it uses the default branch name rather than the name of the current branch, it's particularly useful if you've created a branch locally that does not exist on the server.
 
