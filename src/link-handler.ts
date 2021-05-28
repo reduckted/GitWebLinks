@@ -34,7 +34,6 @@ export class LinkHandler {
 
     /**
      * @constructor
-     *
      * @param definition The details of the handler.
      */
     constructor(private readonly definition: HandlerDefinition) {
