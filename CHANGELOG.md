@@ -1,4 +1,4 @@
-# Unreleased
+# 2.5.1 (2021-07-10)
 
 ## Changes
 
