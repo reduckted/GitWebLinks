@@ -1,3 +1,9 @@
+# Unreleased
+
+## Changes
+
+-   🐛 GitHub links now prevent markdown files from being rendered.
+
 # 2.5.0 (2021-04-11)
 
 ## Changes

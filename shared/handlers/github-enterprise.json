@@ -3,7 +3,7 @@
     "name": "GitHub Enterprise",
     "private": "gitHubEnterprise",
     "branchRef": "abbreviated",
-    "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri }}",
+    "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri }}?plain=1",
     "selection": "#L{{ startLine }}{% if startLine != endLine %}-L{{ endLine }}{% endif %}",
     "reverse": {
         "pattern": [
@@ -11,7 +11,7 @@
             "/(?<repository>[^/]+)",
             "/blob",
             "/(?:[^/]+)",
-            "/(?<file>[^#]+)",
+            "/(?<file>[^#?]+)",
             "(?:\\?[^#]*)?",
             "(?:#L(?<start>\\d+)(?:-L(?<end>\\d+))?)?"
         ],
@@ -41,38 +41,38 @@
                 "httpWithUsername": "https://username@local-github.server:8080/context/foo/bar.git",
                 "ssh": "git@local-github.server:foo/bar.git",
                 "sshWithProtocol": "ssh://git@local-github.server:foo/bar.git",
-                "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt"
+                "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt?plain=1"
             },
             "spaces": {
                 "remote": "https://local-github.server:8080/context/foo/bar.git",
-                "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/path%20spaces/file%20spaces.txt"
+                "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/path%20spaces/file%20spaces.txt?plain=1"
             },
             "branch": {
                 "remote": "https://local-github.server:8080/context/foo/bar.git",
-                "result": "https://local-github.server:8080/context/foo/bar/blob/feature/test/src/file.txt"
+                "result": "https://local-github.server:8080/context/foo/bar/blob/feature/test/src/file.txt?plain=1"
             },
             "commit": {
                 "remote": "https://local-github.server:8080/context/foo/bar.git",
-                "result": "https://local-github.server:8080/context/foo/bar/blob/{{ commit }}/src/file.txt"
+                "result": "https://local-github.server:8080/context/foo/bar/blob/{{ commit }}/src/file.txt?plain=1"
             },
             "selection": {
                 "remote": "https://local-github.server:8080/context/foo/bar.git",
                 "point": {
                     "line": 10,
-                    "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt#L10"
+                    "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt?plain=1#L10"
                 },
                 "singleLine": {
                     "line": 10,
                     "startColumn": 20,
                     "endColumn": 30,
-                    "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt#L10"
+                    "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt?plain=1#L10"
                 },
                 "multipleLines": {
                     "startLine": 10,
                     "startColumn": 20,
                     "endLine": 30,
                     "endColumn": 40,
-                    "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt#L10-L30"
+                    "result": "https://local-github.server:8080/context/foo/bar/blob/master/src/file.txt?plain=1#L10-L30"
                 }
             }
         }
