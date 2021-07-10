@@ -1,6 +1,8 @@
+import assert = require('assert');
 import { expect } from 'chai';
+import { commands, Position, Selection, TextEditor, window } from 'vscode';
 
-import { hasRemote, normalizeUrl } from '../src/utilities';
+import { getSelectedRange, hasRemote, normalizeUrl, toSelection } from '../src/utilities';
 
 describe('utilities', () => {
     describe('hasRemote', () => {
@@ -48,6 +50,80 @@ describe('utilities', () => {
 
         it('should remove the trailing slash from SSH URLs.', () => {
             expect(normalizeUrl('ssh://example.com/')).to.equal('example.com');
+        });
+    });
+
+    describe('getSelectedRange', () => {
+        let editor: TextEditor;
+
+        before(async () => {
+            await commands.executeCommand('openEditors.newUntitledFile');
+
+            assert(window.activeTextEditor !== undefined);
+            editor = window.activeTextEditor;
+
+            await editor.edit((b) => {
+                b.insert(
+                    new Position(0, 0),
+                    ['first line', 'second', 'third', 'fourth line', 'fifth'].join('\n')
+                );
+            });
+        });
+
+        after(async () => {
+            await commands.executeCommand('workbench.action.closeActiveEditor');
+        });
+
+        it('should convert to one-based values.', () => {
+            editor.selection = new Selection(new Position(1, 2), new Position(3, 4));
+
+            expect(getSelectedRange(editor)).to.deep.equal({
+                startLine: 2,
+                startColumn: 3,
+                endLine: 4,
+                endColumn: 5
+            });
+        });
+
+        it('should return correct value when selection is single point at the start of the line.', () => {
+            editor.selection = new Selection(new Position(1, 0), new Position(1, 0));
+
+            expect(getSelectedRange(editor)).to.deep.equal({
+                startLine: 2,
+                startColumn: 1,
+                endLine: 2,
+                endColumn: 1
+            });
+        });
+
+        it('should return correct value when selection is a single line.', () => {
+            editor.selection = new Selection(new Position(3, 2), new Position(3, 5));
+
+            expect(getSelectedRange(editor)).to.deep.equal({
+                startLine: 4,
+                startColumn: 3,
+                endLine: 4,
+                endColumn: 6
+            });
+        });
+
+        it('should exclude the last line if selection ends at the start of a new line.', () => {
+            editor.selection = new Selection(new Position(2, 0), new Position(3, 0));
+
+            expect(getSelectedRange(editor)).to.deep.equal({
+                startLine: 3,
+                startColumn: 1,
+                endLine: 3,
+                endColumn: 6
+            });
+        });
+    });
+
+    describe('toSelection', () => {
+        it('should convert to zero-based values.', () => {
+            expect(
+                toSelection({ startLine: 10, startColumn: 20, endLine: 30, endColumn: 40 })
+            ).to.deep.equal(new Selection(new Position(9, 19), new Position(29, 39)));
         });
     });
 });

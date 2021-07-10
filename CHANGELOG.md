@@ -3,6 +3,7 @@
 ## Changes
 
 -   🐛 GitHub links now prevent markdown files from being rendered.
+-   🐛 Selections that end at the start of a new line are adjusted to end at the end of the previous line.
 
 # 2.5.0 (2021-04-11)
 

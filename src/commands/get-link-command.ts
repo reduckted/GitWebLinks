@@ -7,7 +7,7 @@ import { NoRemoteHeadError } from '../no-remote-head-error';
 import { RepositoryFinder } from '../repository-finder';
 import { STRINGS } from '../strings';
 import { LinkType, Repository, RepositoryWithRemote, SelectedRange } from '../types';
-import { hasRemote, toSelectedRange } from '../utilities';
+import { getSelectedRange, hasRemote } from '../utilities';
 
 /**
  * The command to get a URL from a file.
@@ -62,7 +62,7 @@ export class GetLinkCommand {
                 // selection from the active editor, so we'll only include the selection
                 // if the file we are generating the link for is in the active editor.
                 if (resource.toString() === editor?.document.uri.toString()) {
-                    selection = toSelectedRange(editor.selection);
+                    selection = getSelectedRange(editor);
                     log('Line selection: %o', selection);
                 }
             }

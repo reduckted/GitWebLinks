@@ -1,4 +1,4 @@
-import { Position, Selection } from 'vscode';
+import { Position, Selection, TextEditor } from 'vscode';
 
 import { Repository, RepositoryWithRemote, SelectedRange } from './types';
 
@@ -96,19 +96,31 @@ function hasMessage(err: unknown): err is { message: string } {
 }
 
 /**
- * Converts a `Selection` to a `SelectedRange`.
+ * Gets the `SelectedRange` from the editor's selection.
  *
- * @param selection The selection to convert.
+ * @param editor The editor to get the selection from.
  * @returns The selected range.
  */
-export function toSelectedRange(selection: Selection): SelectedRange {
+export function getSelectedRange(editor: TextEditor): SelectedRange {
+    let start: Position;
+    let end: Position;
+
+    start = editor.selection.start;
+    end = editor.selection.end;
+
+    // If the selection ends at the start of a new line,
+    // then change it to end at the end of the previous line.
+    if (end.line > start.line && end.character === 0) {
+        end = editor.document.lineAt(end.line - 1).range.end;
+    }
+
     // The line numbers are zero-based in the editor,
     // but we need them to be one-based for URLs.
     return {
-        startLine: selection.start.line + 1,
-        endLine: selection.end.line + 1,
-        startColumn: selection.start.character + 1,
-        endColumn: selection.end.character + 1
+        startLine: start.line + 1,
+        endLine: end.line + 1,
+        startColumn: start.character + 1,
+        endColumn: end.character + 1
     };
 }
 
