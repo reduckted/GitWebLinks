@@ -95,7 +95,7 @@ export class GetLinkCommand {
                         break;
 
                     case 'open':
-                        void env.openExternal(Uri.parse(link));
+                        openExternal(link);
                 }
             } catch (ex) {
                 log('Error while generating a link: %o', ex);
@@ -171,10 +171,27 @@ export class GetLinkCommand {
 
             case 'open':
                 if (link) {
-                    void env.openExternal(Uri.parse(link));
+                    openExternal(link);
                 }
                 break;
         }
+    }
+}
+
+/**
+ * A wrapper around `env.openExternal()` to handle a bug in VS Code.
+ *
+ * @param link The link to open.
+ */
+function openExternal(link: string): void {
+    try {
+        // @ts-expect-error: VS Code seems to decode and re-encode the URI, which causes certain
+        // characters to be unescaped and breaks the URL. A a hack, we can try passing a string
+        // instead of a URI. If that throws an error, then we'll fall back to passing a URI.
+        // https://github.com/microsoft/vscode/issues/85930
+        void env.openExternal(link);
+    } catch {
+        void env.openExternal(Uri.parse(link));
     }
 }
 

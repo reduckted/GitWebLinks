@@ -10,8 +10,10 @@ const engine: Liquid = new Liquid({
 engine.filters.set('filename', posix.basename);
 engine.filters.set('encode_uri', encodeURI);
 engine.filters.set('encode_uri_component', encodeURIComponent);
+engine.filters.set('encode_uri_component_segments', encodeURIComponentSegments);
 engine.filters.set('decode_uri', decodeURI);
 engine.filters.set('decode_uri_component', decodeURIComponent);
+engine.filters.set('decode_uri_component_segments', decodeURIComponentSegments);
 
 /**
  * Parses the given template.
@@ -55,6 +57,29 @@ export function parseTemplate(template: Template | undefined): ParsedTemplate | 
     return {
         render: (props) => engine.renderSync(parsed, props) as string // eslint-disable-line node/no-sync
     };
+}
+
+/**
+ * A template filter that splits the value into path segments (at the '/' character)
+ * and applies `encodeURIComponent` on each segment before joining the segments back together.
+ *
+ * @param value The value to transform.
+ * @returns The transformed value.
+ */
+function encodeURIComponentSegments(value: string): string {
+    // Split the value into path segments so that
+    // `encodeURIComponent` doesn't encode the '/' character.
+    return value.split('/').map(encodeURIComponent).join('/');
+}
+
+/**
+ * A template filter that reverses `encodeURIComponentSegments`.
+ *
+ * @param value The value to transform.
+ * @returns The transformed value.
+ */
+function decodeURIComponentSegments(value: string): string {
+    return value.split('/').map(decodeURIComponent).join('/');
 }
 
 /**

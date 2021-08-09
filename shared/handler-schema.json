@@ -441,6 +441,6 @@
         }
     },
     "oneOf": [{ "required": ["server"] }, { "required": ["private"] }],
-    "required": ["name", "branch", "url", "selection", "reverse", "tests"],
+    "required": ["name", "branchRef", "url", "selection", "reverse", "tests"],
     "additionalProperties": false
 }

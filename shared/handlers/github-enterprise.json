@@ -3,7 +3,7 @@
     "name": "GitHub Enterprise",
     "private": "gitHubEnterprise",
     "branchRef": "abbreviated",
-    "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri }}?plain=1",
+    "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri_component_segments }}?plain=1",
     "selection": "#L{{ startLine }}{% if startLine != endLine %}-L{{ endLine }}{% endif %}",
     "reverse": {
         "pattern": [
@@ -15,7 +15,7 @@
             "(?:\\?[^#]*)?",
             "(?:#L(?<start>\\d+)(?:-L(?<end>\\d+))?)?"
         ],
-        "file": "{{ match.groups.file | decode_uri }}",
+        "file": "{{ match.groups.file | decode_uri_component_segments }}",
         "fileMayStartWithBranch": true,
         "server": {
             "http": "{{ http }}/{{ match.groups.username }}/{{ match.groups.repository }}.git",
@@ -55,6 +55,14 @@
                 "remote": "https://local-github.server:8080/context/foo/bar.git",
                 "result": "https://local-github.server:8080/context/foo/bar/blob/{{ commit }}/src/file.txt?plain=1"
             },
+            "misc": [
+                {
+                    "name": "Hash in file name",
+                    "fileName": "test#file",
+                    "remote": "https://local-github.server:8080/context/foo/bar.git",
+                    "result": "https://local-github.server:8080/context/foo/bar/blob/master/test%23file?plain=1"
+                }
+            ],
             "selection": {
                 "remote": "https://local-github.server:8080/context/foo/bar.git",
                 "point": {

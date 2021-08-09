@@ -1,6 +1,12 @@
+# 2.5.2 (2021-08-09)
+
+## Bug Fixes
+
+-   🐛 GitHub links now handle hashes in file names.
+
 # 2.5.1 (2021-07-10)
 
-## Changes
+## Bug Fixes
 
 -   🐛 GitHub links now prevent markdown files from being rendered.
 -   🐛 Selections that end at the start of a new line are adjusted to end at the end of the previous line.

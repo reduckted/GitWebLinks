@@ -233,7 +233,8 @@ describe('GetLinkCommand', () => {
         command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
-        expect(openExternal).to.have.been.calledWith(Uri.parse('http://example.com/foo/bar'));
+        // Should be called with a string instead of a Uri because of https://github.com/microsoft/vscode/issues/85930
+        expect(openExternal).to.have.been.calledWith('http://example.com/foo/bar');
     });
 
     it('should open the link in the browser without showing a notification when the command action is "open".', async () => {
@@ -248,7 +249,8 @@ describe('GetLinkCommand', () => {
         await command.execute(file);
 
         expect(showInformationMessage).to.have.not.been.called;
-        expect(openExternal).to.have.been.calledWith(Uri.parse('http://example.com/foo/bar'));
+        // Should be called with a string instead of a Uri because of https://github.com/microsoft/vscode/issues/85930
+        expect(openExternal).to.have.been.calledWith('http://example.com/foo/bar');
     });
 
     function createCommand(options: GetLinkCommandOptions): GetLinkCommand {
