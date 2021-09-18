@@ -1,3 +1,9 @@
+# Unreleased
+
+## Maintenance
+
+-   🔨 Dependency updates.
+
 # 2.5.2 (2021-08-09)
 
 ## Bug Fixes

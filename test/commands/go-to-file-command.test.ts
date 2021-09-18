@@ -79,14 +79,14 @@ describe('GoToFileLinkCommand', () => {
         });
 
         lines = [];
-        document = ({
+        document = {
             get lineCount(): number {
                 return lines.length;
             },
             lineAt: (index: number) => lines[index]
-        } as unknown) as TextDocument;
+        } as unknown as TextDocument;
 
-        editor = ({ revealRange: () => undefined } as unknown) as TextEditor;
+        editor = { revealRange: () => undefined } as unknown as TextEditor;
         revealRange = sinon.stub(editor, 'revealRange');
 
         workspaceFolders = [];
