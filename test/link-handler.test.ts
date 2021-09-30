@@ -415,6 +415,65 @@ describe('LinkHandler', function () {
             ).to.equal('http://example.com/foo.js');
         });
 
+        it('should not apply query modifications when no query modifications match.', async () => {
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl(
+                    {
+                        url: 'http://example.com/file',
+                        query: [{ pattern: '\\.js$', key: 'a', value: '1' }]
+                    },
+                    { type: undefined },
+                    'foo/bar.txt'
+                )
+            ).to.equal('http://example.com/file');
+        });
+
+        it('should add a query string if one does not exist when a query modification matches.', async () => {
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl(
+                    {
+                        url: 'http://example.com/file',
+                        query: [{ pattern: '\\.txt$', key: 'first', value: 'yes' }]
+                    },
+                    { type: undefined },
+                    'foo/bar.txt'
+                )
+            ).to.equal('http://example.com/file?first=yes');
+        });
+
+        it('should add to the existing query string if one exists when a query modification matches.', async () => {
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl(
+                    {
+                        url: 'http://example.com/file?first=yes',
+                        query: [{ pattern: '\\.txt$', key: 'second', value: 'no' }]
+                    },
+                    { type: undefined },
+                    'foo/bar.txt'
+                )
+            ).to.equal('http://example.com/file?first=yes&second=no');
+        });
+
+        it('should add the query string before the hash when a query modification matches.', async () => {
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl(
+                    {
+                        url: 'http://example.com/file#L1-10',
+                        query: [{ pattern: '\\.txt$', key: 'first', value: 'yes' }]
+                    },
+                    { type: undefined },
+                    'foo/bar.txt'
+                )
+            ).to.equal('http://example.com/file?first=yes#L1-10');
+        });
         async function createUrl(
             definition: Partial<HandlerDefinition>,
             options: Partial<LinkOptions>,

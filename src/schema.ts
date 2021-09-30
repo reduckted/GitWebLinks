@@ -46,6 +46,11 @@ export interface HandlerDefinitionBase {
     readonly url: Template;
 
     /**
+     * Query string modifications that are based on the file name.
+     */
+    readonly query?: QueryModification[];
+
+    /**
      * The template to build the part of the URL that specifies the selection.
      */
     readonly selection: Template;
@@ -54,6 +59,26 @@ export interface HandlerDefinitionBase {
      * The settings to convert a URL into a file name.
      */
     readonly reverse: ReverseSettings;
+}
+
+/**
+ * A modification to make to the URL's query string for matching files.
+ */
+export interface QueryModification {
+    /**
+     * The regular expression to match against the file name.
+     */
+    readonly pattern: string;
+
+    /**
+     * The key to add to the query string when the pattern matches.
+     */
+    readonly key: string;
+
+    /**
+     * The value to add to the query string when the pattern matches.
+     */
+    readonly value: string;
 }
 
 /**

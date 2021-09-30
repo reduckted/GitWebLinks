@@ -6,7 +6,8 @@
         "ssh": "git@github.com"
     },
     "branchRef": "abbreviated",
-    "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri_component_segments }}?plain=1",
+    "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri_component_segments }}",
+    "query": [{ "pattern": "\\.(md|markdown)$", "key": "plain", "value": "1" }],
     "selection": "#L{{ startLine }}{% if startLine != endLine %}-L{{ endLine }}{% endif %}",
     "reverse": {
         "pattern": [
@@ -37,46 +38,58 @@
                 "httpWithUsername": "https://username@github.com/foo/bar.git",
                 "ssh": "git@github.com:foo/bar.git",
                 "sshWithProtocol": "ssh://git@github.com:foo/bar.git",
-                "result": "https://github.com/foo/bar/blob/master/src/file.txt?plain=1"
+                "result": "https://github.com/foo/bar/blob/master/src/file.txt"
             },
             "spaces": {
                 "remote": "https://github.com/foo/bar.git",
-                "result": "https://github.com/foo/bar/blob/master/src/path%20spaces/file%20spaces.txt?plain=1"
+                "result": "https://github.com/foo/bar/blob/master/src/path%20spaces/file%20spaces.txt"
             },
             "branch": {
                 "remote": "https://github.com/foo/bar.git",
-                "result": "https://github.com/foo/bar/blob/feature/test/src/file.txt?plain=1"
+                "result": "https://github.com/foo/bar/blob/feature/test/src/file.txt"
             },
             "commit": {
                 "remote": "https://github.com/foo/bar.git",
-                "result": "https://github.com/foo/bar/blob/{{ commit }}/src/file.txt?plain=1"
+                "result": "https://github.com/foo/bar/blob/{{ commit }}/src/file.txt"
             },
             "misc": [
                 {
                     "name": "Hash in file name",
                     "fileName": "test#file",
                     "remote": "https://github.com/foo/bar.git",
-                    "result": "https://github.com/foo/bar/blob/master/test%23file?plain=1"
+                    "result": "https://github.com/foo/bar/blob/master/test%23file"
+                },
+                {
+                    "name": "Markdown files (.md)",
+                    "fileName": "test.md",
+                    "remote": "https://github.com/foo/bar.git",
+                    "result": "https://github.com/foo/bar/blob/master/test.md?plain=1"
+                },
+                {
+                    "name": "Markdown files (.markdown)",
+                    "fileName": "test.markdown",
+                    "remote": "https://github.com/foo/bar.git",
+                    "result": "https://github.com/foo/bar/blob/master/test.markdown?plain=1"
                 }
             ],
             "selection": {
                 "remote": "https://github.com/foo/bar.git",
                 "point": {
                     "line": 10,
-                    "result": "https://github.com/foo/bar/blob/master/src/file.txt?plain=1#L10"
+                    "result": "https://github.com/foo/bar/blob/master/src/file.txt#L10"
                 },
                 "singleLine": {
                     "line": 10,
                     "startColumn": 20,
                     "endColumn": 30,
-                    "result": "https://github.com/foo/bar/blob/master/src/file.txt?plain=1#L10"
+                    "result": "https://github.com/foo/bar/blob/master/src/file.txt#L10"
                 },
                 "multipleLines": {
                     "startLine": 10,
                     "startColumn": 20,
                     "endLine": 30,
                     "endColumn": 40,
-                    "result": "https://github.com/foo/bar/blob/master/src/file.txt?plain=1#L10-L30"
+                    "result": "https://github.com/foo/bar/blob/master/src/file.txt#L10-L30"
                 }
             }
         }

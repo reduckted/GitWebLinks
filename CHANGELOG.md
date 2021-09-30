@@ -1,5 +1,9 @@
 # Unreleased
 
+## Changes
+
+-   ✨ Better handling of markdown files for GitHub.
+
 ## Maintenance
 
 -   🔨 Dependency updates.

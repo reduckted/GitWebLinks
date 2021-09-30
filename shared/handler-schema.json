@@ -48,6 +48,25 @@
                 { "$ref": "#/definitions/dynamicServer" }
             ]
         },
+        "queryModification": {
+            "type": "object",
+            "properties": {
+                "pattern": {
+                    "type": "string",
+                    "description": "A regular expression to match on the file name."
+                },
+                "key": {
+                    "type": "string",
+                    "description": "The key to add to the query string when the pattern matches."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "The value to add to the query string when the pattern matches."
+                }
+            },
+            "required": ["pattern", "key", "value"],
+            "additionalProperties": false
+        },
         "reverse": {
             "type": "object",
             "properties": {
@@ -426,6 +445,11 @@
         "url": {
             "$ref": "#/definitions/template",
             "description": "The template to build the URL of a file."
+        },
+        "query": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/queryModification" },
+            "description": "Query string modifications that are based on the file name."
         },
         "selection": {
             "$ref": "#/definitions/template",

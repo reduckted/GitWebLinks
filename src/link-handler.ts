@@ -1,5 +1,6 @@
 import { promises as fs, Stats } from 'fs';
 import * as path from 'path';
+import { URL } from 'url';
 
 import { git } from './git';
 import { NoRemoteHeadError } from './no-remote-head-error';
@@ -31,6 +32,7 @@ export class LinkHandler {
     private readonly urlTemplate: ParsedTemplate;
     private readonly selectionTemplate: ParsedTemplate;
     private readonly reverse: ParsedReverseSettings;
+    private readonly queryModifications: ParsedQueryModification[];
 
     /**
      * @constructor
@@ -47,6 +49,13 @@ export class LinkHandler {
 
         this.urlTemplate = parseTemplate(definition.url);
         this.selectionTemplate = parseTemplate(definition.selection);
+
+        this.queryModifications =
+            definition.query?.map((x) => ({
+                pattern: new RegExp(x.pattern),
+                key: x.key,
+                value: x.value
+            })) ?? [];
 
         this.reverse = {
             // The regular expression can be defined as an array of strings.
@@ -132,6 +141,34 @@ export class LinkHandler {
 
         if (file.selection) {
             url += this.selectionTemplate.render(data);
+        }
+
+        url = this.applyModifications(
+            url,
+            this.queryModifications.filter((x) => x.pattern.test(file.filePath))
+        );
+
+        return url;
+    }
+
+    /**
+     * Applies the given query string modifications to the URL.
+     *
+     * @param url The URL to modify.
+     * @param modifications The modifications to apply.
+     * @returns The modified URL.
+     */
+    private applyModifications(url: string, modifications: ParsedQueryModification[]): string {
+        if (modifications.length > 0) {
+            let u: URL;
+
+            u = new URL(url);
+
+            for (let modification of modifications) {
+                u.searchParams.append(modification.key, modification.value);
+            }
+
+            url = u.toString();
         }
 
         return url;
@@ -522,6 +559,26 @@ interface FileData {
     readonly http?: string;
 
     readonly ssh?: string;
+}
+
+/**
+ * The parsed query modification for making modifications to the URL's query string.
+ */
+export interface ParsedQueryModification {
+    /**
+     * The regular expression to match against the file name.
+     */
+    readonly pattern: RegExp;
+
+    /**
+     * The key to add to the query string when the pattern matches.
+     */
+    readonly key: string;
+
+    /**
+     * The value to add to the query string when the pattern matches.
+     */
+    readonly value: string;
 }
 
 /**
