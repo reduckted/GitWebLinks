@@ -143,6 +143,10 @@ export class LinkHandler {
             url += this.selectionTemplate.render(data);
         }
 
+        if (this.settings.shouldUseGithubDev()) {
+            url = url.replace('github.com', 'github.dev');
+        }
+
         url = this.applyModifications(
             url,
             this.queryModifications.filter((x) => x.pattern.test(file.filePath))
