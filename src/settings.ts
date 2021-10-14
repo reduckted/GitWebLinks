@@ -73,6 +73,15 @@ export class Settings {
     }
 
     /**
+     * Gets the setting that controls whether github.dev links should be used.
+     *
+     * @returns True if github.dev should be used; otherwise, github.com should be used.
+     */
+    public shouldUseGithubDev(): boolean {
+        return !!this.getConfiguration().get(CONFIGURATION.useGithubDev);
+    }
+
+    /**
      * Gets the configuration for the workspace.
      *
      * @returns The configuration.
