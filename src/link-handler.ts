@@ -144,7 +144,7 @@ export class LinkHandler {
         }
 
         if (this.settings.shouldUseGithubDev()) {
-            url = url.replace('github.com', 'github.dev');
+            url = url.replace('https://github.com', 'https://github.dev');
         }
 
         url = this.applyModifications(
