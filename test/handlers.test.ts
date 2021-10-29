@@ -1,8 +1,10 @@
+import Ajv from 'ajv';
 import { expect } from 'chai';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import { Uri, workspace } from 'vscode';
 
+import * as schema from '../shared/handler-schema.json';
 import { git } from '../src/git';
 import { LinkHandler } from '../src/link-handler';
 import { LinkHandlerProvider } from '../src/link-handler-provider';
@@ -58,6 +60,20 @@ describe('Link handlers', function () {
 
     definitions.forEach((definition) => {
         describe(definition.name, () => {
+            describe('schema', () => {
+                it('should have a valid JSON definition.', () => {
+                    let validator: Ajv;
+
+                    validator = new Ajv({ allErrors: true });
+                    validator.addSchema(schema, 'definition');
+
+                    expect(
+                        validator.validate('definition', definition),
+                        JSON.stringify(validator.errors, undefined, 4)
+                    ).to.be.true;
+                });
+            });
+
             describe('createUrl', () => {
                 it('http', async () => {
                     await runRemoteTest('http');
