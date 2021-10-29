@@ -302,6 +302,11 @@
                     "type": "boolean",
                     "description": "Controls the visibility of the 'Open Link' menu item.",
                     "default": false
+                },
+                "gitweblinks.useGitHubDev": {
+                    "type": "boolean",
+                    "description": "Generate links to 'github.dev' instead of 'github.com'.",
+                    "default": false
                 }
             }
         }

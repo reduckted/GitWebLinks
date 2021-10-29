@@ -442,6 +442,11 @@
             "enum": ["abbreviated", "symbolic"],
             "description": "The type of ref that is used for branch names."
         },
+        "settingsKeys": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "The keys of settings to make available to this handler when rendering templates."
+        },
         "url": {
             "$ref": "#/definitions/template",
             "description": "The template to build the URL of a file."

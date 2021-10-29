@@ -28,6 +28,7 @@ import { getErrorMessage, normalizeUrl } from './utilities';
  */
 export class LinkHandler {
     private readonly server: RemoteServer;
+    private readonly settingsKeys: string[] | undefined;
     private readonly settings: Settings;
     private readonly urlTemplate: ParsedTemplate;
     private readonly selectionTemplate: ParsedTemplate;
@@ -47,6 +48,7 @@ export class LinkHandler {
             this.server = new RemoteServer(definition.server);
         }
 
+        this.settingsKeys = definition.settingsKeys;
         this.urlTemplate = parseTemplate(definition.url);
         this.selectionTemplate = parseTemplate(definition.selection);
 
@@ -136,6 +138,12 @@ export class LinkHandler {
             type: type === 'commit' ? 'commit' : 'branch',
             ...file.selection
         };
+
+        if (this.settingsKeys) {
+            for (let key of this.settingsKeys) {
+                data[key] = this.settings.getHandlerSetting(key);
+            }
+        }
 
         url = this.urlTemplate.render(data);
 
@@ -551,6 +559,11 @@ interface UrlData {
      * The one-based column number of the end of the selection, if a selection is being included in the link.
      */
     readonly endColumn?: number;
+
+    /**
+     * Additional handler-specific settings.
+     */
+    [settingsKey: string]: unknown;
 }
 
 interface FileData {

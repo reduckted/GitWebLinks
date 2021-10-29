@@ -41,6 +41,11 @@ export interface HandlerDefinitionBase {
     readonly branchRef: 'abbreviated' | 'symbolic';
 
     /**
+     * The keys of settings to make available to this handler when rendering templates.
+     */
+    readonly settingsKeys?: string[];
+
+    /**
      * The template to build the URL of a file.
      */
     readonly url: Template;

@@ -1,17 +1,33 @@
 {
     "$schema": "../handler-schema.json",
     "name": "GitHub",
-    "server": {
-        "http": "https://github.com",
-        "ssh": "git@github.com"
-    },
+    "server": [
+        {
+            "pattern": "^https:\\/\\/github.(?:com|dev)",
+            "http": "https://github.com",
+            "ssh": "git@github.com"
+        },
+        {
+            "pattern": "^(?:git@)?github\\.com",
+            "http": "https://github.com",
+            "ssh": "git@github.com"
+        }
+    ],
     "branchRef": "abbreviated",
-    "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri_component_segments }}",
+    "settingsKeys": ["useGitHubDev"],
+    "url": [
+        "{% if useGitHubDev %}",
+        "{{ base | replace: \"github.com\", \"github.dev\" }}",
+        "{% else %}",
+        "{{ base }}",
+        "{% endif %}",
+        "/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri_component_segments }}"
+    ],
     "query": [{ "pattern": "\\.(md|markdown)$", "key": "plain", "value": "1" }],
     "selection": "#L{{ startLine }}{% if startLine != endLine %}-L{{ endLine }}{% endif %}",
     "reverse": {
         "pattern": [
-            "https://github\\.com",
+            "https://github\\.(?:com|dev)",
             "/(?<username>[^/]+)",
             "/(?<repository>[^/]+)",
             "/blob",
@@ -70,6 +86,24 @@
                     "fileName": "test.markdown",
                     "remote": "https://github.com/foo/bar.git",
                     "result": "https://github.com/foo/bar/blob/master/test.markdown?plain=1"
+                },
+                {
+                    "name": "useGitHubDev = true",
+                    "fileName": "file.txt",
+                    "remote": "https://github.com/foo/bar.git",
+                    "result": "https://github.dev/foo/bar/blob/master/file.txt",
+                    "settings": {
+                        "useGitHubDev": true
+                    }
+                },
+                {
+                    "name": "useGitHubDev = false",
+                    "fileName": "file.txt",
+                    "remote": "https://github.com/foo/bar.git",
+                    "result": "https://github.com/foo/bar/blob/master/file.txt",
+                    "settings": {
+                        "useGitHubDev": false
+                    }
                 }
             ],
             "selection": {

@@ -100,6 +100,13 @@ describe('Settings', () => {
         });
     });
 
+    describe('getHandlerSetting', () => {
+        it('should return the value of the specified key.', () => {
+            setup({ foo: 'bar' });
+            expect(settings.getHandlerSetting('foo')).to.equal('bar');
+        });
+    });
+
     function setup(data: Record<string, unknown>): void {
         sinon
             .stub(workspace, 'getConfiguration')

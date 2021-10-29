@@ -73,6 +73,16 @@ export class Settings {
     }
 
     /**
+     * Gets a handler-specific setting.
+     *
+     * @param key The key of the setting to retrieve.
+     * @returns The value of the setting.
+     */
+    public getHandlerSetting(key: string): unknown {
+        return this.getConfiguration().get(key);
+    }
+
+    /**
      * Gets the configuration for the workspace.
      *
      * @returns The configuration.
