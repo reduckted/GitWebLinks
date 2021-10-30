@@ -7,7 +7,7 @@ const engine: Liquid = new Liquid({
     strictFilters: true
 });
 
-engine.filters.set('filename', posix.basename);
+engine.filters.set('filename', posix.basename.bind(posix));
 engine.filters.set('encode_uri', encodeURI);
 engine.filters.set('encode_uri_component', encodeURIComponent);
 engine.filters.set('encode_uri_component_segments', encodeURIComponentSegments);

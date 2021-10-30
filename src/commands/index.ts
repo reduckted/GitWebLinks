@@ -1,4 +1,4 @@
-import { commands, Disposable } from 'vscode';
+import { commands, Disposable, Uri } from 'vscode';
 
 import { COMMANDS } from '../constants';
 import { LinkHandlerProvider } from '../link-handler-provider';
@@ -123,7 +123,9 @@ function registerGetLinkCommand(
 
     command = new GetLinkCommand(repositoryFinder, handlerProvider, options);
 
-    return commands.registerCommand(identifier, async (resource) => command.execute(resource));
+    return commands.registerCommand(identifier, async (resource: Uri | undefined) =>
+        command.execute(resource)
+    );
 }
 
 /**
