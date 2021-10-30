@@ -1,3 +1,13 @@
+# 2.6.0 (2021-10-30)
+
+## New Features
+
+-   ⭐ Setting to create [github.dev](https://github.dev) links instead of [github.com](https://github.com) links (thanks @jungaretti).
+
+## Maintenance
+
+-   🔨 Dependency updates.
+
 # 2.5.3 (2021-09-30)
 
 ## Changes
