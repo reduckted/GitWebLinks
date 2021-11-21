@@ -1,0 +1,30 @@
+<UserControl
+    x:Class="GitWebLinks.GitHubEnterpriseOptionsControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:local="clr-namespace:GitWebLinks"
+    mc:Ignorable="d" 
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    d:DataContext="{d:DesignInstance Type=local:GitHubEnterpriseOptionsPage, IsDesignTimeCreatable=False}"
+    >
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="pack://application:,,,/GitWebLinks;component/UI/Common.xaml"/>
+    </UserControl.Resources>
+
+    <StackPanel Style="{StaticResource OptionsContainer}">
+        <TextBlock
+            Text="GitHub Enterprise URLs:"
+            Margin="{StaticResource SmallSpacerBottom}"
+            />
+
+        <local:ServerDataGrid
+            ItemsSource="{Binding Servers}"
+            HttpExample="http://github.my-server:8000"
+            SshExample="ssh://github.my-server"
+            />
+    </StackPanel>
+</UserControl>

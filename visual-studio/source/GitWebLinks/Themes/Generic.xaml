@@ -1,0 +1,9 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    >
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/GitWebLinks;component/UI/InfoTip.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/GitWebLinks;component/UI/ServerDataGrid.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

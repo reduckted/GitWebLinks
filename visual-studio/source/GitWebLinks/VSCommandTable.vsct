@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <Extern href="stdidcmd.h"/>
+    <Extern href="vsshlids.h"/>
+
+    <Include href="VSGlobals.vsct"/>
+    <Include href="KnownImageIds.vsct"/>
+
+    <Commands package="GitWebLinksPackage">
+        <Groups>
+            <Group guid="GitWebLinksPackage" id="Group_Selection" priority="0x0401">
+                <!-- Priority is after IDG_VS_CODEWIN_TEXTEDIT -->
+                <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+            </Group>
+
+            <Group guid="GitWebLinksPackage" id="Group_File" priority="0x0100"/>
+
+            <Group guid="GitWebLinksPackage" id="Group_CopySubMenu" priority="0x0001">
+                <Parent guid="GitWebLinksPackage" id="Menu_SubMenu"/>
+            </Group>
+
+            <Group guid="GitWebLinksPackage" id="Group_OpenSubMenu" priority="0x0002">
+                <Parent guid="GitWebLinksPackage" id="Menu_SubMenu"/>
+            </Group>
+        </Groups>
+
+        <Menus>
+            <Menu guid="GitWebLinksPackage" id="Menu_SubMenu">
+                <Strings>
+                    <ButtonText>Git Web Links</ButtonText>
+                </Strings>
+            </Menu>
+        </Menus>
+
+        <Buttons>
+            <!-- File Commands -->
+            <Button guid="GitWebLinksPackage" id="Command_CopyLinkToFile" priority="0x0001" type="Button">
+                <Parent guid="GitWebLinksPackage" id="Group_File"/>
+                <Icon guid="ImageCatalogGuid" id="Git" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <Strings>
+                    <LocCanonicalName>.GitWebLinks.CopyLinkToFile</LocCanonicalName>
+                    <ButtonText>Copy Link To File</ButtonText>
+                </Strings>
+            </Button>
+
+            <Button guid="GitWebLinksPackage" id="Command_OpenLinkToFile" priority="0x0002" type="Button">
+                <Parent guid="GitWebLinksPackage" id="Group_File"/>
+                <Icon guid="ImageCatalogGuid" id="Git" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <Strings>
+                    <LocCanonicalName>.GitWebLinks.OpenLinkToFile</LocCanonicalName>
+                    <ButtonText>Open Link To File</ButtonText>
+                </Strings>
+            </Button>
+
+            <!-- Selection Commands -->
+            <Button guid="GitWebLinksPackage" id="Command_CopyLinkToSelection" priority="0x0001" type="Button">
+                <Parent guid="GitWebLinksPackage" id="Group_Selection"/>
+                <Icon guid="ImageCatalogGuid" id="Git" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <Strings>
+                    <LocCanonicalName>.GitWebLinks.CopyLinkToSelection</LocCanonicalName>
+                    <ButtonText>Copy Link To Selection</ButtonText>
+                </Strings>
+            </Button>
+
+            <Button guid="GitWebLinksPackage" id="Command_OpenLinkToSelection" priority="0x0002" type="Button">
+                <Parent guid="GitWebLinksPackage" id="Group_Selection"/>
+                <Icon guid="ImageCatalogGuid" id="Git" />
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <Strings>
+                    <LocCanonicalName>.GitWebLinks.OpenLinkToSelection</LocCanonicalName>
+                    <ButtonText>Open Link To Selection</ButtonText>
+                </Strings>
+            </Button>
+
+            <!-- Copy Sub Menu Commands -->
+            <Button guid="GitWebLinksPackage" id="Command_CopyLinkToSelectionAtCurrentCommit" priority="0x0001" type="Button">
+                <Parent guid="GitWebLinksPackage" id="Group_CopySubMenu"/>
+                <Strings>
+                    <LocCanonicalName>.GitWebLinks.CopyLinkToCurrentCommit</LocCanonicalName>
+                    <ButtonText>Copy Link To Current Commit</ButtonText>
+                </Strings>
+            </Button>
+
+            <Button guid="GitWebLinksPackage" id="Command_CopyLinkToSelectionOnCurrentBranch" priority="0x0002" type="Button">
+                <Parent guid="GitWebLinksPackage" id="Group_CopySubMenu"/>
+                <Strings>
+                    <LocCanonicalName>.GitWebLinks.CopyLinkToCurrentBranch</LocCanonicalName>
+                    <ButtonText>Copy Link To Current Branch</ButtonText>
+                </Strings>
+            </Button>
+
+            <Button guid="GitWebLinksPackage" id="Command_CopyLinkToSelectionOnDefaultBranch" priority="0x0003" type="Button">
+                <Parent guid="GitWebLinksPackage" id="Group_CopySubMenu"/>
+                <Strings>
+                    <LocCanonicalName>.GitWebLinks.CopyLinkToDefaultBranch</LocCanonicalName>
+                    <ButtonText>Copy Link To Default Branch</ButtonText>
+                </Strings>
+            </Button>
+
+            <!-- Open Sub Menu Commands -->
+            <Button guid="GitWebLinksPackage" id="Command_OpenLinkToSelectionAtCurrentCommit" priority="0x0001" type="Button">
+                <Parent guid="GitWebLinksPackage" id="Group_OpenSubMenu"/>
+                <Strings>
+                    <LocCanonicalName>.GitWebLinks.OpenLinkToCurrentCommit</LocCanonicalName>
+                    <ButtonText>Open Link To Current Commit</ButtonText>
+                </Strings>
+            </Button>
+
+            <Button guid="GitWebLinksPackage" id="Command_OpenLinkToSelectionOnCurrentBranch" priority="0x0002" type="Button">
+                <Parent guid="GitWebLinksPackage" id="Group_OpenSubMenu"/>
+                <Strings>
+                    <LocCanonicalName>.GitWebLinks.OpenLinkToCurrentBranch</LocCanonicalName>
+                    <ButtonText>Open Link To Current Branch</ButtonText>
+                </Strings>
+            </Button>
+
+            <Button guid="GitWebLinksPackage" id="Command_OpenLinkToSelectionOnDefaultBranch" priority="0x0003" type="Button">
+                <Parent guid="GitWebLinksPackage" id="Group_OpenSubMenu"/>
+                <Strings>
+                    <LocCanonicalName>.GitWebLinks.OpenLinkToDefaultBranch</LocCanonicalName>
+                    <ButtonText>Open Link To Default Branch</ButtonText>
+                </Strings>
+            </Button>
+        </Buttons>
+    </Commands>
+
+    <CommandPlacements>
+        <!-- Solution Explorer: File -->
+        <CommandPlacement guid="GitWebLinksPackage" id="Group_File" priority="0x0601">
+            <!-- Priority is after IDG_VS_CTXT_ITEM_TRANSFER -->
+            <Parent guid="VSMainMenu" id="ItemNode"/>
+        </CommandPlacement>
+
+        <!-- Solution Explorer: Folder -->
+        <CommandPlacement guid="GitWebLinksPackage" id="Group_File" priority="0x0501">
+            <!-- Priority is after IDG_VS_CTXT_FOLDER_TRANSFER -->
+            <Parent guid="VSMainMenu" id="FolderNode"/>
+        </CommandPlacement>
+
+        <!-- Solution Explorer: Project -->
+        <CommandPlacement guid="GitWebLinksPackage" id="Group_File" priority="0x0701">
+            <!-- Priority is after IDG_VS_CTXT_PROJECT_TRANSFER -->
+            <Parent guid="VSMainMenu" id="ProjectNode"/>
+        </CommandPlacement>
+
+        <!-- Solution Explorer: Solution -->
+        <CommandPlacement guid="GitWebLinksPackage" id="Group_File" priority="0x0801">
+            <!-- Priority is after IDG_VS_CTXT_SOLUTION_TRANSFER -->
+            <Parent guid="VSMainMenu" id="SolutionNode"/>
+        </CommandPlacement>
+
+        <!-- File Tab -->
+        <CommandPlacement guid="GitWebLinksPackage" id="Group_File" priority="0x0201">
+            <!-- Priority is after IDG_VS_EZ_DOCWINDOWPATHOPS -->
+            <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_EZDOCWINTAB"/>
+        </CommandPlacement>
+
+        <!-- Sub Menu in File and Selection Groups -->
+        <CommandPlacement guid="GitWebLinksPackage" id="Menu_SubMenu" priority="0x0100">
+            <Parent guid="GitWebLinksPackage" id="Group_File"/>
+        </CommandPlacement>
+
+        <CommandPlacement guid="GitWebLinksPackage" id="Menu_SubMenu" priority="0x0100">
+            <Parent guid="GitWebLinksPackage" id="Group_Selection"/>
+        </CommandPlacement>
+    </CommandPlacements>
+
+    <Symbols>
+        <GuidSymbol name="GitWebLinksPackage" value="{c79040c1-a271-4bae-b776-be5f65b29c4c}">
+            <!-- Groups -->
+            <IDSymbol name="Group_File" value="0x1000"/>
+            <IDSymbol name="Group_Selection" value="0x1001"/>
+            <IDSymbol name="Group_CopySubMenu" value="0x1002"/>
+            <IDSymbol name="Group_OpenSubMenu" value="0x1003"/>
+
+            <!-- Menus -->
+            <IDSymbol name="Menu_SubMenu" value="0x2000"/>
+
+            <!-- Commands -->
+            <IDSymbol name="Command_CopyLinkToFile" value="0x100"/>
+            <IDSymbol name="Command_CopyLinkToSelection" value="0x101"/>
+            <IDSymbol name="Command_CopyLinkToSelectionAtCurrentCommit" value="0x102"/>
+            <IDSymbol name="Command_CopyLinkToSelectionOnCurrentBranch" value="0x103"/>
+            <IDSymbol name="Command_CopyLinkToSelectionOnDefaultBranch" value="0x104"/>
+
+            <IDSymbol name="Command_OpenLinkToFile" value="0x105"/>
+            <IDSymbol name="Command_OpenLinkToSelection" value="0x106"/>
+            <IDSymbol name="Command_OpenLinkToSelectionAtCurrentCommit" value="0x107"/>
+            <IDSymbol name="Command_OpenLinkToSelectionOnCurrentBranch" value="0x108"/>
+            <IDSymbol name="Command_OpenLinkToSelectionOnDefaultBranch" value="0x109"/>
+        </GuidSymbol>
+    </Symbols>
+</CommandTable>

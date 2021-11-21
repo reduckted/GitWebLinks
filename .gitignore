@@ -4,4 +4,9 @@ vscode/node_modules/
 vscode/dist/
 vscode/out-test/
 
+visual-studio/.vs/
+visual-studio/**/*.user
+visual-studio/**/obj/
+visual-studio/**/bin/
+
 *.vsix
