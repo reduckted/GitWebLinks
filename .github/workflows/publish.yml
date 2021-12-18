@@ -18,10 +18,35 @@ jobs:
 
             - name: Install dependencies
               working-directory: ./vscode
-              run: npm install
+              run: npm ci
 
-            - name: 'Publish'
+            - name: Publish
               working-directory: ./vscode
               env:
                   PUBLISHER_TOKEN: ${{ secrets.PUBLISHER_TOKEN }}
               run: node_modules/.bin/vsce publish -p $PUBLISHER_TOKEN
+
+    publish-visual-studio:
+        runs-on: windows-2022
+
+        env:
+            Configuration: Release
+            DeployExtension: false
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+
+            - name: Setup MSBuild
+              uses: microsoft/setup-msbuild@v1.0.2
+
+            - name: Build
+              working-directory: ./visual-studio
+              run: msbuild /t:Rebuild /Restore /v:Minimal
+
+            - name: Publish
+              uses: cezarypiatek/VsixPublisherAction@0.2
+              with:
+                  extension-file: visual-studio\source\GitWebLinks\bin\Release\GitWebLinks.vsix
+                  publish-manifest-file: visual-studio\publish.json
+                  personal-access-code: ${{ secrets.PUBLISHER_TOKEN }}
