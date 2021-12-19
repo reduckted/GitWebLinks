@@ -16,8 +16,8 @@ Copy links to files in their online Git repositories. Works with:
 
 <div align="center">
     <h3>
-        <a href="tree/master/visual-studio">Visual Studio 2022</a>
+        <a href="visual-studio">Visual Studio 2022</a>
         &nbsp; &middot; &nbsp;
-        <a href="tree/master/vscode">Visual Studio Code</a>
+        <a href="vscode">Visual Studio Code</a>
     </h3>
 </div>
