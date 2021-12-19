@@ -1,0 +1,31 @@
+<Project>
+    <ItemGroup>
+        <PackageReference Update="Microsoft.VSSDK.BuildTools">
+            <GeneratePathProperty>true</GeneratePathProperty>
+        </PackageReference>
+    </ItemGroup>
+
+    <Target Name="PublishToMarketplace" DependsOnTargets="Rebuild">
+        <Message Text="Publishing extension to the marketplace..." Importance="high"/>
+        
+        <Error 
+            Condition="'$(Configuration)' != 'Release'"
+            Text="The configuration must be 'Release' when publishing to the marketplace."
+            />
+        
+        <PropertyGroup>
+            <VsixPublisher>$(PkgMicrosoft_VSSDK_BuildTools)\tools\vssdk\bin\VsixPublisher.exe</VsixPublisher>
+            <PublishManifestFileName>$(MSBuildThisFileDirectory)..\publish.json</PublishManifestFileName>
+            <ExtensionFileName>$(ProjectDir)$(TargetVsixContainer)</ExtensionFileName>
+        </PropertyGroup>
+        
+        <Exec 
+            Command="$(VsixPublisher) publish -personalAccessToken $(PersonalAccessToken) -payload $(ExtensionFileName) -publishManifest $(PublishManifestFileName)"
+            StandardOutputImportance="high"
+            StandardErrorImportance="high"
+            LogStandardErrorAsError="true"
+            />
+        
+        <Message Text="Finished publishing." Importance="high"/>
+    </Target>
+</Project>
