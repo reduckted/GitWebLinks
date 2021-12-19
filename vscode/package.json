@@ -4,13 +4,13 @@
     "description": "Copy links to files in their online Git repositories",
     "version": "2.6.1",
     "publisher": "reduckted",
-    "homepage": "https://github.com/reduckted/vscode-gitweblinks",
+    "homepage": "https://github.com/reduckted/GitWebLinks",
     "repository": {
         "type": "git",
-        "url": "https://github.com/reduckted/vscode-gitweblinks"
+        "url": "https://github.com/reduckted/GitWebLinks"
     },
     "bugs": {
-        "url": "https://github.com/reduckted/vscode-gitweblinks/issues"
+        "url": "https://github.com/reduckted/GitWebLinks/issues"
     },
     "icon": "icon.png",
     "galleryBanner": {
