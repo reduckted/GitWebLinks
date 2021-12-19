@@ -2,13 +2,13 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es6",
-        "outDir": "out",
+        "outDir": "out-test",
         "strict": true,
         "lib": ["es6"],
         "sourceMap": true,
-        "rootDir": ".",
         "resolveJsonModule": true,
-        "noUnusedLocals": true
+        "noUnusedLocals": true,
+        "rootDir": "."
     },
     "exclude": ["node_modules", ".vscode-test"]
 }

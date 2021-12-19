@@ -22,9 +22,8 @@ export function markAsSlow(suite: Mocha.Suite): void {
  * Sets up a Git repository in the specified directory.
  *
  * @param root The root directory.
- * @returns The given root directory.
  */
-export async function setupRepository(root: string): Promise<string> {
+export async function setupRepository(root: string): Promise<void> {
     await git(root, 'init');
     await git(root, 'config', 'user.email', 'foo@example.com');
     await git(root, 'config', 'user.name', 'foo');
@@ -33,8 +32,6 @@ export async function setupRepository(root: string): Promise<string> {
 
     await git(root, 'add', '.');
     await git(root, 'commit', '-m', '"initial"');
-
-    return root;
 }
 
 /**

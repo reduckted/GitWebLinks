@@ -67,8 +67,6 @@ export class RepositoryFinder {
             // we need to search down into the directories within the workspace.
             log('Searching within the workspace...');
 
-            // If there are repositories within the workspace, they will most likely
-            // be near the root of the workspace, so we won't traverse too deeply.
             for await (let repository of this.searchForRepositories(workspace)) {
                 yield repository;
             }

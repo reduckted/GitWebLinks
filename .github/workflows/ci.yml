@@ -3,7 +3,7 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-    build:
+    build-vscode:
         strategy:
             matrix:
                 os: [macos-latest, ubuntu-latest, windows-latest]
@@ -20,15 +20,19 @@ jobs:
                   node-version: 12.x
 
             - name: Install dependencies
+              working-directory: ./vscode
               run: npm install
 
             - name: Lint
+              working-directory: ./vscode
               run: npm run lint
 
             - name: Build
+              working-directory: ./vscode
               run: npm run build
 
             - name: Test
               uses: GabrielBB/xvfb-action@v1.0
               with:
+                  working-directory: ./vscode
                   run: npm run test

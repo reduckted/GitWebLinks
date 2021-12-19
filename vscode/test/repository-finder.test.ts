@@ -194,12 +194,11 @@ describe('RepositoryFinder', function () {
         ['first', 'first/second', 'first/second/third'].forEach((path) => {
             it(`should return one repository when the workspace contains a repository in a child directory of '${path}'.`, async () => {
                 let child: string;
-                let repository: string;
 
                 child = await root.mkdirp(path);
-                repository = await setupRepository(child);
+                await setupRepository(child);
 
-                expect(await findRoots(root.path)).to.deep.equal([repository]);
+                expect(await findRoots(root.path)).to.deep.equal([child]);
             });
         });
 

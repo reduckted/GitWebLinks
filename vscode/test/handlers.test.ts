@@ -1,14 +1,14 @@
-import Ajv from 'ajv';
+import Ajv, { AnySchema } from 'ajv';
 import { expect } from 'chai';
+import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import { Uri, workspace } from 'vscode';
 
-import * as schema from '../shared/handler-schema.json';
 import { git } from '../src/git';
 import { LinkHandler } from '../src/link-handler';
 import { LinkHandlerProvider } from '../src/link-handler-provider';
-import { load, Template } from '../src/schema';
+import { findHandlersDirectory, load, Template } from '../src/schema';
 import { parseTemplate } from '../src/templates';
 import { LinkOptions, RepositoryWithRemote, SelectedRange, UrlInfo } from '../src/types';
 import { normalizeUrl } from '../src/utilities';
@@ -61,6 +61,17 @@ describe('Link handlers', function () {
     definitions.forEach((definition) => {
         describe(definition.name, () => {
             describe('schema', () => {
+                let schema: AnySchema;
+
+                before(async () => {
+                    schema = JSON.parse(
+                        await fs.readFile(
+                            path.resolve(findHandlersDirectory(), '../handler-schema.json'),
+                            { encoding: 'utf8' }
+                        )
+                    ) as AnySchema;
+                });
+
                 it('should have a valid JSON definition.', () => {
                     let validator: Ajv;
 

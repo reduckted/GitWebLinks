@@ -457,7 +457,7 @@ export class LinkHandler {
             let data: FileData;
             let file: string;
             let server: StaticServer;
-            let selection: Partial<SelectedRange> | undefined;
+            let selection: Partial<SelectedRange>;
 
             data = {
                 match,

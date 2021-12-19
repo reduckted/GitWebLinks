@@ -28,9 +28,9 @@
             "args": [
                 "--disable-extensions",
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test/index"
+                "--extensionTestsPath=${workspaceFolder}/out-test/test/index"
             ],
-            "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
+            "outFiles": ["${workspaceFolder}/out-test/**/*.js"],
             "sourceMaps": true,
             "preLaunchTask": "npm: debug-test",
             "internalConsoleOptions": "openOnSessionStart"
@@ -42,9 +42,9 @@
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test/index"
+                "--extensionTestsPath=${workspaceFolder}/out-test/test/index"
             ],
-            "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
+            "outFiles": ["${workspaceFolder}/out-test/**/*.js"],
             "sourceMaps": true
         }
     ]

@@ -3,7 +3,10 @@
     "type": "object",
     "definitions": {
         "template": {
-            "anyOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }]
+            "anyOf": [
+                { "type": "string" },
+                { "type": "array", "items": { "type": "string" } }
+            ]
         },
         "staticServer": {
             "type": "object",
@@ -17,7 +20,7 @@
                     "description": "The SSH URL of the remote server. This is used to match SSH remote URLs."
                 }
             },
-            "required": ["http"],
+            "required": ["http", "ssh"],
             "additionalProperties": false
         },
         "dynamicServer": {
@@ -171,7 +174,13 @@
                             "description": "Tests for including the selected range in the URL."
                         }
                     },
-                    "required": ["remotes", "spaces", "branch", "commit", "selection"],
+                    "required": [
+                        "remotes",
+                        "spaces",
+                        "branch",
+                        "commit",
+                        "selection"
+                    ],
                     "additionalProperties": false,
                     "description": "Defines the test cases for creating URLs."
                 }
@@ -207,7 +216,13 @@
                     "description": "The URL that is expected to be created.\n\nThe current commit hash is available via the `commit` variable."
                 }
             },
-            "required": ["http", "httpWithUsername", "ssh", "sshWithProtocol", "result"],
+            "required": [
+                "http",
+                "httpWithUsername",
+                "ssh",
+                "sshWithProtocol",
+                "result"
+            ],
             "additionalProperties": false
         },
         "urlTest": {
@@ -397,7 +412,13 @@
                     "description": "The selection range to expect when parsing the URL to file info."
                 }
             },
-            "required": ["startLine", "startColumn", "endLine", "endColumn", "result"],
+            "required": [
+                "startLine",
+                "startColumn",
+                "endLine",
+                "endColumn",
+                "result"
+            ],
             "additionalProperties": false
         },
         "reverseTestSelectionRange": {

@@ -1,11 +1,11 @@
-name: 'Publish Extension to Marketplace'
+name: Publish Extensions
 
 on:
     release:
         types: [published]
 
 jobs:
-    publish:
+    publish-vscode:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
@@ -17,9 +17,11 @@ jobs:
                   node-version: 12.x
 
             - name: Install dependencies
+              working-directory: ./vscode
               run: npm install
 
             - name: 'Publish'
+              working-directory: ./vscode
               env:
                   PUBLISHER_TOKEN: ${{ secrets.PUBLISHER_TOKEN }}
               run: node_modules/.bin/vsce publish -p $PUBLISHER_TOKEN

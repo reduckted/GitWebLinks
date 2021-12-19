@@ -474,6 +474,7 @@ describe('LinkHandler', function () {
                 )
             ).to.equal('http://example.com/file?first=yes#L1-10');
         });
+
         async function createUrl(
             definition: Partial<HandlerDefinition>,
             options: Partial<LinkOptions>,

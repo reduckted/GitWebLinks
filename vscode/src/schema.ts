@@ -1,3 +1,5 @@
+/* eslint-disable node/no-sync */
+
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -215,20 +217,56 @@ export function load<T extends HandlerDefinition>(): T[] {
     if (process.env.WEBPACK) {
         let context: __WebpackModuleApi.RequireContext;
 
-        context = require.context('../shared/handlers');
+        context = require.context('../../shared/handlers');
 
         return context.keys().map((key) => context(key) as T);
     } else {
         let dir: string;
 
-        dir = path.resolve(__dirname, '../shared/handlers');
+        dir = findHandlersDirectory();
 
-        /* eslint-disable node/no-sync */
         return fs
             .readdirSync(dir)
             .filter((entry) => path.extname(entry) === '.json')
             .map((file) => fs.readFileSync(path.join(dir, file), { encoding: 'utf-8' }))
             .map((contents) => JSON.parse(contents) as T);
-        /* eslint-enable node/no-sync */
     }
+}
+
+/**
+ * Finds the directory that contains the handler definition files.
+ *
+ * @returns The directory.
+ */
+export function findHandlersDirectory(): string {
+    if (process.env.WEBPACK) {
+        throw new Error(
+            'Finding the handlers directory is not supported when compiled with webpack.'
+        );
+    }
+
+    let current: string;
+
+    current = __dirname;
+
+    while (current) {
+        let directory: string;
+        let parent: string;
+
+        directory = path.join(current, 'shared/handlers');
+
+        if (fs.existsSync(directory)) {
+            return directory;
+        }
+
+        parent = path.dirname(current);
+
+        if (parent == current) {
+            break;
+        }
+
+        current = parent;
+    }
+
+    throw new Error(`Could not find the handlers directory starting from '${__dirname}'.`);
 }

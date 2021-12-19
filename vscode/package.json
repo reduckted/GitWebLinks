@@ -12,7 +12,7 @@
     "bugs": {
         "url": "https://github.com/reduckted/vscode-gitweblinks/issues"
     },
-    "icon": "images/icon.png",
+    "icon": "icon.png",
     "galleryBanner": {
         "color": "#F0F0E6",
         "theme": "light"
@@ -31,11 +31,10 @@
         "vscode:prepublish": "npm run build",
         "lint": "eslint --ext .ts .",
         "build": "webpack --mode production",
-        "pretest:clean": "rimraf ./out",
+        "pretest:clean": "rimraf ./out-test",
         "pretest:build": "tsc -p ./",
-        "pretest:copy-schemas": "cpy ./shared ./out --parents",
-        "pretest": "run-s pretest:clean pretest:build pretest:copy-schemas",
-        "test": "node ./out/test/run.js",
+        "pretest": "run-s pretest:clean pretest:build",
+        "test": "node ./out-test/test/run.js",
         "watch": "webpack --mode development --watch",
         "debug-build": "webpack --mode development",
         "debug-test": "npm run pretest"
