@@ -50,7 +50,9 @@ describe('LinkHandler', function () {
             expect(await createUrl({ url: '{{ type }}' }, { type: undefined })).to.equal('branch');
         });
 
-        it('should use the commit hash as the "ref" value when the link type is "commit".', async () => {
+        it('should use the full commit hash as the "ref" value when the link type is "commit" and short hashes should not be used.', async () => {
+            sinon.stub(Settings.prototype, 'getUseShortHash').returns(false);
+
             await setupRepository(root.path);
 
             expect(await createUrl({ url: '{{ ref }}' }, { type: 'commit' })).to.equal(
@@ -59,9 +61,9 @@ describe('LinkHandler', function () {
         });
 
         it('should use a short commit hash as the "ref" value when the link type is "commit" and short hashes should be used.', async () => {
-            await setupRepository(root.path);
-
             sinon.stub(Settings.prototype, 'getUseShortHash').returns(true);
+
+            await setupRepository(root.path);
 
             expect(await createUrl({ url: '{{ ref }}' }, { type: 'commit' })).to.equal(
                 (await git(root.path, 'rev-parse', '--short', 'HEAD')).trim()
