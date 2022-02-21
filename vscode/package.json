@@ -174,11 +174,16 @@
             "properties": {
                 "gitweblinks.linkType": {
                     "type": "string",
-                    "description": "The type of links to create by default:\n - defaultBranch: Create a link to the default branch.\n - commit: Create a link to the current commit (default).\n - branch: Create a link to the current branch.",
+                    "description": "The type of links to create by default.",
                     "enum": [
                         "defaultBranch",
                         "commit",
                         "branch"
+                    ],
+                    "enumDescriptions": [
+                        "Create a link to the default branch.",
+                        "Create a link to the current commit.",
+                        "Create a link to the current branch."
                     ],
                     "default": "commit"
                 },
