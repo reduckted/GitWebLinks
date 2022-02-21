@@ -49,8 +49,10 @@ public static class LinkHandlerTests {
 
 
         [Fact]
-        public async Task ShouldUseTheCommitHashAsTheRefValueWhenTheLinkTypeIsCommit() {
+        public async Task ShouldUseTheFullCommitHashAsTheRefValueWhenTheLinkTypeIsCommitAndShortHashesShouldNotBeUsed() {
             await SetupRepositoryAsync(RootDirectory);
+
+            _settings.Setup((x) => x.GetUseShortHashesAsync()).ReturnsAsync(false);
 
             Assert.Equal(
                 string.Concat(await Git.ExecuteAsync(RootDirectory, "rev-parse", "HEAD")).Trim(),
