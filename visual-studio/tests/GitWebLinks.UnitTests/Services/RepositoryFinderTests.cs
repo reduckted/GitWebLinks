@@ -1,3 +1,5 @@
+using Moq;
+
 namespace GitWebLinks;
 
 public static class RepositoryFinderTests {
@@ -8,7 +10,13 @@ public static class RepositoryFinderTests {
 
 
         public HasRepositoriesMethod() {
-            _finder = new(Git, NullLogger.Instance);
+            Mock<ISettings> settings;
+
+
+            settings = new Mock<ISettings>();
+            settings.Setup((x) => x.GetPreferredRemoteNameAsync()).ReturnsAsync(() => "origin");
+
+            _finder = new(Git, settings.Object, NullLogger.Instance);
         }
 
 
@@ -84,10 +92,19 @@ public static class RepositoryFinderTests {
     public class FindRepositoryMethod : RepositoryTestBase {
 
         private readonly RepositoryFinder _finder;
+        private string _preferredRemoteName;
+
 
 
         public FindRepositoryMethod() {
-            _finder = new(Git, NullLogger.Instance);
+            Mock<ISettings> settings;
+
+
+            _preferredRemoteName = "origin";
+            settings = new Mock<ISettings>();
+            settings.Setup((x) => x.GetPreferredRemoteNameAsync()).ReturnsAsync(() => _preferredRemoteName);
+
+            _finder = new(Git, settings.Object, NullLogger.Instance);
         }
 
 
@@ -169,13 +186,15 @@ public static class RepositoryFinderTests {
 
         [Fact]
         public async Task ShouldUseTheOriginRemoteIfItExists() {
+            _preferredRemoteName = "testing";
+
             await SetupRepositoryAsync(RootDirectory);
             await Git.ExecuteAsync(RootDirectory, "remote", "add", "alpha", "https://github.com/example/alpha");
             await Git.ExecuteAsync(RootDirectory, "remote", "add", "beta", "https://github.com/example/beta");
-            await Git.ExecuteAsync(RootDirectory, "remote", "add", "origin", "https://github.com/example/repo");
+            await Git.ExecuteAsync(RootDirectory, "remote", "add", "testing", "https://github.com/example/repo");
 
             Assert.Equal(
-                new Repository(RootDirectory, new Remote("origin", "https://github.com/example/repo")),
+                new Repository(RootDirectory, new Remote("testing", "https://github.com/example/repo")),
                 await _finder.FindRepositoryAsync(RootDirectory),
                 RepositoryComparer.Instance
             );
@@ -184,6 +203,8 @@ public static class RepositoryFinderTests {
 
         [Fact]
         public async Task ShouldUseTheFirstRemoteAlphabeticallyWhenTheOriginRemoteDoesNotExist() {
+            _preferredRemoteName = "testing";
+
             await SetupRepositoryAsync(RootDirectory);
             await Git.ExecuteAsync(RootDirectory, "remote", "add", "beta", "https://github.com/example/beta");
             await Git.ExecuteAsync(RootDirectory, "remote", "add", "alpha", "https://github.com/example/alpha");
@@ -205,7 +226,13 @@ public static class RepositoryFinderTests {
 
 
         public FindRepositoriesMethod() {
-            _finder = new(Git, NullLogger.Instance);
+            Mock<ISettings> settings;
+
+
+            settings = new Mock<ISettings>();
+            settings.Setup((x) => x.GetPreferredRemoteNameAsync()).ReturnsAsync(() => "origin");
+
+            _finder = new(Git, settings.Object, NullLogger.Instance);
         }
 
 

@@ -13,6 +13,9 @@ public interface ISettings {
     Task<LinkType> GetDefaultLinkTypeAsync();
 
 
+    Task<string> GetPreferredRemoteNameAsync();
+
+
     Task<bool> GetUseShortHashesAsync();
 
 

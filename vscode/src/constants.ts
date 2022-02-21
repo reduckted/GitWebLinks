@@ -7,6 +7,7 @@ export const CONFIGURATION = {
     section: EXTENSION.id,
     linkType: 'linkType',
     defaultBranch: 'defaultBranch',
+    preferredRemoteName: 'preferredRemoteName',
     showCopy: 'showCopy',
     showOpen: 'showOpen',
     useShortHash: 'useShortHash'

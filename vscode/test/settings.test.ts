@@ -82,6 +82,18 @@ describe('Settings', () => {
         });
     });
 
+    describe('getPreferredRemoteName', () => {
+        it('should return "origin" if there is no stored value.', () => {
+            setup({ preferredRemoteName: undefined });
+            expect(settings.getPreferredRemoteName()).to.equal('origin');
+        });
+
+        it('should return the stored value when it exists.', () => {
+            setup({ preferredRemoteName: 'foo' });
+            expect(settings.getPreferredRemoteName()).to.equal('foo');
+        });
+    });
+
     describe('getShowCopy', () => {
         [true, false].forEach((value) => {
             it(`should return ${value} when the stored value is ${value}.`, () => {

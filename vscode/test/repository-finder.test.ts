@@ -1,9 +1,11 @@
 import { expect } from 'chai';
 import { promises as fs } from 'fs';
 import { join } from 'path';
+import * as sinon from 'sinon';
 
 import { git } from '../src/git';
 import { RepositoryFinder } from '../src/repository-finder';
+import { Settings } from '../src/settings';
 import { Repository } from '../src/types';
 
 import { Directory, markAsSlow, setupRepository } from './helpers';
@@ -23,6 +25,7 @@ describe('RepositoryFinder', function () {
     });
 
     afterEach(async () => {
+        sinon.restore();
         await root.dispose();
     });
 
@@ -139,19 +142,23 @@ describe('RepositoryFinder', function () {
             });
         });
 
-        it('should use the "origin" remote if it exists.', async () => {
+        it('should use the remote specified in the settings if it exists.', async () => {
+            sinon.stub(Settings.prototype, 'getPreferredRemoteName').returns('testing');
+
             await setupRepository(root.path);
             await git(root.path, 'remote', 'add', 'alpha', 'https://github.com/example/alpha');
             await git(root.path, 'remote', 'add', 'beta', 'https://github.com/example/beta');
-            await git(root.path, 'remote', 'add', 'origin', 'https://github.com/example/repo');
+            await git(root.path, 'remote', 'add', 'testing', 'https://github.com/example/repo');
 
             expect(await finder.findRepository(root.path)).to.deep.equal({
                 root: root.path,
-                remote: { url: 'https://github.com/example/repo', name: 'origin' }
+                remote: { url: 'https://github.com/example/repo', name: 'testing' }
             });
         });
 
-        it('should use the first remote alphabetically when the "origin" remote does not exist.', async () => {
+        it('should use the first remote alphabetically when the remote specified in the settings does not exist.', async () => {
+            sinon.stub(Settings.prototype, 'getPreferredRemoteName').returns('testing');
+
             await setupRepository(root.path);
             await git(root.path, 'remote', 'add', 'beta', 'https://github.com/example/beta');
             await git(root.path, 'remote', 'add', 'alpha', 'https://github.com/example/alpha');

@@ -45,6 +45,11 @@ public class Settings : ISettings {
     }
 
 
+    public async Task<string> GetPreferredRemoteNameAsync() {
+        return (await _generalOptions.GetValueAsync()).PreferredRemoteName;
+    }
+
+
     public async Task<bool> GetUseShortHashesAsync() {
         return (await _generalOptions.GetValueAsync()).UseShortHashes;
     }

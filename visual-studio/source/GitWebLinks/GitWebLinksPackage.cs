@@ -50,7 +50,7 @@ public class GitWebLinksPackage : ToolkitPackage {
         logger = await Logger.CreateAsync();
         git = new Git(logger);
         linkHandlerProvider = new LinkHandlerProvider(settings, git, logger);
-        repositoryFinder = new RepositoryFinder(git, logger);
+        repositoryFinder = new RepositoryFinder(git, settings, logger);
 
         AddService(typeof(LinkHandlerProvider), (_, _, _) => Task.FromResult<object>(linkHandlerProvider));
         AddService(typeof(ILogger), (_, _, _) => Task.FromResult<object>(logger));

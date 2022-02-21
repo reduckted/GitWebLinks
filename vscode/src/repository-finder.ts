@@ -3,6 +3,7 @@ import { dirname, join } from 'path';
 
 import { git } from './git';
 import { log } from './log';
+import { Settings } from './settings';
 import { Remote, Repository } from './types';
 import { getErrorMessage, isErrorCode } from './utilities';
 
@@ -12,6 +13,8 @@ const IGNORED_DIRECTORIES: Set<string> = new Set(['node_modules', 'bin', 'obj'])
  * Finds the repository that a workspace belongs to.
  */
 export class RepositoryFinder {
+    private readonly settings: Settings = new Settings();
+
     /**
      * Determines whether the specified workspace contains Git repositories.
      *
@@ -227,6 +230,7 @@ export class RepositoryFinder {
         let data: string;
         let remotes: Remote[];
         let remote: Remote;
+        let preferredRemoteName: string;
 
         log('Finding remote repositories...');
 
@@ -239,9 +243,10 @@ export class RepositoryFinder {
 
         log('Remotes found: %O', remotes);
 
-        // Use the "origin" remote if it exists;
-        // otherwise, just use the first remote.
-        remote = remotes.filter((x) => x.name === 'origin')[0];
+        // Use the remote that's specified in the settings if
+        // that remote exists; otherwise, just use the first remote.
+        preferredRemoteName = this.settings.getPreferredRemoteName();
+        remote = remotes.filter((x) => x.name === preferredRemoteName)[0];
 
         if (!remote) {
             remote = remotes.sort((x, y) => x.name.localeCompare(y.name))[0];

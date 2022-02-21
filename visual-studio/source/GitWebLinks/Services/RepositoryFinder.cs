@@ -18,11 +18,13 @@ public class RepositoryFinder {
     );
 
     private readonly Git _git;
+    private readonly ISettings _settings;
     private readonly ILogger _logger;
 
 
-    public RepositoryFinder(Git git, ILogger logger) {
+    public RepositoryFinder(Git git, ISettings settings, ILogger logger) {
         _git = git;
+        _settings = settings;
         _logger = logger;
     }
 
@@ -179,6 +181,7 @@ public class RepositoryFinder {
         IReadOnlyList<string> data;
         List<Remote> remotes;
         Remote? remote;
+        string preferredRemoteName;
 
         await _logger.LogAsync("Finding remote repositories...");
 
@@ -191,9 +194,10 @@ public class RepositoryFinder {
 
         await _logger.LogAsync($"Remotes found: {remotes}");
 
-        // Use the "origin" remote if it exists;
-        // otherwise, just use the first remote.
-        remote = remotes.FirstOrDefault((x) => x.Name == "origin");
+        // Use the remote that's specified in the settings if
+        // that remote exists; otherwise, just use the first remote.
+        preferredRemoteName = await _settings.GetPreferredRemoteNameAsync();
+        remote = remotes.FirstOrDefault((x) => x.Name == preferredRemoteName);
 
         if (remote is null) {
             remote = remotes.OrderBy((x) => x.Name).FirstOrDefault();

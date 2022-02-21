@@ -17,6 +17,7 @@ public class GeneralOptionsPage : OptionsPageBase {
 
 
     private string _defaultBranch;
+    private string _preferredRemoteName;
     private LinkType _defaultLinkType;
     private bool _showCopyLinkMenuItem;
     private bool _showOpenLinkMenuItem;
@@ -25,6 +26,7 @@ public class GeneralOptionsPage : OptionsPageBase {
 
     public GeneralOptionsPage() {
         _defaultBranch = "";
+        _preferredRemoteName = "origin";
         _defaultLinkType = LinkType.Commit;
         _showCopyLinkMenuItem = true;
         _showOpenLinkMenuItem = false;
@@ -42,6 +44,13 @@ public class GeneralOptionsPage : OptionsPageBase {
     public string DefaultBranch {
         get => _defaultBranch;
         set => SetProperty(ref _defaultBranch, value);
+    }
+
+
+    [DefaultValue("origin")]
+    public string PreferredRemoteName {
+        get => _preferredRemoteName;
+        set => SetProperty(ref _preferredRemoteName, value);
     }
 
 

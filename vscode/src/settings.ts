@@ -55,6 +55,15 @@ export class Settings {
     }
 
     /**
+     * Gets the name of the remote to use.
+     *
+     * @returns The name of the remote.
+     */
+    public getPreferredRemoteName(): string {
+        return this.getConfiguration().get<string>(CONFIGURATION.preferredRemoteName) ?? 'origin';
+    }
+
+    /**
      * Gets the setting that controls whether the "Copy Link" menu item is visible.
      *
      * @returns True if the menu item should be visible; otherwise, false.

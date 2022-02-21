@@ -51,7 +51,19 @@
             </TextBlock>
         </local:InfoTip>
 
-        <!-- use Short Hashes -->
+        <!-- Preferred Remote Name -->
+        <TextBlock
+            Text="Preferred Remote Name:"
+            Margin="{StaticResource SmallSpacerBottom}"
+            />
+
+        <TextBox
+            Text="{Binding PreferredRemoteName, UpdateSourceTrigger=PropertyChanged}"
+            Margin="{StaticResource LargeSpacerBottom}"
+            Padding="3"
+            />
+        
+        <!-- Use Short Hashes -->
         <CheckBox
             IsChecked="{Binding UseShortHashes, UpdateSourceTrigger=PropertyChanged}"
             Content="Use short SHA hashes for links to specific commits"

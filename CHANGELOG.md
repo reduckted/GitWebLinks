@@ -2,7 +2,8 @@
 
 ## New Features
 
--   ⭐ Setting to use short SHA hashes.
+-   ⭐ You can now generate links that use short SHA hashes.
+-   ⭐ You can use a remote other than "origin".
 
 ## Maintenance
 
