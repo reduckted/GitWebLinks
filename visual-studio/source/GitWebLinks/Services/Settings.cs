@@ -45,6 +45,11 @@ public class Settings : ISettings {
     }
 
 
+    public async Task<bool> GetUseShortHashesAsync() {
+        return (await _generalOptions.GetValueAsync()).UseShortHashes;
+    }
+
+
     public async Task<object?> GetHandlerSettingAsync(string key) {
         if (_handlerSettings.TryGetValue(key, out IHandlerSettingProvider setting)) {
             return await setting.GetValueAsync();

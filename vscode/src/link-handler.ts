@@ -270,7 +270,11 @@ export class LinkHandler {
                     )
                 ).trim();
             case 'commit':
-                return (await git(repository.root, 'rev-parse', 'HEAD')).trim();
+                if (this.settings.getUseShortHash()) {
+                    return (await git(repository.root, 'rev-parse', '--short', 'HEAD')).trim();
+                } else {
+                    return (await git(repository.root, 'rev-parse', 'HEAD')).trim();
+                }
 
             default:
                 // Use the default branch if one is specified in the settings; otherwise find the

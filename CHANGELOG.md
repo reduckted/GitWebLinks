@@ -1,3 +1,13 @@
+# Unreleased
+
+## New Features
+
+-   ⭐ Setting to use short SHA hashes.
+
+## Maintenance
+
+-   🔨 Dependency updates.
+
 # 2.6.0 (2021-10-30)
 
 ## New Features

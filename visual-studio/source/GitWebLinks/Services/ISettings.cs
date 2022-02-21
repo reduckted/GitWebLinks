@@ -13,6 +13,9 @@ public interface ISettings {
     Task<LinkType> GetDefaultLinkTypeAsync();
 
 
+    Task<bool> GetUseShortHashesAsync();
+
+
     Task<object?> GetHandlerSettingAsync(string key);
 
 

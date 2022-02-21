@@ -8,7 +8,8 @@ export const CONFIGURATION = {
     linkType: 'linkType',
     defaultBranch: 'defaultBranch',
     showCopy: 'showCopy',
-    showOpen: 'showOpen'
+    showOpen: 'showOpen',
+    useShortHash: 'useShortHash'
 };
 
 export const CONTEXT = {

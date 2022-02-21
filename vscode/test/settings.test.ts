@@ -100,6 +100,15 @@ describe('Settings', () => {
         });
     });
 
+    describe('getUseShortHash', () => {
+        [true, false].forEach((value) => {
+            it(`should return ${value} when the stored value is ${value}.`, () => {
+                setup({ useShortHash: value });
+                expect(settings.getUseShortHash()).to.equal(value);
+            });
+        });
+    });
+
     describe('getHandlerSetting', () => {
         it('should return the value of the specified key.', () => {
             setup({ foo: 'bar' });

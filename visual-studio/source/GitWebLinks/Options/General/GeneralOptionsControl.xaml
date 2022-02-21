@@ -51,6 +51,13 @@
             </TextBlock>
         </local:InfoTip>
 
+        <!-- use Short Hashes -->
+        <CheckBox
+            IsChecked="{Binding UseShortHashes, UpdateSourceTrigger=PropertyChanged}"
+            Content="Use short SHA hashes for links to specific commits"
+            Margin="{StaticResource LargeSpacerBottom}"
+            />
+
         <!-- Show 'Copy Link' Menu Item -->
         <CheckBox
             IsChecked="{Binding ShowCopyLinkMenuItem, UpdateSourceTrigger=PropertyChanged}"

@@ -20,6 +20,7 @@ public class GeneralOptionsPage : OptionsPageBase {
     private LinkType _defaultLinkType;
     private bool _showCopyLinkMenuItem;
     private bool _showOpenLinkMenuItem;
+    private bool _useShortHashes;
 
 
     public GeneralOptionsPage() {
@@ -27,6 +28,7 @@ public class GeneralOptionsPage : OptionsPageBase {
         _defaultLinkType = LinkType.Commit;
         _showCopyLinkMenuItem = true;
         _showOpenLinkMenuItem = false;
+        _useShortHashes = false;
 
         LinkTypes = new List<LinkTypeListItem> {
             new LinkTypeListItem(LinkType.Commit),
@@ -64,6 +66,13 @@ public class GeneralOptionsPage : OptionsPageBase {
     public bool ShowOpenLinkMenuItem {
         get => _showOpenLinkMenuItem;
         set => SetProperty(ref _showOpenLinkMenuItem, value);
+    }
+
+
+    [DefaultValue(false)]
+    public bool UseShortHashes {
+        get => _useShortHashes;
+        set => SetProperty(ref _useShortHashes, value);
     }
 
 

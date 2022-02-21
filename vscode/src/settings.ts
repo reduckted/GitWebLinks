@@ -73,6 +73,15 @@ export class Settings {
     }
 
     /**
+     * Gets the setting that controls whether short SHA hashes should be used.
+     *
+     * @returns True if short hashes should be used; otherwise, false.
+     */
+    public getUseShortHash(): boolean {
+        return !!this.getConfiguration().get(CONFIGURATION.useShortHash);
+    }
+
+    /**
      * Gets a handler-specific setting.
      *
      * @param key The key of the setting to retrieve.

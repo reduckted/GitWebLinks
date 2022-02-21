@@ -186,7 +186,11 @@ public class LinkHandler {
                     .Trim();
 
             case LinkType.Commit:
-                return string.Concat(await _git.ExecuteAsync(repositoryRoot, "rev-parse", "HEAD")).Trim();
+                if (await _settings.GetUseShortHashesAsync()) {
+                    return string.Concat(await _git.ExecuteAsync(repositoryRoot, "rev-parse", "--short", "HEAD")).Trim();
+                } else {
+                    return string.Concat(await _git.ExecuteAsync(repositoryRoot, "rev-parse", "HEAD")).Trim();
+                }
 
             default:
                 string defaultBranch;

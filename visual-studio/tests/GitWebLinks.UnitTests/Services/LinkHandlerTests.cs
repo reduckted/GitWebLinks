@@ -60,6 +60,19 @@ public static class LinkHandlerTests {
 
 
         [Fact]
+        public async Task ShouldUseTheShortCommitHashAsTheRefValueWhenTheLinkTypeIsCommitAndShortHashesShouldBeUsed() {
+            await SetupRepositoryAsync(RootDirectory);
+
+            _settings.Setup((x) => x.GetUseShortHashesAsync()).ReturnsAsync(true);
+
+            Assert.Equal(
+                string.Concat(await Git.ExecuteAsync(RootDirectory, "rev-parse", "--short", "HEAD")).Trim(),
+                await CreateUrlAsync(new PartialHandlerDefinition { Url = "{{ ref }}" }, LinkType.Commit)
+            );
+        }
+
+
+        [Fact]
         public async Task ShouldUseTheBranchNameAsTheRefValueWhenTheLinkTypeIsCurrentBranch() {
             await SetupRepositoryAsync(RootDirectory);
 

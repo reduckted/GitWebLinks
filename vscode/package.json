@@ -306,6 +306,11 @@
                     "type": "boolean",
                     "description": "Generate links to 'github.dev' instead of 'github.com'.",
                     "default": false
+                },
+                "gitweblinks.useShortHash": {
+                    "type": "boolean",
+                    "description": "Use short SHA hashes in links to specific commits.",
+                    "default": false
                 }
             }
         }
