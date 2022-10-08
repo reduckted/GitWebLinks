@@ -2,7 +2,7 @@
     "name": "vscode-gitweblinks",
     "displayName": "Git Web Links for VS Code",
     "description": "Copy links to files in their online Git repositories",
-    "version": "2.7.0",
+    "version": "2.8.0",
     "publisher": "reduckted",
     "homepage": "https://github.com/reduckted/GitWebLinks",
     "repository": {

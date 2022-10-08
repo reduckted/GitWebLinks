@@ -25,7 +25,7 @@ You can also right-click on a file in Explorer panel and select _Copy Link to Fi
 
 ## Copy a Link to the Selection
 
-To copy a link to a particular line in the file, right-click on the line in the editor and select _Copy Link to Selection_.
+To copy a link to a particular line in the file, right-click on the line in the editor and select _Copy Link to Selection_. You can also use the shortcut <kbd>Ctrl</kbd>+<kbd>G</kbd>,<kbd>Ctrl</kbd>+<kbd>L</kbd>.
 
 If you want to copy a link to a range of lines, just select the lines first.
 

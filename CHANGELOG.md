@@ -1,3 +1,13 @@
+# 2.8.0 (2022-10-08)
+
+## New Features
+
+-   ⭐ VS Code: Use the shortcut <kbd>Ctrl</kbd>+<kbd>G</kbd>,<kbd>Ctrl</kbd>+<kbd>L</kbd> to copy the link to the current selection (thanks @rubengmurray).
+
+## Maintenance
+
+-   🔨 Dependency updates.
+
 # 2.7.0 (2022-02-21)
 
 ## New Features
