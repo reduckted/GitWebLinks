@@ -131,6 +131,13 @@
                 "category": "Git Web Links"
             }
         ],
+        "keybindings": [
+            {
+                "command": "gitweblinks.copySelection",
+                "key": "ctrl+g ctrl+l",
+                "mac": "cmd+g cmd+l"
+            }
+        ],
         "menus": {
             "editor/context": [
                 {
