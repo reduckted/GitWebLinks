@@ -24,7 +24,11 @@ export function markAsSlow(suite: Mocha.Suite): void {
  * @param root The root directory.
  */
 export async function setupRepository(root: string): Promise<void> {
-    await git(root, 'init');
+    // Ensure that the default branch name matches what the tests are expecting
+    // (`master` because the tests were written before `main` became the default).
+    // The default branch can be specified in the git configuration, but we
+    // don't want to change the global configuration when running the tests.
+    await git(root, 'init', '--initial-branch=master');
     await git(root, 'config', 'user.email', 'foo@example.com');
     await git(root, 'config', 'user.name', 'foo');
 
