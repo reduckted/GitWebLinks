@@ -134,8 +134,8 @@
         "keybindings": [
             {
                 "command": "gitweblinks.copySelection",
-                "key": "ctrl+g ctrl+l",
-                "mac": "cmd+g cmd+l"
+                "key": "ctrl+alt+l",
+                "mac": "ctrl+cmd+l"
             }
         ],
         "menus": {
