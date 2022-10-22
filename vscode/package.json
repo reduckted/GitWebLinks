@@ -51,7 +51,7 @@
         "@types/sinon": "10.0.13",
         "@types/sinon-chai": "3.2.8",
         "@types/uuid": "8.3.4",
-        "@types/vscode": "1.50.0",
+        "@types/vscode": "1.64.0",
         "@types/webpack-env": "1.18.0",
         "@typescript-eslint/eslint-plugin": "5.40.1",
         "@typescript-eslint/parser": "5.40.1",
@@ -79,7 +79,7 @@
         "webpack-cli": "4.10.0"
     },
     "engines": {
-        "vscode": "^1.50.0",
+        "vscode": "^1.64.0",
         "node": ">=12.0.0"
     },
     "categories": [
