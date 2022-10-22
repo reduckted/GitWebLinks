@@ -1,8 +1,14 @@
+# 2.8.1 (2022-10-22)
+
+## Bug Fixes
+
+-   🐛 VS Code: Changed the keyboard shortcut to <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>L</kbd> on Windows and Linux, and <kbd>Ctrl</kbd>+<kbd>Cmd</kbd>+<kbd>L</kbd> on macOS to avoid conflicts with VS Code's default keyboard shortcuts.
+
 # 2.8.0 (2022-10-08)
 
 ## New Features
 
--   ⭐ VS Code: Use the shortcut <kbd>Ctrl</kbd>+<kbd>G</kbd>,<kbd>Ctrl</kbd>+<kbd>L</kbd> to copy the link to the current selection (thanks @rubengmurray).
+-   ⭐ VS Code: Use the keyboard shortcut <kbd>Ctrl</kbd>+<kbd>G</kbd>,<kbd>Ctrl</kbd>+<kbd>L</kbd> to copy the link to the current selection (thanks @rubengmurray).
 
 ## Maintenance
 
