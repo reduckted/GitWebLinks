@@ -1,3 +1,7 @@
+# 2.9.0 (2022-10-30)
+
+-   ⭐ New command that lets you choose which branch or commit to generate the link to.
+
 # 2.8.1 (2022-10-22)
 
 ## Bug Fixes

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="GitWebLinks.c090a256-229d-440e-8f5d-34306611b61b" Version="2.8.1" Language="en-US" Publisher="reduckted" />
+        <Identity Id="GitWebLinks.c090a256-229d-440e-8f5d-34306611b61b" Version="2.9.0" Language="en-US" Publisher="reduckted" />
         <DisplayName>Git Web Links</DisplayName>
         <Description xml:space="preserve">Copy links to files in their online Git repositories.</Description>
         <MoreInfo>https://github.com/reduckted/GitWebLinks</MoreInfo>
