@@ -8,7 +8,7 @@ namespace GitWebLinks;
 
 public class LinkHandlerProvider {
 
-    private readonly IReadOnlyCollection<LinkHandler> _handlers;
+    private readonly IReadOnlyCollection<ILinkHandler> _handlers;
     private readonly ILogger _logger;
 
 
@@ -23,14 +23,14 @@ public class LinkHandlerProvider {
     }
 
 
-    public async Task<LinkHandler?> SelectAsync(Repository repository) {
+    public async Task<ILinkHandler?> SelectAsync(Repository repository) {
         if (repository.Remote is null) {
             return null;
         }
 
         await _logger.LogAsync($"Finding a handler for repository {repository.Remote}.");
 
-        foreach (LinkHandler handler in _handlers) {
+        foreach (ILinkHandler handler in _handlers) {
             await _logger.LogAsync($"Testing '{handler.Name}");
 
             if (await handler.IsMatchAsync(repository.Remote.Url)) {
@@ -66,7 +66,7 @@ public class LinkHandlerProvider {
 
         output = new List<UrlInfo>();
 
-        foreach (LinkHandler handler in _handlers) {
+        foreach (ILinkHandler handler in _handlers) {
             UrlInfo? info;
 
 

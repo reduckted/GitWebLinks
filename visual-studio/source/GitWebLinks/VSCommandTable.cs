@@ -30,6 +30,7 @@ namespace GitWebLinks
         public const int Command_CopyLinkToSelectionAtCurrentCommit = 0x0102;
         public const int Command_CopyLinkToSelectionOnCurrentBranch = 0x0103;
         public const int Command_CopyLinkToSelectionOnDefaultBranch = 0x0104;
+        public const int Command_CopyLinkToSelectionForTarget = 0x0110;
         public const int Command_OpenLinkToFile = 0x0105;
         public const int Command_OpenLinkToSelection = 0x0106;
         public const int Command_OpenLinkToSelectionAtCurrentCommit = 0x0107;

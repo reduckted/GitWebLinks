@@ -163,7 +163,7 @@ public static class HandlerTests {
 
         private async Task RunTestAsync(string remote, Dictionary<string, JToken> settings, string result, TestOptions? options = null) {
             Repository repository;
-            LinkHandler? handler;
+            ILinkHandler? handler;
             string? link;
 
 
@@ -186,7 +186,7 @@ public static class HandlerTests {
             link = await handler.CreateUrlAsync(
                 repository,
                 new FileInfo(Path.Combine(RepositoryRoot, options.FileName ?? TestFileName), options.Selection),
-                new LinkOptions(options.Type ?? LinkType.CurrentBranch)
+                new LinkOptions(new LinkTargetPreset(options.Type ?? LinkType.CurrentBranch))
             );
 
             Assert.Equal(result, link);

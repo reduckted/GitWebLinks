@@ -3,7 +3,7 @@
     >
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/GitWebLinks;component/UI/InfoTip.xaml"/>
-        <ResourceDictionary Source="pack://application:,,,/GitWebLinks;component/UI/ServerDataGrid.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/GitWebLinks;component/UI/Controls/InfoTip.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/GitWebLinks;component/UI/Controls/ServerDataGrid.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

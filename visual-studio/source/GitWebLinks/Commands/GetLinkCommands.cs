@@ -7,7 +7,7 @@ namespace GitWebLinks;
 [Command(PackageIds.Command_CopyLinkToFile)]
 public class CopyLinkToFileCommand : GetLinkCommandBase<CopyLinkToFileCommand> {
     protected override bool IncludeSelection => false;
-    protected override LinkType? LinkType => null;
+    protected override CommandLinkType LinkType => CommandLinkType.UseDefault;
     protected override CommandAction Action => CommandAction.Copy;
     protected override bool IsVisible(GeneralOptionsPage options) => options.ShowCopyLinkMenuItem;
 }
@@ -16,7 +16,7 @@ public class CopyLinkToFileCommand : GetLinkCommandBase<CopyLinkToFileCommand> {
 [Command(PackageIds.Command_CopyLinkToSelection)]
 public class CopyLinkToSelectionCommand : GetLinkCommandBase<CopyLinkToSelectionCommand> {
     protected override bool IncludeSelection => true;
-    protected override LinkType? LinkType => null;
+    protected override CommandLinkType LinkType => CommandLinkType.UseDefault;
     protected override CommandAction Action => CommandAction.Copy;
     protected override bool IsVisible(GeneralOptionsPage options) => options.ShowCopyLinkMenuItem;
 }
@@ -25,7 +25,7 @@ public class CopyLinkToSelectionCommand : GetLinkCommandBase<CopyLinkToSelection
 [Command(PackageIds.Command_CopyLinkToSelectionAtCurrentCommit)]
 public class CopyLinkToSelectionAtCurrentCommitCommand : GetLinkCommandBase<CopyLinkToSelectionAtCurrentCommitCommand> {
     protected override bool IncludeSelection => true;
-    protected override LinkType? LinkType => GitWebLinks.LinkType.Commit;
+    protected override CommandLinkType LinkType => CommandLinkType.Commit;
     protected override CommandAction Action => CommandAction.Copy;
 }
 
@@ -33,7 +33,7 @@ public class CopyLinkToSelectionAtCurrentCommitCommand : GetLinkCommandBase<Copy
 [Command(PackageIds.Command_CopyLinkToSelectionOnCurrentBranch)]
 public class CopyLinkToSelectionOnCurrentBranchCommand : GetLinkCommandBase<CopyLinkToSelectionOnCurrentBranchCommand> {
     protected override bool IncludeSelection => true;
-    protected override LinkType? LinkType => GitWebLinks.LinkType.CurrentBranch;
+    protected override CommandLinkType LinkType => CommandLinkType.CurrentBranch;
     protected override CommandAction Action => CommandAction.Copy;
 }
 
@@ -41,7 +41,15 @@ public class CopyLinkToSelectionOnCurrentBranchCommand : GetLinkCommandBase<Copy
 [Command(PackageIds.Command_CopyLinkToSelectionOnDefaultBranch)]
 public class CopyLinkToSelectionOnDefaultBranchCommand : GetLinkCommandBase<CopyLinkToSelectionOnDefaultBranchCommand> {
     protected override bool IncludeSelection => true;
-    protected override LinkType? LinkType => GitWebLinks.LinkType.DefaultBranch;
+    protected override CommandLinkType LinkType => CommandLinkType.DefaultBranch;
+    protected override CommandAction Action => CommandAction.Copy;
+}
+
+
+[Command(PackageIds.Command_CopyLinkToSelectionForTarget)]
+public class CopyLinkToSelectionForTargetCommand : GetLinkCommandBase<CopyLinkToSelectionForTargetCommand> {
+    protected override bool IncludeSelection => true;
+    protected override CommandLinkType LinkType => CommandLinkType.Prompt;
     protected override CommandAction Action => CommandAction.Copy;
 }
 
@@ -49,7 +57,7 @@ public class CopyLinkToSelectionOnDefaultBranchCommand : GetLinkCommandBase<Copy
 [Command(PackageIds.Command_OpenLinkToFile)]
 public class OpenLinkToFileCommand : GetLinkCommandBase<OpenLinkToFileCommand> {
     protected override bool IncludeSelection => false;
-    protected override LinkType? LinkType => null;
+    protected override CommandLinkType LinkType => CommandLinkType.UseDefault;
     protected override CommandAction Action => CommandAction.Open;
     protected override bool IsVisible(GeneralOptionsPage options) => options.ShowOpenLinkMenuItem;
 }
@@ -58,7 +66,7 @@ public class OpenLinkToFileCommand : GetLinkCommandBase<OpenLinkToFileCommand> {
 [Command(PackageIds.Command_OpenLinkToSelection)]
 public class OpenLinkToSelectionCommand : GetLinkCommandBase<OpenLinkToSelectionCommand> {
     protected override bool IncludeSelection => true;
-    protected override LinkType? LinkType => null;
+    protected override CommandLinkType LinkType => CommandLinkType.UseDefault;
     protected override CommandAction Action => CommandAction.Open;
     protected override bool IsVisible(GeneralOptionsPage options) => options.ShowOpenLinkMenuItem;
 }
@@ -67,7 +75,7 @@ public class OpenLinkToSelectionCommand : GetLinkCommandBase<OpenLinkToSelection
 [Command(PackageIds.Command_OpenLinkToSelectionAtCurrentCommit)]
 public class OpenLinkToSelectionAtCurrentCommitCommand : GetLinkCommandBase<OpenLinkToSelectionAtCurrentCommitCommand> {
     protected override bool IncludeSelection => true;
-    protected override LinkType? LinkType => GitWebLinks.LinkType.Commit;
+    protected override CommandLinkType LinkType => CommandLinkType.Commit;
     protected override CommandAction Action => CommandAction.Open;
 }
 
@@ -75,7 +83,7 @@ public class OpenLinkToSelectionAtCurrentCommitCommand : GetLinkCommandBase<Open
 [Command(PackageIds.Command_OpenLinkToSelectionOnCurrentBranch)]
 public class OpenLinkToSelectionOnCurrentBranchCommand : GetLinkCommandBase<OpenLinkToSelectionOnCurrentBranchCommand> {
     protected override bool IncludeSelection => true;
-    protected override LinkType? LinkType => GitWebLinks.LinkType.CurrentBranch;
+    protected override CommandLinkType LinkType => CommandLinkType.CurrentBranch;
     protected override CommandAction Action => CommandAction.Open;
 }
 
@@ -83,6 +91,6 @@ public class OpenLinkToSelectionOnCurrentBranchCommand : GetLinkCommandBase<Open
 [Command(PackageIds.Command_OpenLinkToSelectionOnDefaultBranch)]
 public class OpenLinkToSelectionOnDefaultBranchCommand : GetLinkCommandBase<OpenLinkToSelectionOnDefaultBranchCommand> {
     protected override bool IncludeSelection => true;
-    protected override LinkType? LinkType => GitWebLinks.LinkType.DefaultBranch;
+    protected override CommandLinkType LinkType => CommandLinkType.DefaultBranch;
     protected override CommandAction Action => CommandAction.Open;
 }

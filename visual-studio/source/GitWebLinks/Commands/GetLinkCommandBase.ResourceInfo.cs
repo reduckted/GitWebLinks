@@ -6,7 +6,7 @@ partial class GetLinkCommandBase<T> {
 
     private class ResourceInfo {
 
-        public ResourceInfo(string filePath, Repository repository, LinkHandler handler) {
+        public ResourceInfo(string filePath, Repository repository, ILinkHandler handler) {
             FilePath = filePath;
             Repository = repository;
             Handler = handler;
@@ -19,7 +19,7 @@ partial class GetLinkCommandBase<T> {
         public Repository Repository { get; }
 
 
-        public LinkHandler Handler { get; }
+        public ILinkHandler Handler { get; }
 
     }
 

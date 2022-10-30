@@ -42,7 +42,7 @@ public static class LinkHandlerTests {
                 expected,
                 await CreateUrlAsync(
                     new PartialHandlerDefinition { Url = "{{ type }}" },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -56,7 +56,7 @@ public static class LinkHandlerTests {
 
             Assert.Equal(
                 string.Concat(await Git.ExecuteAsync(RootDirectory, "rev-parse", "HEAD")).Trim(),
-                await CreateUrlAsync(new PartialHandlerDefinition { Url = "{{ ref }}" }, LinkType.Commit)
+                await CreateUrlAsync(new PartialHandlerDefinition { Url = "{{ ref }}" }, new LinkTargetPreset(LinkType.Commit))
             );
         }
 
@@ -69,7 +69,7 @@ public static class LinkHandlerTests {
 
             Assert.Equal(
                 string.Concat(await Git.ExecuteAsync(RootDirectory, "rev-parse", "--short", "HEAD")).Trim(),
-                await CreateUrlAsync(new PartialHandlerDefinition { Url = "{{ ref }}" }, LinkType.Commit)
+                await CreateUrlAsync(new PartialHandlerDefinition { Url = "{{ ref }}" }, new LinkTargetPreset(LinkType.Commit))
             );
         }
 
@@ -87,7 +87,7 @@ public static class LinkHandlerTests {
                         Url = "{{ ref }}",
                         BranchRef = BranchRefType.Abbreviated
                     },
-                    LinkType.CurrentBranch
+                    new LinkTargetPreset(LinkType.CurrentBranch)
                 )
             );
         }
@@ -103,7 +103,7 @@ public static class LinkHandlerTests {
                 "bar",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition { Url = "{{ ref }}" },
-                    LinkType.DefaultBranch
+                    new LinkTargetPreset(LinkType.DefaultBranch)
                 )
             );
         }
@@ -128,7 +128,7 @@ public static class LinkHandlerTests {
             await Assert.ThrowsAsync<NoRemoteHeadException>(
                 () => CreateUrlAsync(
                     new PartialHandlerDefinition { Url = "{{ ref }}" },
-                    LinkType.DefaultBranch
+                    new LinkTargetPreset(LinkType.DefaultBranch)
                 )
             );
         }
@@ -157,7 +157,77 @@ public static class LinkHandlerTests {
                 "master",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition { Url = "{{ ref }}", BranchRef = BranchRefType.Abbreviated },
-                    LinkType.DefaultBranch
+                    new LinkTargetPreset(LinkType.DefaultBranch)
+                )
+            );
+        }
+
+
+        [Fact]
+        public async Task ShouldUseTheGivenShortCommitHashWhenShortHashesShouldBeUsed() {
+            _settings.Setup((x) => x.GetUseShortHashesAsync()).ReturnsAsync(true);
+
+            await SetupRepositoryAsync(RootDirectory);
+
+            Assert.Equal(
+                "short.commit",
+                await CreateUrlAsync(
+                    new PartialHandlerDefinition {
+                        Url = "{{ ref }}.{{ type }}"
+                    },
+                    new LinkTargetRef(new RefInfo("short", "long"), RefType.Commit)
+                )
+            );
+        }
+
+
+        [Fact]
+        public async Task ShouldUseTheGivenLongCommitHashWhenShortHashesShouldNotBeUsed() {
+            _settings.Setup((x) => x.GetUseShortHashesAsync()).ReturnsAsync(false);
+
+            await SetupRepositoryAsync(RootDirectory);
+
+            Assert.Equal(
+                "long.commit",
+                await CreateUrlAsync(
+                    new PartialHandlerDefinition {
+                        Url = "{{ ref }}.{{ type }}"
+                    },
+                    new LinkTargetRef(new RefInfo("short", "long"), RefType.Commit)
+                )
+            );
+        }
+
+
+        [Fact]
+        public async Task ShouldUseTheGivenShortBranchNameWhenAbbreviatedBranchRefsShouldBeUsed() {
+            await SetupRepositoryAsync(RootDirectory);
+
+            Assert.Equal(
+                "short.branch",
+                await CreateUrlAsync(
+                    new PartialHandlerDefinition {
+                        Url = "{{ ref }}.{{ type }}",
+                        BranchRef = BranchRefType.Abbreviated
+                    },
+                    new LinkTargetRef(new RefInfo("short", "long"), RefType.Branch)
+                )
+            );
+        }
+
+
+        [Fact]
+        public async Task ShouldUseTheGivenLongBranchNameWhenSymbolicBranchRefsShouldBeUsed() {
+            await SetupRepositoryAsync(RootDirectory);
+
+            Assert.Equal(
+                "long.branch",
+                await CreateUrlAsync(
+                    new PartialHandlerDefinition {
+                        Url = "{{ ref }}.{{ type }}",
+                        BranchRef = BranchRefType.Symbolic 
+                    },
+                    new LinkTargetRef(new RefInfo("short", "long"), RefType.Branch)
                 )
             );
         }
@@ -176,7 +246,7 @@ public static class LinkHandlerTests {
                         Server = new StaticServer("http://example.com/", ""),
                         Url = "{{ base }} | {{ repository }}"
                     },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -195,7 +265,7 @@ public static class LinkHandlerTests {
                         Server = new StaticServer("http://example.com", ""),
                         Url = "{{ base }} | {{ repository }}"
                     },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -214,7 +284,7 @@ public static class LinkHandlerTests {
                         Server = new StaticServer("http://example.com", "ssh://git@example.com/"),
                         Url = "{{ base }} | {{ repository }}"
                     },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -233,7 +303,7 @@ public static class LinkHandlerTests {
                         Server = new StaticServer("http://example.com", "ssh://git@example.com"),
                         Url = "{{ base }} | {{ repository }}"
                     },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -252,7 +322,7 @@ public static class LinkHandlerTests {
                         Server = new StaticServer("http://example.com/", "ssh://git@example.com"),
                         Url = "{{ base }} | {{ repository }}"
                     },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -271,7 +341,7 @@ public static class LinkHandlerTests {
                         Server = new StaticServer("http://example.com/", "ssh://git@example.com:"),
                         Url = "{{ base }} | {{ repository }}"
                     },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -290,7 +360,7 @@ public static class LinkHandlerTests {
                         Server = new StaticServer("http://example.com", ""),
                         Url = "{{ base }} | {{ repository }}"
                     },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -309,7 +379,7 @@ public static class LinkHandlerTests {
                         Server = new StaticServer("http://example.com/", "ssh://git@example.com"),
                         Url = "{{ base }}"
                     },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -328,7 +398,7 @@ public static class LinkHandlerTests {
                         Server = new StaticServer("http://example.com/", "git@example.com"),
                         Url = "{{ base }}"
                     },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -347,7 +417,7 @@ public static class LinkHandlerTests {
                         Server = new StaticServer("http://example.com/", "git@example.com"),
                         Url = "{{ base }}"
                     },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -366,7 +436,7 @@ public static class LinkHandlerTests {
                         Server = new StaticServer("http://example.com/", "example.com"),
                         Url = "{{ base }}"
                     },
-                    null
+                    new LinkTargetPreset(null)
                 )
             );
         }
@@ -393,7 +463,7 @@ public static class LinkHandlerTests {
                 "http://example.com/real/foo.js",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition { Url = "{{ base }}/{{ file }}" },
-                    LinkType.CurrentBranch,
+                    new LinkTargetPreset(LinkType.CurrentBranch),
                     filePath: Path.Combine(link, "foo.js")
                 )
             );
@@ -421,7 +491,7 @@ public static class LinkHandlerTests {
                 "http://example.com/real/foo.js",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition { Url = "{{ base }}/{{ file }}" },
-                    LinkType.CurrentBranch,
+                    new LinkTargetPreset(LinkType.CurrentBranch),
                     filePath: link
                 )
             );
@@ -451,7 +521,7 @@ public static class LinkHandlerTests {
                 "http://example.com/foo.js",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition { Url = "{{ base }}/{{ file }}" },
-                    LinkType.CurrentBranch,
+                    new LinkTargetPreset(LinkType.CurrentBranch),
                     filePath: Path.Combine(link, "foo.js")
                 )
             );
@@ -469,7 +539,7 @@ public static class LinkHandlerTests {
                         Url = "http://example.com/file",
                         Query = new[] { new QueryModification(new Regex("\\.js$"), "a", "1") }
                     },
-                    null,
+                    new LinkTargetPreset(null),
                     filePath: "foo/bar.txt"
                 )
             );
@@ -487,7 +557,7 @@ public static class LinkHandlerTests {
                         Url = "http://example.com/file",
                         Query = new[] { new QueryModification(new Regex("\\.txt$"), "first", "yes") }
                     },
-                    null,
+                    new LinkTargetPreset(null),
                     filePath: "foo/bar.txt"
                 )
             );
@@ -505,7 +575,7 @@ public static class LinkHandlerTests {
                         Url = "http://example.com/file?first=yes",
                         Query = new[] { new QueryModification(new Regex("\\.txt$"), "second", "no") }
                     },
-                    null,
+                    new LinkTargetPreset(null),
                     filePath: "foo/bar.txt"
                 )
             );
@@ -523,7 +593,7 @@ public static class LinkHandlerTests {
                         Url = "http://example.com/file#L1-10",
                         Query = new[] { new QueryModification(new Regex("\\.txt$"), "first", "yes") }
                     },
-                    null,
+                    new LinkTargetPreset(null),
                     filePath: "foo/bar.txt"
                 )
             );
@@ -540,11 +610,11 @@ public static class LinkHandlerTests {
         }
 
 
-        private async Task<string> CreateUrlAsync(PartialHandlerDefinition definition, LinkType? linkType, string filePath = "file.txt") {
+        private async Task<string> CreateUrlAsync(PartialHandlerDefinition definition, ILinkTarget target, string filePath = "file.txt") {
             return await CreateHandler(definition).CreateUrlAsync(
                 _repository,
                 new FileInfo(filePath, null),
-                new LinkOptions(linkType)
+                new LinkOptions(target)
             );
         }
 

@@ -14,7 +14,7 @@ using System.Web;
 
 namespace GitWebLinks;
 
-public class LinkHandler {
+public class LinkHandler : ILinkHandler {
 
     private readonly HandlerDefinition _definition;
     private readonly ISettings _settings;
@@ -50,7 +50,9 @@ public class LinkHandler {
 
         string remote;
         StaticServer address;
-        LinkType type;
+        string refValue;
+        RefType refType;
+        LinkType linkType;
         string url;
         TemplateData data;
         Hash hash;
@@ -58,7 +60,27 @@ public class LinkHandler {
 
         // If a link type wasn't specified, then we'll use
         // the default type that's defined in the settings.
-        type = options.Type ?? await _settings.GetDefaultLinkTypeAsync();
+        if (options.Target is LinkTargetPreset preset) {
+            linkType = preset.Type ?? await _settings.GetDefaultLinkTypeAsync();
+            refType = linkType == LinkType.Commit ? RefType.Commit : RefType.Branch;
+            refValue = await GetRefAsync(linkType, repository.Root, repository.Remote);
+
+        } else if (options.Target is LinkTargetRef refTarget) {
+            if (refTarget.Type == RefType.Branch) {
+                refType = RefType.Branch;
+                refValue = _definition.BranchRef == BranchRefType.Abbreviated
+                    ? refTarget.RefInfo.Abbreviated
+                    : refTarget.RefInfo.Symbolic;
+            } else {
+                refType = RefType.Commit;
+                refValue = await _settings.GetUseShortHashesAsync()
+                    ? refTarget.RefInfo.Abbreviated
+                    : refTarget.RefInfo.Symbolic;
+            }
+
+        } else {
+            throw new NotSupportedException($"Unknown link target {options.Target.GetType().Name}.");
+        }
 
         // Adjust the remote URL so that it's in a
         // standard format that we can manipulate.
@@ -70,10 +92,10 @@ public class LinkHandler {
             .Create()
             .Add("base", address.Http)
             .Add("repository", GetRepositoryPath(remote, address))
-            .Add("ref", await GetRefAsync(type, repository.Root, repository.Remote))
+            .Add("ref", refValue)
             .Add("commit", await GetRefAsync(LinkType.Commit, repository.Root, repository.Remote))
             .Add("file", GetRelativePath(repository.Root, file.FilePath))
-            .Add("type", type == LinkType.Commit ? "commit" : "branch");
+            .Add("type", refType == RefType.Commit ? "commit" : "branch");
 
         if (file.Selection is not null) {
             data.Add("startLine", file.Selection.StartLine);
@@ -178,7 +200,7 @@ public class LinkHandler {
     }
 
 
-    private async Task<string> GetRefAsync(LinkType type, string repositoryRoot, Remote remote) {
+    public async Task<string> GetRefAsync(LinkType type, string repositoryRoot, Remote remote) {
         switch (type) {
             case LinkType.CurrentBranch:
                 return string

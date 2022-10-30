@@ -104,6 +104,14 @@
                 </Strings>
             </Button>
 
+            <Button guid="GitWebLinksPackage" id="Command_CopyLinkToSelectionForTarget" priority="0x0004" type="Button">
+                <Parent guid="GitWebLinksPackage" id="Group_CopySubMenu"/>
+                <Strings>
+                    <LocCanonicalName>.GitWebLinks.CopyLinkForTarget</LocCanonicalName>
+                    <ButtonText>Copy Link To Target...</ButtonText>
+                </Strings>
+            </Button>
+            
             <!-- Open Sub Menu Commands -->
             <Button guid="GitWebLinksPackage" id="Command_OpenLinkToSelectionAtCurrentCommit" priority="0x0001" type="Button">
                 <Parent guid="GitWebLinksPackage" id="Group_OpenSubMenu"/>
@@ -189,6 +197,7 @@
             <IDSymbol name="Command_CopyLinkToSelectionAtCurrentCommit" value="0x102"/>
             <IDSymbol name="Command_CopyLinkToSelectionOnCurrentBranch" value="0x103"/>
             <IDSymbol name="Command_CopyLinkToSelectionOnDefaultBranch" value="0x104"/>
+            <IDSymbol name="Command_CopyLinkToSelectionForTarget" value="0x110"/>
 
             <IDSymbol name="Command_OpenLinkToFile" value="0x105"/>
             <IDSymbol name="Command_OpenLinkToSelection" value="0x106"/>

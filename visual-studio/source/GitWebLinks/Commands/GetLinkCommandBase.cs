@@ -25,7 +25,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
     protected abstract bool IncludeSelection { get; }
 
 
-    protected abstract LinkType? LinkType { get; }
+    protected abstract CommandLinkType LinkType { get; }
 
 
     protected abstract CommandAction Action { get; }
@@ -82,13 +82,25 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
             }
 
             try {
+                ILinkTarget? target;
                 string url;
 
+
+                if (LinkType == CommandLinkType.Prompt) {
+                    target = await PromptForTargetAsync(info);
+
+                    if (target is null) {
+                        return;
+                    }
+
+                } else {
+                    target = new LinkTargetPreset(GetPresetLinkType(LinkType));
+                }
 
                 url = await info.Handler.CreateUrlAsync(
                     info.Repository,
                     new FileInfo(info.FilePath, selection),
-                    new LinkOptions(LinkType)
+                    new LinkOptions(target)
                 );
 
                 await logger.LogAsync($"URL created: {url}");
@@ -129,7 +141,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
         RepositoryFinder repositoryFinder;
         LinkHandlerProvider handlerProvider;
         Repository? repository;
-        LinkHandler? handler;
+        ILinkHandler? handler;
 
 
         repositoryFinder = await Package.GetServiceAsync<RepositoryFinder, RepositoryFinder>();
@@ -190,6 +202,33 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
             end.GetContainingLineNumber() + 1,
             end.GetContainingLine().Start.Difference(end) + 1
         );
+    }
+
+
+    private async Task<ILinkTarget?> PromptForTargetAsync(GetLinkCommandBase<T>.ResourceInfo info) {
+        LinkTargetSelector selector;
+
+
+        selector = await Package.GetServiceAsync<LinkTargetSelector, LinkTargetSelector>();
+
+        return await selector.SelectAsync(info.Handler, info.Repository);
+    }
+
+
+    private LinkType? GetPresetLinkType(CommandLinkType linkType) {
+        switch (linkType) {
+            case CommandLinkType.DefaultBranch:
+                return GitWebLinks.LinkType.DefaultBranch;
+
+            case CommandLinkType.CurrentBranch:
+                return GitWebLinks.LinkType.CurrentBranch;
+
+            case CommandLinkType.Commit:
+                return GitWebLinks.LinkType.Commit;
+
+            default:
+                return null;
+        }
     }
 
 

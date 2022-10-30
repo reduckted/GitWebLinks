@@ -1,12 +1,14 @@
+#nullable enable
+
 namespace GitWebLinks;
 
 public class LinkOptions {
 
-    public LinkOptions(LinkType? type) {
-        Type = type;
+    public LinkOptions(ILinkTarget target) {
+        Target = target;
     }
 
 
-    public LinkType? Type { get; }
+    public ILinkTarget Target { get; }
 
 }

@@ -17,6 +17,7 @@ namespace GitWebLinks;
 [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
 [ProvideService(typeof(ILogger), IsAsyncQueryable = true)]
 [ProvideService(typeof(LinkHandlerProvider), IsAsyncQueryable = true)]
+[ProvideService(typeof(LinkTargetSelector), IsAsyncQueryable = true)]
 [ProvideService(typeof(RepositoryFinder), IsAsyncQueryable = true)]
 [ProvideOptionPage(typeof(AzureDevOpsServerOptionsPage), Vsix.Name, AzureDevOpsServerOptionsPage.Name, CategoryID, AzureDevOpsServerOptionsPage.ResourceID, true, SupportsProfiles = true, DescriptionResourceId = DescriptionID, CategoryDescriptionResourceId = DescriptionID)]
 [ProvideOptionPage(typeof(BitbucketServerOptionsPage), Vsix.Name, BitbucketServerOptionsPage.Name, CategoryID, BitbucketServerOptionsPage.ResourceID, true, SupportsProfiles = true, DescriptionResourceId = DescriptionID, CategoryDescriptionResourceId = DescriptionID)]
@@ -43,6 +44,7 @@ public class GitWebLinksPackage : ToolkitPackage {
         ILogger logger;
         Git git;
         LinkHandlerProvider linkHandlerProvider;
+        LinkTargetSelector linkTargetSelector;
         RepositoryFinder repositoryFinder;
 
 
@@ -50,9 +52,11 @@ public class GitWebLinksPackage : ToolkitPackage {
         logger = await Logger.CreateAsync();
         git = new Git(logger);
         linkHandlerProvider = new LinkHandlerProvider(settings, git, logger);
+        linkTargetSelector = new LinkTargetSelector(settings, git, logger);
         repositoryFinder = new RepositoryFinder(git, settings, logger);
 
         AddService(typeof(LinkHandlerProvider), (_, _, _) => Task.FromResult<object>(linkHandlerProvider));
+        AddService(typeof(LinkTargetSelector), (_, _, _) => Task.FromResult<object>(linkTargetSelector));
         AddService(typeof(ILogger), (_, _, _) => Task.FromResult<object>(logger));
         AddService(typeof(RepositoryFinder), (_, _, _) => Task.FromResult<object>(repositoryFinder));
     }
