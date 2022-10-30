@@ -102,6 +102,15 @@ export function registerGetLinkCommands(
             }
         )
     );
+
+    // And add a command where you can choose what to generate the link to.
+    subscriptions.push(
+        registerGetLinkCommand(COMMANDS.copySelectionToChoice, repositoryFinder, handlerProvider, {
+            linkType: 'prompt',
+            includeSelection: true,
+            action: 'copy'
+        })
+    );
 }
 
 /**

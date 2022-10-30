@@ -116,12 +116,29 @@ export class LinkHandler {
         let remote: string;
         let address: StaticServer;
         let type: LinkType;
+        let ref: string;
         let url: string;
         let data: UrlData;
 
         // If a link type wasn't specified, then we'll use
         // the default type that's defined in the settings.
-        type = options.type ?? this.settings.getDefaultLinkType();
+        if ('preset' in options.target) {
+            type = options.target.preset ?? this.settings.getDefaultLinkType();
+            ref = await this.getRef(type, repository);
+        } else {
+            if (options.target.type === 'branch') {
+                type = 'branch';
+                ref =
+                    this.definition.branchRef === 'abbreviated'
+                        ? options.target.ref.abbreviated
+                        : options.target.ref.symbolic;
+            } else {
+                type = 'commit';
+                ref = this.settings.getUseShortHash()
+                    ? options.target.ref.abbreviated
+                    : options.target.ref.symbolic;
+            }
+        }
 
         // Adjust the remote URL so that it's in a
         // standard format that we can manipulate.
@@ -132,7 +149,7 @@ export class LinkHandler {
         data = {
             base: address.http,
             repository: this.getRepositoryPath(remote, address),
-            ref: await this.getRef(type, repository),
+            ref,
             commit: await this.getRef('commit', repository),
             file: await this.getRelativePath(repository.root, file.filePath),
             type: type === 'commit' ? 'commit' : 'branch',
@@ -258,7 +275,7 @@ export class LinkHandler {
      * @param repository The repository.
      * @returns The ref to use.
      */
-    private async getRef(type: LinkType, repository: RepositoryWithRemote): Promise<string> {
+    public async getRef(type: LinkType, repository: RepositoryWithRemote): Promise<string> {
         switch (type) {
             case 'branch':
                 return (

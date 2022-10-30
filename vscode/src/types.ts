@@ -75,11 +75,37 @@ export interface SelectedRange {
  */
 export interface LinkOptions {
     /**
+     * The target of the link to create.
+     *
+     * A value of `undefined` means the link should target the default link type.
+     */
+    readonly target: LinkTarget;
+}
+
+/**
+ * A link target.
+ */
+export type LinkTarget = LinkTargetRef | LinkTargetPreset;
+
+export interface LinkTargetRef {
+    /**
+     * The abbreviated and symbolic ref to create the link to.
+     */
+    readonly ref: { readonly abbreviated: string; readonly symbolic: string };
+
+    /**
+     * What the ref refers to.
+     */
+    readonly type: 'commit' | 'branch';
+}
+
+export interface LinkTargetPreset {
+    /**
      * The type of link to create.
      *
      * A value of `undefined` means the default link type should be used.
      */
-    readonly type: LinkType | undefined;
+    readonly preset: LinkType | undefined;
 }
 
 /**

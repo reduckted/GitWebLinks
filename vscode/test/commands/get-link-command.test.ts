@@ -1,14 +1,30 @@
 import * as chai from 'chai';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import { env, MessageItem, Position, Selection, TextDocument, Uri, window } from 'vscode';
+import {
+    CancellationToken,
+    env,
+    MessageItem,
+    Position,
+    QuickPickItem,
+    QuickPickOptions,
+    Selection,
+    TextDocument,
+    Uri,
+    window
+} from 'vscode';
 
 import { GetLinkCommand, GetLinkCommandOptions } from '../../src/commands/get-link-command';
+import { git } from '../../src/git';
 import { LinkHandler } from '../../src/link-handler';
 import { LinkHandlerProvider } from '../../src/link-handler-provider';
 import { RepositoryFinder } from '../../src/repository-finder';
+import { Settings } from '../../src/settings';
 import { STRINGS } from '../../src/strings';
 import { LinkType, Repository } from '../../src/types';
+import { Directory, markAsSlow, setupRepository } from '../helpers';
 
 const expect = chai.use(sinonChai).expect;
 
@@ -130,7 +146,7 @@ describe('GetLinkCommand', () => {
                 filePath: file.fsPath,
                 selection: { startLine: 1, startColumn: 1, endLine: 1, endColumn: 1 }
             },
-            { type: 'commit' }
+            { target: { preset: 'commit' } }
         );
     });
 
@@ -141,7 +157,7 @@ describe('GetLinkCommand', () => {
         expect(createUrl).to.have.been.calledWithExactly(
             repository,
             { filePath: file.fsPath, selection: undefined },
-            { type: 'commit' }
+            { target: { preset: 'commit' } }
         );
     });
 
@@ -160,7 +176,7 @@ describe('GetLinkCommand', () => {
                 filePath: file.fsPath,
                 selection: { startLine: 2, startColumn: 3, endLine: 4, endColumn: 5 }
             },
-            { type: 'commit' }
+            { target: { preset: 'commit' } }
         );
     });
 
@@ -173,7 +189,7 @@ describe('GetLinkCommand', () => {
         expect(createUrl).to.have.been.calledWithExactly(
             repository,
             { filePath: file.fsPath, selection: undefined },
-            { type: 'commit' }
+            { target: { preset: 'commit' } }
         );
     });
 
@@ -187,7 +203,7 @@ describe('GetLinkCommand', () => {
             expect(createUrl).to.have.been.calledWithExactly(
                 repository,
                 { filePath: file.fsPath, selection: undefined },
-                { type: linkType }
+                { target: { preset: linkType } }
             );
         });
     });
@@ -251,6 +267,179 @@ describe('GetLinkCommand', () => {
         expect(showInformationMessage).to.have.not.been.called;
         // Should be called with a string instead of a Uri because of https://github.com/microsoft/vscode/issues/85930
         expect(openExternal).to.have.been.calledWith('http://example.com/foo/bar');
+    });
+
+    describe('prompt', function () {
+        let root: Directory;
+        let commits: Ref[];
+        let showQuickPick: sinon.SinonStub<
+            [
+                items: readonly QuickPickItem[] | Thenable<readonly QuickPickItem[]>,
+                options?: QuickPickOptions | undefined,
+                token?: CancellationToken | undefined
+            ],
+            Thenable<QuickPickItem | undefined>
+        >;
+
+        // We need to create repositories, so mark the
+        // tests as being a bit slower than other tests.
+        markAsSlow(this);
+
+        before(async () => {
+            root = await Directory.create();
+            commits = [];
+
+            await setupRepository(root.path);
+
+            await fs.writeFile(path.join(root.path, '0'), '');
+            await git(root.path, 'add', '*');
+            await git(root.path, 'commit', '-m', '0');
+            commits.push(await getRef());
+
+            await git(root.path, 'checkout', '-b', 'first');
+            await fs.writeFile(path.join(root.path, '1'), '');
+            await git(root.path, 'add', '*');
+            await git(root.path, 'commit', '-m', '1');
+            commits.push(await getRef());
+
+            await git(root.path, 'checkout', '-b', 'second');
+            await fs.writeFile(path.join(root.path, '2'), '');
+            await git(root.path, 'add', '*');
+            await git(root.path, 'commit', '-m', '2');
+            commits.push(await getRef());
+
+            commits.sort((x, y) => x.abbreviated.localeCompare(y.abbreviated));
+        });
+
+        beforeEach(() => {
+            command = createCommand({
+                linkType: 'prompt',
+                includeSelection: false,
+                action: 'copy'
+            });
+
+            repository = {
+                root: root.path,
+                remote: { url: 'http://example.com', name: 'origin' }
+            };
+
+            showQuickPick = sinon.stub(window, 'showQuickPick');
+        });
+
+        after(async () => {
+            await root.dispose();
+        });
+
+        it('should not create a link when the prompt is cancelled.', async () => {
+            showQuickPick.resolves(undefined);
+
+            await command.execute(file);
+
+            expect(createUrl).to.have.not.been.called;
+        });
+
+        getLinkTypes()
+            .filter((x): x is LinkType => x !== undefined)
+            .forEach((type) => {
+                it(`should show the default preset first when the default is '${type}'.`, async () => {
+                    sinon.stub(Settings.prototype, 'getDefaultLinkType').returns(type);
+
+                    showQuickPick.callsFake(async (items) => (await items)[0]);
+
+                    await command.execute(file);
+
+                    expect(createUrl).to.have.been.calledWithExactly(
+                        repository,
+                        { filePath: file.fsPath, selection: undefined },
+                        { target: { preset: type } }
+                    );
+                });
+            });
+
+        it(`should use the selected branch.`, async () => {
+            showQuickPick.callsFake(async (items) => (await items)[4]);
+            await command.execute(file);
+
+            expect(createUrl, 'branch #1').to.have.been.calledWithExactly(
+                repository,
+                { filePath: file.fsPath, selection: undefined },
+                {
+                    target: {
+                        ref: { abbreviated: 'first', symbolic: 'refs/heads/first' },
+                        type: 'branch'
+                    }
+                }
+            );
+
+            showQuickPick.callsFake(async (items) => (await items)[5]);
+            await command.execute(file);
+
+            expect(createUrl, 'branch #2').to.have.been.calledWithExactly(
+                repository,
+                { filePath: file.fsPath, selection: undefined },
+                {
+                    target: {
+                        ref: { abbreviated: 'master', symbolic: 'refs/heads/master' },
+                        type: 'branch'
+                    }
+                }
+            );
+
+            showQuickPick.callsFake(async (items) => (await items)[6]);
+            await command.execute(file);
+
+            expect(createUrl, 'branch #3').to.have.been.calledWithExactly(
+                repository,
+                { filePath: file.fsPath, selection: undefined },
+                {
+                    target: {
+                        ref: { abbreviated: 'second', symbolic: 'refs/heads/second' },
+                        type: 'branch'
+                    }
+                }
+            );
+        });
+
+        it(`should use the selected commit.`, async () => {
+            showQuickPick.callsFake(async (items) => (await items)[8]);
+            await command.execute(file);
+
+            expect(createUrl, 'commit #1').to.have.been.calledWithExactly(
+                repository,
+                { filePath: file.fsPath, selection: undefined },
+                { target: { ref: commits[0], type: 'commit' } }
+            );
+
+            showQuickPick.callsFake(async (items) => (await items)[9]);
+            await command.execute(file);
+
+            expect(createUrl, 'commit #2').to.have.been.calledWithExactly(
+                repository,
+                { filePath: file.fsPath, selection: undefined },
+                { target: { ref: commits[1], type: 'commit' } }
+            );
+
+            showQuickPick.callsFake(async (items) => (await items)[10]);
+            await command.execute(file);
+
+            expect(createUrl, 'commit #3').to.have.been.calledWithExactly(
+                repository,
+                { filePath: file.fsPath, selection: undefined },
+                { target: { ref: commits[2], type: 'commit' } }
+            );
+        });
+
+        async function getRef(): Promise<Ref> {
+            return {
+                abbreviated: (await git(root.path, 'rev-parse', '--short', 'HEAD')).trim(),
+                symbolic: (await git(root.path, 'rev-parse', 'HEAD')).trim()
+            };
+        }
+
+        interface Ref {
+            abbreviated: string;
+            symbolic: string;
+        }
     });
 
     function createCommand(options: GetLinkCommandOptions): GetLinkCommand {

@@ -107,11 +107,14 @@ describe('Link handlers', function () {
                 });
 
                 it('branch', async () => {
-                    await runUrlTest('branch', { type: 'branch', branch: TEST_BRANCH_NAME });
+                    await runUrlTest('branch', {
+                        target: { preset: 'branch' },
+                        branch: TEST_BRANCH_NAME
+                    });
                 });
 
                 it('commit', async () => {
-                    await runUrlTest('commit', { type: 'commit' });
+                    await runUrlTest('commit', { target: { preset: 'commit' } });
                 });
 
                 it('default branch', async () => {
@@ -122,7 +125,7 @@ describe('Link handlers', function () {
                             result: definition.tests.createUrl.remotes.result
                         },
                         {
-                            type: 'defaultBranch',
+                            target: { preset: 'defaultBranch' },
                             remoteName: 'origin',
                             // Run with a different branch to confirm that the remote's default branch is used.
                             branch: TEST_BRANCH_NAME
@@ -231,7 +234,7 @@ describe('Link handlers', function () {
                             ).fsPath,
                             selection: options.selection
                         },
-                        { type: options.type || 'branch' }
+                        { target: options.target || { preset: 'branch' } }
                     );
 
                     expect(link, 'Link does not match the expected result').to.equal(result);
@@ -274,14 +277,14 @@ describe('Link handlers', function () {
 
                 it('branch', async () => {
                     await runUrlTest('branch', {
-                        type: 'branch',
+                        target: { preset: 'branch' },
                         branch: TEST_BRANCH_NAME,
                         fileMayStartWithBranch: definition.reverse?.fileMayStartWithBranch
                     });
                 });
 
                 it('commit', async () => {
-                    await runUrlTest('commit', { type: 'commit' });
+                    await runUrlTest('commit', { target: { preset: 'commit' } });
                 });
 
                 definition.tests.createUrl.misc?.forEach((test) => {

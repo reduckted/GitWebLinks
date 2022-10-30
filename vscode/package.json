@@ -116,6 +116,11 @@
                 "category": "Git Web Links"
             },
             {
+                "command": "gitweblinks.copySelectionToChoice",
+                "title": "Copy Link to Selection (choose type)",
+                "category": "Git Web Links"
+            },
+            {
                 "command": "gitweblinks.openFile",
                 "title": "Open Link to File",
                 "category": "Git Web Links"

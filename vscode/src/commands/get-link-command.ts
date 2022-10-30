@@ -1,18 +1,31 @@
-import { commands, env, MessageItem, TextEditor, Uri, window } from 'vscode';
+import {
+    commands,
+    env,
+    MessageItem,
+    QuickPickItem,
+    QuickPickItemKind,
+    TextEditor,
+    Uri,
+    window
+} from 'vscode';
 
+import { git } from '../git';
 import { LinkHandler } from '../link-handler';
 import { LinkHandlerProvider } from '../link-handler-provider';
 import { log } from '../log';
 import { NoRemoteHeadError } from '../no-remote-head-error';
 import { RepositoryFinder } from '../repository-finder';
+import { Settings } from '../settings';
 import { STRINGS } from '../strings';
-import { LinkType, Repository, RepositoryWithRemote, SelectedRange } from '../types';
-import { getSelectedRange, hasRemote } from '../utilities';
+import { LinkTarget, LinkType, Repository, RepositoryWithRemote, SelectedRange } from '../types';
+import { getErrorMessage, getSelectedRange, hasRemote } from '../utilities';
 
 /**
  * The command to get a URL from a file.
  */
 export class GetLinkCommand {
+    private readonly settings: Settings;
+
     /**
      * @constructor
      * @param repositoryFinder The repository finder to use for finding repository information for a file.
@@ -23,7 +36,9 @@ export class GetLinkCommand {
         private readonly repositoryFinder: RepositoryFinder,
         private readonly handlerProvider: LinkHandlerProvider,
         private readonly options: GetLinkCommandOptions
-    ) {}
+    ) {
+        this.settings = new Settings();
+    }
 
     /**
      * Executes the commands.
@@ -68,12 +83,23 @@ export class GetLinkCommand {
             }
 
             try {
+                let target: LinkTarget | undefined;
                 let link: string;
+
+                if (this.options.linkType === 'prompt') {
+                    target = await this.promptForLinkTarget(info);
+
+                    if (target === undefined) {
+                        return;
+                    }
+                } else {
+                    target = { preset: this.options.linkType };
+                }
 
                 link = await info.handler.createUrl(
                     info.repository,
                     { filePath: info.uri.fsPath, selection },
-                    { type: this.options.linkType }
+                    { target }
                 );
 
                 log('Web link created: %s', link);
@@ -158,6 +184,163 @@ export class GetLinkCommand {
     }
 
     /**
+     * Prompts the user to select the target of the link that will be created.
+     *
+     * @param info The info for the resource that the link will be created for.
+     * @returns The target, or undefined to cancel the operation.
+     */
+    private async promptForLinkTarget(info: ResourceInfo): Promise<LinkTarget | undefined> {
+        let items: (QuickPickLinkTargetItem | QuickPickItem)[];
+        let selection: QuickPickLinkTargetItem | QuickPickItem | undefined;
+
+        items = [
+            ...(await this.getPresetTargetItems(info)),
+            ...(await this.getRefTargetItems(info))
+        ];
+
+        selection = await window.showQuickPick(items, {
+            placeHolder: 'What would you like to create the link to?',
+            matchOnDescription: true
+        });
+
+        if (selection && 'target' in selection) {
+            return selection?.target;
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Gets the quick pick items for the preset targets.
+     *
+     * @param info The info for the resource that the link will be created for.
+     * @returns The quick pick items for the preset targets.
+     */
+    private async getPresetTargetItems(info: ResourceInfo): Promise<QuickPickLinkTargetItem[]> {
+        let targets: string[];
+        let items: { item: QuickPickLinkTargetItem; default: boolean }[];
+        let defaultType: LinkType;
+
+        // Get the refs in parallel.
+        targets = await Promise.all([
+            this.tryGetRef(info, 'branch'),
+            this.tryGetRef(info, 'commit'),
+            this.tryGetRef(info, 'defaultBranch')
+        ]);
+
+        defaultType = this.settings.getDefaultLinkType();
+
+        items = [
+            {
+                item: {
+                    label: 'Current branch',
+                    description: targets[0],
+                    target: { preset: 'branch' }
+                },
+                default: defaultType === 'branch'
+            },
+            {
+                item: {
+                    label: 'Current commit',
+                    description: targets[1],
+                    target: { preset: 'commit' }
+                },
+                default: defaultType === 'commit'
+            },
+            {
+                item: {
+                    label: 'Default branch',
+                    description: targets[2],
+                    target: { preset: 'defaultBranch' }
+                },
+                default: defaultType === 'defaultBranch'
+            }
+        ];
+
+        // Sort the presets so that the default link type is at
+        // the top. This will cause it to be the initial selection.
+        return items
+            .sort((a, b) =>
+                a.default ? -1 : b.default ? 1 : a.item.label.localeCompare(b.item.label)
+            )
+            .map((x) => x.item);
+    }
+
+    /**
+     * Attempts to get the ref for the specified link type.
+     *
+     * @param info The resource info.
+     * @param type The type of link to get the ref for.
+     * @returns The ref, or an empty string if it could not be retrieved.
+     */
+    private async tryGetRef(info: ResourceInfo, type: LinkType): Promise<string> {
+        try {
+            return await info.handler.getRef(type, info.repository);
+        } catch (ex) {
+            log("Error when getting ref for link type '%s': %s", type, getErrorMessage(ex));
+            return '';
+        }
+    }
+
+    /**
+     * Gets the quick pick items for the ref targets.
+     *
+     * @param info The info for the resource that the link will be created for.
+     * @returns The quick pick items for the ref targets.
+     */
+    private async getRefTargetItems(
+        info: ResourceInfo
+    ): Promise<(QuickPickLinkTargetItem | QuickPickItem)[]> {
+        let branches: (QuickPickLinkTargetItem | QuickPickItem)[];
+        let commits: (QuickPickLinkTargetItem | QuickPickItem)[];
+        let lines: string[];
+        let useShortHashes: boolean;
+
+        lines = (
+            await git(
+                info.repository.root,
+                'branch',
+                '--list',
+                '--no-color',
+                '--format',
+                '%(refname:short) %(refname) %(objectname:short) %(objectname)'
+            )
+        )
+            .split(/\r?\n/)
+            .filter((x) => x.length > 0);
+
+        branches = [];
+        commits = [];
+        useShortHashes = this.settings.getUseShortHash();
+
+        for (let line of lines) {
+            let [branchName, branchRef, shortHash, fullHash] = line.split(' ');
+
+            branches.push({
+                label: branchName,
+                description: useShortHashes ? shortHash : fullHash,
+                target: { ref: { abbreviated: branchName, symbolic: branchRef }, type: 'branch' }
+            });
+
+            commits.push({
+                label: useShortHashes ? shortHash : fullHash,
+                description: branchName,
+                target: { ref: { abbreviated: shortHash, symbolic: fullHash }, type: 'commit' }
+            });
+        }
+
+        branches.sort((x, y) => x.label.localeCompare(y.label));
+        commits.sort((x, y) => x.label.localeCompare(y.label));
+
+        return [
+            { label: 'Branches', kind: QuickPickItemKind.Separator },
+            ...branches,
+            { label: 'Commits', kind: QuickPickItemKind.Separator },
+            ...commits
+        ];
+    }
+
+    /**
      * Handles a button on a notification being clicked.
      *
      * @param item The item that was clicked on.
@@ -200,10 +383,10 @@ function openExternal(link: string): void {
  */
 export interface GetLinkCommandOptions {
     /**
-     * The type of link the command will prodice (`undefined` means
-     * the command will use the settings to determine the link type).
+     * The type of link the command will produce, or 'prompt' to ask the user which ref to use a function to get the
+     * link type, or `undefined` to use the settings to determine the link type).
      */
-    linkType: LinkType | undefined;
+    linkType: LinkType | 'prompt' | undefined;
 
     /**
      * Whether to include the selection region
@@ -235,6 +418,16 @@ interface ResourceInfo {
      * The link handler for the resource.
      */
     readonly handler: LinkHandler;
+}
+
+/**
+ * An quick pick item for selecting a link target.
+ */
+interface QuickPickLinkTargetItem extends QuickPickItem {
+    /**
+     * The target that the item represents.
+     */
+    readonly target: LinkTarget;
 }
 
 /**

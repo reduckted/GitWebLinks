@@ -36,7 +36,7 @@ describe('LinkHandler', function () {
     });
 
     describe('createUrl', () => {
-        it('should use the default link type if no type was specified.', async () => {
+        it('should use the default link type if an undefined preset was specified.', async () => {
             let getDefaultLinkType: sinon.SinonStub<[], LinkType>;
 
             await setupRepository(root.path);
@@ -44,10 +44,14 @@ describe('LinkHandler', function () {
             getDefaultLinkType = sinon.stub(Settings.prototype, 'getDefaultLinkType');
 
             getDefaultLinkType.returns('commit');
-            expect(await createUrl({ url: '{{ type }}' }, { type: undefined })).to.equal('commit');
+            expect(
+                await createUrl({ url: '{{ type }}' }, { target: { preset: undefined } })
+            ).to.equal('commit');
 
             getDefaultLinkType.returns('branch');
-            expect(await createUrl({ url: '{{ type }}' }, { type: undefined })).to.equal('branch');
+            expect(
+                await createUrl({ url: '{{ type }}' }, { target: { preset: undefined } })
+            ).to.equal('branch');
         });
 
         it('should use the full commit hash as the "ref" value when the link type is "commit" and short hashes should not be used.', async () => {
@@ -55,9 +59,9 @@ describe('LinkHandler', function () {
 
             await setupRepository(root.path);
 
-            expect(await createUrl({ url: '{{ ref }}' }, { type: 'commit' })).to.equal(
-                (await git(root.path, 'rev-parse', 'HEAD')).trim()
-            );
+            expect(
+                await createUrl({ url: '{{ ref }}' }, { target: { preset: 'commit' } })
+            ).to.equal((await git(root.path, 'rev-parse', 'HEAD')).trim());
         });
 
         it('should use a short commit hash as the "ref" value when the link type is "commit" and short hashes should be used.', async () => {
@@ -65,9 +69,9 @@ describe('LinkHandler', function () {
 
             await setupRepository(root.path);
 
-            expect(await createUrl({ url: '{{ ref }}' }, { type: 'commit' })).to.equal(
-                (await git(root.path, 'rev-parse', '--short', 'HEAD')).trim()
-            );
+            expect(
+                await createUrl({ url: '{{ ref }}' }, { target: { preset: 'commit' } })
+            ).to.equal((await git(root.path, 'rev-parse', '--short', 'HEAD')).trim());
         });
 
         it('should use the branch name as the "ref" value when the link type is "branch".', async () => {
@@ -81,7 +85,7 @@ describe('LinkHandler', function () {
                         url: '{{ ref }}',
                         branchRef: 'abbreviated'
                     },
-                    { type: 'branch' }
+                    { target: { preset: 'branch' } }
                 )
             ).to.equal('foo');
         });
@@ -91,9 +95,9 @@ describe('LinkHandler', function () {
 
             await setupRepository(root.path);
 
-            expect(await createUrl({ url: '{{ ref }}' }, { type: 'defaultBranch' })).to.equal(
-                'bar'
-            );
+            expect(
+                await createUrl({ url: '{{ ref }}' }, { target: { preset: 'defaultBranch' } })
+            ).to.equal('bar');
         });
 
         it('should throw an error when the link type is "defaultBranch" and the remote does not have a HEAD ref.', async () => {
@@ -106,7 +110,7 @@ describe('LinkHandler', function () {
 
             try {
                 try {
-                    await createUrl({ url: '{{ ref }}' }, { type: 'defaultBranch' });
+                    await createUrl({ url: '{{ ref }}' }, { target: { preset: 'defaultBranch' } });
                     expect.fail('Expected an error to be thrown.');
                 } catch (ex) {
                     expect(ex).to.be.instanceOf(NoRemoteHeadError);
@@ -132,12 +136,60 @@ describe('LinkHandler', function () {
                 expect(
                     await createUrl(
                         { url: '{{ ref }}', branchRef: 'abbreviated' },
-                        { type: 'defaultBranch' }
+                        { target: { preset: 'defaultBranch' } }
                     )
                 ).to.equal('master');
             } finally {
                 await origin.dispose();
             }
+        });
+
+        it('should use the given short commit hash when short hashes should be used.', async () => {
+            sinon.stub(Settings.prototype, 'getUseShortHash').returns(true);
+
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl(
+                    { url: '{{ ref }}.{{ type }}' },
+                    { target: { ref: { abbreviated: 'short', symbolic: 'long' }, type: 'commit' } }
+                )
+            ).to.equal('short.commit');
+        });
+
+        it('should use the given long commit hash when short hashes should not be used.', async () => {
+            sinon.stub(Settings.prototype, 'getUseShortHash').returns(false);
+
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl(
+                    { url: '{{ ref }}.{{ type }}' },
+                    { target: { ref: { abbreviated: 'short', symbolic: 'long' }, type: 'commit' } }
+                )
+            ).to.equal('long.commit');
+        });
+
+        it('should use the given short branch name when abbreviated branch refs should be used.', async () => {
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl(
+                    { url: '{{ ref }}.{{ type }}', branchRef: 'abbreviated' },
+                    { target: { ref: { abbreviated: 'short', symbolic: 'long' }, type: 'branch' } }
+                )
+            ).to.equal('short.branch');
+        });
+
+        it('should use the given long branch name when symbolic branch refs should be used.', async () => {
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl(
+                    { url: '{{ ref }}.{{ type }}', branchRef: 'symbolic' },
+                    { target: { ref: { abbreviated: 'short', symbolic: 'long' }, type: 'branch' } }
+                )
+            ).to.equal('long.branch');
         });
 
         it('should handle the matching server HTTP address ending with a slash.', async () => {
@@ -149,13 +201,10 @@ describe('LinkHandler', function () {
             await setupRepository(root.path);
 
             expect(
-                await createUrl(
-                    {
-                        server: { http: 'http://example.com/', ssh: '' },
-                        url: '{{ base }} | {{ repository }}'
-                    },
-                    {}
-                )
+                await createUrl({
+                    server: { http: 'http://example.com/', ssh: '' },
+                    url: '{{ base }} | {{ repository }}'
+                })
             ).to.equal('http://example.com | foo/bar');
         });
 
@@ -168,13 +217,10 @@ describe('LinkHandler', function () {
             await setupRepository(root.path);
 
             expect(
-                await createUrl(
-                    {
-                        server: { http: 'http://example.com', ssh: '' },
-                        url: '{{ base }} | {{ repository }}'
-                    },
-                    {}
-                )
+                await createUrl({
+                    server: { http: 'http://example.com', ssh: '' },
+                    url: '{{ base }} | {{ repository }}'
+                })
             ).to.equal('http://example.com | foo/bar');
         });
 
@@ -187,13 +233,10 @@ describe('LinkHandler', function () {
             await setupRepository(root.path);
 
             expect(
-                await createUrl(
-                    {
-                        server: { http: 'http://example.com', ssh: 'ssh://git@example.com/' },
-                        url: '{{ base }} | {{ repository }}'
-                    },
-                    {}
-                )
+                await createUrl({
+                    server: { http: 'http://example.com', ssh: 'ssh://git@example.com/' },
+                    url: '{{ base }} | {{ repository }}'
+                })
             ).to.equal('http://example.com | foo/bar');
         });
 
@@ -206,13 +249,10 @@ describe('LinkHandler', function () {
             await setupRepository(root.path);
 
             expect(
-                await createUrl(
-                    {
-                        server: { http: 'http://example.com', ssh: 'ssh://git@example.com' },
-                        url: '{{ base }} | {{ repository }}'
-                    },
-                    {}
-                )
+                await createUrl({
+                    server: { http: 'http://example.com', ssh: 'ssh://git@example.com' },
+                    url: '{{ base }} | {{ repository }}'
+                })
             ).to.equal('http://example.com | foo/bar');
         });
 
@@ -225,13 +265,10 @@ describe('LinkHandler', function () {
             await setupRepository(root.path);
 
             expect(
-                await createUrl(
-                    {
-                        server: { http: 'http://example.com/', ssh: 'ssh://git@example.com' },
-                        url: '{{ base }} | {{ repository }}'
-                    },
-                    {}
-                )
+                await createUrl({
+                    server: { http: 'http://example.com/', ssh: 'ssh://git@example.com' },
+                    url: '{{ base }} | {{ repository }}'
+                })
             ).to.equal('http://example.com | foo/bar');
         });
 
@@ -244,13 +281,10 @@ describe('LinkHandler', function () {
             await setupRepository(root.path);
 
             expect(
-                await createUrl(
-                    {
-                        server: { http: 'http://example.com/', ssh: 'ssh://git@example.com:' },
-                        url: '{{ base }} | {{ repository }}'
-                    },
-                    {}
-                )
+                await createUrl({
+                    server: { http: 'http://example.com/', ssh: 'ssh://git@example.com:' },
+                    url: '{{ base }} | {{ repository }}'
+                })
             ).to.equal('http://example.com | foo/bar');
         });
 
@@ -263,13 +297,10 @@ describe('LinkHandler', function () {
             await setupRepository(root.path);
 
             expect(
-                await createUrl(
-                    {
-                        server: { http: 'http://example.com', ssh: '' },
-                        url: '{{ base }} | {{ repository }}'
-                    },
-                    {}
-                )
+                await createUrl({
+                    server: { http: 'http://example.com', ssh: '' },
+                    url: '{{ base }} | {{ repository }}'
+                })
             ).to.equal('http://example.com | foo/bar');
         });
 
@@ -282,13 +313,10 @@ describe('LinkHandler', function () {
             await setupRepository(root.path);
 
             expect(
-                await createUrl(
-                    {
-                        server: { http: 'http://example.com/', ssh: 'ssh://git@example.com' },
-                        url: '{{ base }}'
-                    },
-                    {}
-                )
+                await createUrl({
+                    server: { http: 'http://example.com/', ssh: 'ssh://git@example.com' },
+                    url: '{{ base }}'
+                })
             ).to.equal('http://example.com');
         });
 
@@ -301,13 +329,10 @@ describe('LinkHandler', function () {
             await setupRepository(root.path);
 
             expect(
-                await createUrl(
-                    {
-                        server: { http: 'http://example.com/', ssh: 'git@example.com' },
-                        url: '{{ base }}'
-                    },
-                    {}
-                )
+                await createUrl({
+                    server: { http: 'http://example.com/', ssh: 'git@example.com' },
+                    url: '{{ base }}'
+                })
             ).to.equal('http://example.com');
         });
 
@@ -320,13 +345,10 @@ describe('LinkHandler', function () {
             await setupRepository(root.path);
 
             expect(
-                await createUrl(
-                    {
-                        server: { http: 'http://example.com/', ssh: 'git@example.com' },
-                        url: '{{ base }}'
-                    },
-                    {}
-                )
+                await createUrl({
+                    server: { http: 'http://example.com/', ssh: 'git@example.com' },
+                    url: '{{ base }}'
+                })
             ).to.equal('http://example.com');
         });
 
@@ -339,13 +361,10 @@ describe('LinkHandler', function () {
             await setupRepository(root.path);
 
             expect(
-                await createUrl(
-                    {
-                        server: { http: 'http://example.com/', ssh: 'example.com' },
-                        url: '{{ base }}'
-                    },
-                    {}
-                )
+                await createUrl({
+                    server: { http: 'http://example.com/', ssh: 'example.com' },
+                    url: '{{ base }}'
+                })
             ).to.equal('http://example.com');
         });
 
@@ -367,7 +386,7 @@ describe('LinkHandler', function () {
             expect(
                 await createUrl(
                     { url: '{{ base }}/{{ file }}' },
-                    { type: 'branch' },
+                    { target: { preset: 'branch' } },
                     path.join(link, 'foo.js')
                 )
             ).to.equal('http://example.com/real/foo.js');
@@ -392,7 +411,11 @@ describe('LinkHandler', function () {
             }
 
             expect(
-                await createUrl({ url: '{{ base }}/{{ file }}' }, { type: 'branch' }, link)
+                await createUrl(
+                    { url: '{{ base }}/{{ file }}' },
+                    { target: { preset: 'branch' } },
+                    link
+                )
             ).to.equal('http://example.com/real/foo.js');
         });
 
@@ -421,7 +444,7 @@ describe('LinkHandler', function () {
             expect(
                 await createUrl(
                     { url: '{{ base }}/{{ file }}' },
-                    { type: 'branch' },
+                    { target: { preset: 'branch' } },
                     path.join(link, 'foo.js')
                 )
             ).to.equal('http://example.com/foo.js');
@@ -436,7 +459,7 @@ describe('LinkHandler', function () {
                         url: 'http://example.com/file',
                         query: [{ pattern: '\\.js$', key: 'a', value: '1' }]
                     },
-                    { type: undefined },
+                    { target: { preset: undefined } },
                     'foo/bar.txt'
                 )
             ).to.equal('http://example.com/file');
@@ -451,7 +474,7 @@ describe('LinkHandler', function () {
                         url: 'http://example.com/file',
                         query: [{ pattern: '\\.txt$', key: 'first', value: 'yes' }]
                     },
-                    { type: undefined },
+                    { target: { preset: undefined } },
                     'foo/bar.txt'
                 )
             ).to.equal('http://example.com/file?first=yes');
@@ -466,7 +489,7 @@ describe('LinkHandler', function () {
                         url: 'http://example.com/file?first=yes',
                         query: [{ pattern: '\\.txt$', key: 'second', value: 'no' }]
                     },
-                    { type: undefined },
+                    undefined,
                     'foo/bar.txt'
                 )
             ).to.equal('http://example.com/file?first=yes&second=no');
@@ -481,7 +504,7 @@ describe('LinkHandler', function () {
                         url: 'http://example.com/file#L1-10',
                         query: [{ pattern: '\\.txt$', key: 'first', value: 'yes' }]
                     },
-                    { type: undefined },
+                    undefined,
                     'foo/bar.txt'
                 )
             ).to.equal('http://example.com/file?first=yes#L1-10');
@@ -489,13 +512,13 @@ describe('LinkHandler', function () {
 
         async function createUrl(
             definition: Partial<HandlerDefinition>,
-            options: Partial<LinkOptions>,
+            options: LinkOptions | undefined = undefined,
             filePath: string = 'file.txt'
         ): Promise<string> {
             return await createHandler(definition).createUrl(
                 repository,
                 { filePath, selection: undefined },
-                { type: 'commit', ...options }
+                { target: { preset: 'commit' }, ...options }
             );
         }
 
