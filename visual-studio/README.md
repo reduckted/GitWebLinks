@@ -29,6 +29,16 @@ To copy a link to a particular line in the file, right-click on the line in the 
 
 If you want to copy a link to a range of lines, just select the lines first.
 
+## Copy a Link to a Specific Branch or Commit
+
+If the current commit, current branch of default branch is not suitable, you can choose which commit or branch to copy a link to by using the _Copy Link to Target..._ menu item.
+
+![Copy Link to Target](images/select-target.png)
+
+This command can be useful if you need to share a link to code that is not on the default branch, and your current branch has not been pushed to the server. For example, your current branch may have branched off an "epic" branch but has not been pushed to the server. You can use this command to create a link to the "epic" branch.
+
+The caveat with this command is that if the code you are linking to is different between your current branch and the branch or commit you are linking to, the link may be invalid.
+
 ## Default Link Format
 
 The commands above will create links using either the current commit hash, the current branch name or the default branch name.
@@ -73,7 +83,7 @@ This is great for producing permalinks, but it can lead to 404s if your current 
 
 This will create a link using the name of the branch that is currently checked out.
 
-This is good if you only need the link to be useful for a short period of time (for example, sharing a link via email or instant messaging), but it's not great for producing permalinks - if the code on that branch changes in the future, the link maybe become invalid.
+This is good if you only need the link to be useful for a short period of time (for example, sharing a link via email or instant messaging), but it's not great for producing permalinks - if the code on that branch changes in the future, the link may become invalid.
 
 ### `defaultBranch`
 
