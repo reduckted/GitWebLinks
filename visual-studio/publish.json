@@ -9,5 +9,19 @@
     "publisher": "reduckted",
     "private": false,
     "qna": true,
-    "repo": "https://github.com/reduckted/GitWebLinks"
+    "repo": "https://github.com/reduckted/GitWebLinks",
+    "assetFiles": [
+        {
+            "pathOnDisk": "images/copy-file-solution-explorer.png",
+            "targetPath": "images/copy-file-solution-explorer.png"
+        },
+        {
+            "pathOnDisk": "images/copy-file-tab.png",
+            "targetPath": "images/copy-file-tab.png"
+        },
+        {
+            "pathOnDisk": "images/select-target.png",
+            "targetPath": "images/select-target.png"
+        }
+    ]
 }

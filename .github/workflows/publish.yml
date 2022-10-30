@@ -24,7 +24,7 @@ jobs:
               working-directory: ./vscode
               env:
                   PUBLISHER_TOKEN: ${{ secrets.PUBLISHER_TOKEN }}
-              run: node_modules/.bin/vsce publish -p $PUBLISHER_TOKEN
+              run: node_modules/.bin/vsce publish -p $PUBLISHER_TOKEN --baseImagesUrl https://github.com/reduckted/GitWebLinks/raw/HEAD/vscode
 
     publish-visual-studio:
         runs-on: windows-2022
