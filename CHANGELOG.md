@@ -1,3 +1,9 @@
+# 2.9.1 (2022-12-23)
+
+## Maintenance
+
+-   🔨 Dependency updates.
+
 # 2.9.0 (2022-10-30)
 
 -   ⭐ New command that lets you choose which branch or commit to generate the link to.
