@@ -7,13 +7,13 @@ const engine: Liquid = new Liquid({
     strictFilters: true
 });
 
-engine.filters.set('filename', posix.basename.bind(posix));
-engine.filters.set('encode_uri', encodeURI);
-engine.filters.set('encode_uri_component', encodeURIComponent);
-engine.filters.set('encode_uri_component_segments', encodeURIComponentSegments);
-engine.filters.set('decode_uri', decodeURI);
-engine.filters.set('decode_uri_component', decodeURIComponent);
-engine.filters.set('decode_uri_component_segments', decodeURIComponentSegments);
+engine.filters['filename'] = posix.basename.bind(posix);
+engine.filters['encode_uri'] = encodeURI;
+engine.filters['encode_uri_component'] = encodeURIComponent;
+engine.filters['encode_uri_component_segments'] = encodeURIComponentSegments;
+engine.filters['decode_uri'] = decodeURI;
+engine.filters['decode_uri_component'] = decodeURIComponent;
+engine.filters['decode_uri_component_segments'] = decodeURIComponentSegments;
 
 /**
  * Parses the given template.
