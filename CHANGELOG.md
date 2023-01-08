@@ -1,3 +1,9 @@
+# UNRELEASED
+
+## Maintenance
+
+-   🔨 Dependency updates.
+
 # 2.9.2 (2022-12-23)
 
 ## Maintenance
