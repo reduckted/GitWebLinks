@@ -13,4 +13,4 @@ updates:
       schedule:
           interval: "weekly"
       ignore:
-          -dependency-name: "Microsoft.VisualStudio.SDK" # Pinned to support all versions of Visual Studio 2022.
+          - dependency-name: "Microsoft.VisualStudio.SDK" # Pinned to support all versions of Visual Studio 2022.
