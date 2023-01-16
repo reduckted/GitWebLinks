@@ -1,7 +1,7 @@
 /* eslint-disable no-console, no-process-exit */
 
+import { runTests } from '@vscode/test-electron';
 import * as path from 'path';
-import { runTests } from 'vscode-test';
 
 runTests({
     extensionDevelopmentPath: path.resolve(__dirname, '../'),
