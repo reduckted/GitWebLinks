@@ -5,6 +5,7 @@
         "outDir": "out-test",
         "strict": true,
         "lib": ["es6"],
+        "skipLibCheck": true,
         "sourceMap": true,
         "resolveJsonModule": true,
         "noUnusedLocals": true,
