@@ -44,7 +44,7 @@
         "spawn-rx": "3.0.0"
     },
     "devDependencies": {
-        "@types/chai": "4.3.4",
+        "@types/chai": "4.3.5",
         "@types/glob": "8.1.0",
         "@types/mocha": "10.0.1",
         "@types/node": "16.11.68",
