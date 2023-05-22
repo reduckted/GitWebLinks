@@ -82,6 +82,7 @@
                 }
             }
         ],
+        "jsdoc/tag-lines": ["warn", "never", { "startLines": 1 }],
         "node/no-sync": "error",
         "node/no-unpublished-import": "off",
         "no-console": "error",
