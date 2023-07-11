@@ -4,6 +4,10 @@ updates:
       directory: "/vscode"
       schedule:
           interval: "weekly"
+      groups:
+          vscode-dependencies:
+              patterns:
+                  - "*"
       ignore:
           - dependency-name: "@types/vscode" # Pinned to enable support for older versions of VS Code.
           - dependency-name: "@types/node" # Pinned because VS Code uses Node.js v16.
@@ -12,5 +16,9 @@ updates:
       directory: "/visual-studio"
       schedule:
           interval: "weekly"
+      groups:
+          visual-studio-dependencies:
+              patterns:
+                  - "*"
       ignore:
           - dependency-name: "Microsoft.VisualStudio.SDK" # Pinned to support all versions of Visual Studio 2022.
