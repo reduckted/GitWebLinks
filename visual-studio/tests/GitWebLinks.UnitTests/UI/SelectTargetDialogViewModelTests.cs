@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.PatternMatching;
 using Microsoft.VisualStudio.Threading;
-using Moq;
+using NSubstitute;
 using System.Collections.Immutable;
 using System.Windows;
 
@@ -15,53 +15,53 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
     [Fact]
     public async Task IsInitializedWithPresets() {
         SelectTargetDialogViewModel viewModel;
-        Mock<ILinkTargetLoader> loader;
+        ILinkTargetLoader loader;
 
 
         loader = CreateLoader(
             new[] {
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Mock.Of<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Mock.Of<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Mock.Of<ILinkTarget>())
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>()),
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>())
             },
             Array.Empty<string>(),
             Array.Empty<LinkTargetListItem>()
         );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
-            loader.Object,
-            Mock.Of<IPatternMatcherFactory>(),
+            loader,
+            Substitute.For<IPatternMatcherFactory>(),
             new JoinableTaskFactory(_joinableTaskContext)
         );
 
         Assert.Equal(new[] { "one", "two", "three" }, viewModel.Targets.Select((x) => x.Name));
 
-        loader.Verify((x) => x.LoadPresetsAsync(), Times.Once());
-        loader.VerifyNoOtherCalls();
+        await loader.Received(1).LoadPresetsAsync();
+        Assert.Single(loader.ReceivedCalls());
     }
 
 
     [Fact]
     public async Task LoadsPresetDescriptionsAndBranchesAndCommitsOnLoad() {
         SelectTargetDialogViewModel viewModel;
-        Mock<ILinkTargetLoader> loader;
+        ILinkTargetLoader loader;
 
 
         loader = CreateLoader(
             new[] {
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Mock.Of<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Mock.Of<ILinkTarget>())
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>())
             },
             new[] { "1", "2" },
             new[] {
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Mock.Of<ILinkTarget>()) { Description = "3" },
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Mock.Of<ILinkTarget>()) { Description = "4" }
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>()) { Description = "3" },
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Substitute.For <ILinkTarget>()) { Description = "4" }
             }
         );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
-            loader.Object,
-            Mock.Of<IPatternMatcherFactory>(),
+            loader,
+            Substitute.For<IPatternMatcherFactory>(),
             new JoinableTaskFactory(_joinableTaskContext)
         );
 
@@ -83,34 +83,34 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
             viewModel.Targets.Select((x) => (x.Name, x.Description))
         );
 
-        loader.Verify((x) => x.LoadPresetsAsync(), Times.Once());
-        loader.Verify((x) => x.PopulatePresetDescriptionsAsync(It.IsAny<IEnumerable<LinkTargetListItem>>()), Times.Once());
-        loader.Verify((x) => x.LoadBranchesAndCommitsAsync(), Times.Once());
-        loader.VerifyNoOtherCalls();
+        await loader.Received(1).LoadPresetsAsync();
+        await loader.Received(1).PopulatePresetDescriptionsAsync(Arg.Any<IEnumerable<LinkTargetListItem>>());
+        await loader.Received(1).LoadBranchesAndCommitsAsync();
+        Assert.Equal(3, loader.ReceivedCalls().Count());
     }
 
 
     [Fact]
     public async Task CanFilterTargetsByName() {
         SelectTargetDialogViewModel viewModel;
-        Mock<ILinkTargetLoader> loader;
+        ILinkTargetLoader loader;
 
 
         loader = CreateLoader(
-            new[] {
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Mock.Of<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Mock.Of<ILinkTarget>())
+        new[] {
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>())
             },
             new[] { "1", "2" },
             new[] {
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Mock.Of<ILinkTarget>()) { Description = "3" },
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Mock.Of<ILinkTarget>()) { Description = "4" }
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>()) { Description = "3" },
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Substitute.For<ILinkTarget>()) { Description = "4" }
             }
         );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
-            loader.Object,
-            CreateMatcher(),
+            loader,
+            CreateMatcherFactory(),
             new JoinableTaskFactory(_joinableTaskContext)
         );
 
@@ -139,24 +139,24 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
     [Fact]
     public async Task CanFilterTargetsByDescription() {
         SelectTargetDialogViewModel viewModel;
-        Mock<ILinkTargetLoader> loader;
+        ILinkTargetLoader loader;
 
 
         loader = CreateLoader(
             new[] {
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "1", Mock.Of<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "2", Mock.Of<ILinkTarget>())
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "1", Substitute.For<ILinkTarget>()),
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "2", Substitute.For<ILinkTarget>())
             },
             new[] { "first", "second" },
             new[] {
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "3", Mock.Of<ILinkTarget>()) { Description = "third" },
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "4", Mock.Of<ILinkTarget>()) { Description = "fourth" }
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "3", Substitute.For<ILinkTarget>()) { Description = "third" },
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "4", Substitute.For<ILinkTarget>()) { Description = "fourth" }
             }
         );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
-            loader.Object,
-            CreateMatcher(),
+            loader,
+            CreateMatcherFactory(),
             new JoinableTaskFactory(_joinableTaskContext)
         );
 
@@ -185,24 +185,24 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
     [Fact]
     public async Task AppliesFilterAfterLoading() {
         SelectTargetDialogViewModel viewModel;
-        Mock<ILinkTargetLoader> loader;
+        ILinkTargetLoader loader;
 
 
         loader = CreateLoader(
             new[] {
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Mock.Of<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Mock.Of<ILinkTarget>())
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>())
             },
             new[] { "1", "2" },
             new[] {
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Mock.Of<ILinkTarget>()) { Description = "3" },
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Mock.Of<ILinkTarget>()) { Description = "4" }
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>()) { Description = "3" },
+                new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Substitute.For<ILinkTarget>()) { Description = "4" }
             }
         );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
-            loader.Object,
-            CreateMatcher(),
+            loader,
+            CreateMatcherFactory(),
             new JoinableTaskFactory(_joinableTaskContext)
         );
 
@@ -217,68 +217,77 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
     }
 
 
-    private Mock<ILinkTargetLoader> CreateLoader(
+    private ILinkTargetLoader CreateLoader(
         IReadOnlyList<LinkTargetListItem> presets,
         IReadOnlyList<string> presetDescriptions,
         IReadOnlyList<LinkTargetListItem> branchesAndCommits
     ) {
-        Mock<ILinkTargetLoader> loader;
+        ILinkTargetLoader loader;
 
 
-        loader = new Mock<ILinkTargetLoader>();
+        loader = Substitute.For<ILinkTargetLoader>();
 
-        loader.Setup((x) => x.LoadPresetsAsync()).ReturnsAsync(presets);
+        loader.LoadPresetsAsync().Returns(presets);
 
-        loader.Setup((x) => x.PopulatePresetDescriptionsAsync(It.IsAny<IEnumerable<LinkTargetListItem>>())).Callback(
-            (IEnumerable<LinkTargetListItem> collection) => {
+        loader.PopulatePresetDescriptionsAsync(Arg.Any<IEnumerable<LinkTargetListItem>>()).Returns(
+            (args) => {
+                IEnumerable<LinkTargetListItem> collection;
+
+                collection = args.ArgAt<IEnumerable<LinkTargetListItem>>(0);
+
                 foreach ((LinkTargetListItem preset, string description) in collection.Zip(presetDescriptions, (preset, description) => (preset, description))) {
                     preset.Description = description;
                 }
+
+                return Task.CompletedTask;
             }
         );
 
-        loader.Setup((x) => x.LoadBranchesAndCommitsAsync()).ReturnsAsync(branchesAndCommits);
+        loader.LoadBranchesAndCommitsAsync().Returns(branchesAndCommits);
 
         return loader;
     }
 
 
-    private IPatternMatcherFactory CreateMatcher() {
-        Mock<IPatternMatcherFactory> factory;
+    private IPatternMatcherFactory CreateMatcherFactory() {
+        IPatternMatcherFactory factory;
 
 
-        factory = new Mock<IPatternMatcherFactory>();
+        factory = Substitute.For<IPatternMatcherFactory>();
 
         factory
-            .Setup((x) => x.CreatePatternMatcher(It.IsAny<string>(), It.IsAny<PatternMatcherCreationOptions>()))
-            .Returns((string pattern, PatternMatcherCreationOptions options) => {
-                Mock<IPatternMatcher> matcher;
+            .CreatePatternMatcher(Arg.Any<string>(), Arg.Any<PatternMatcherCreationOptions>())
+            .Returns((args) => CreateMatcher(args.ArgAt<string>(0)));
+
+        return factory;
+
+        static IPatternMatcher CreateMatcher(string pattern) {
+            IPatternMatcher matcher;
 
 
-                matcher = new Mock<IPatternMatcher>();
-                matcher.Setup((x) => x.TryMatch(It.IsAny<string>())).Returns((string candidate) => {
-                    int matchIndex;
+            matcher = Substitute.For<IPatternMatcher>();
+            matcher.TryMatch(Arg.Any<string>()).Returns((args) => {
+                int matchIndex;
 
 
-                    matchIndex = candidate.IndexOf(pattern);
+                matchIndex = args.ArgAt<string>(0).IndexOf(pattern);
 
-                    if (matchIndex >= 0) {
-                        return new PatternMatch(
-                            PatternMatchKind.Exact,
-                            false,
-                            false,
-                            ImmutableArray.Create(new Span(matchIndex, pattern.Length))
-                        );
+                if (matchIndex >= 0) {
+                    return new PatternMatch(
+                        PatternMatchKind.Exact,
+                        false,
+                        false,
+                        ImmutableArray.Create(new Span(matchIndex, pattern.Length))
+                    );
 
-                    } else {
-                        return null;
-                    }
-                });
-
-                return matcher.Object;
+                } else {
+                    return null;
+                }
             });
 
-        return factory.Object;
+            return matcher;
+
+        }
     }
 
     public void Dispose() {

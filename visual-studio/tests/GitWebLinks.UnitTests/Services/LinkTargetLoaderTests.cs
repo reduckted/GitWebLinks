@@ -1,4 +1,4 @@
-using Moq;
+using NSubstitute;
 
 namespace GitWebLinks;
 
@@ -12,9 +12,9 @@ public static class LinkTargetLoaderTests {
             IReadOnlyList<LinkTargetListItem> presets;
 
 
-            Settings.Setup((x) => x.GetDefaultLinkTypeAsync()).ReturnsAsync(LinkType.Commit);
+            Settings.GetDefaultLinkTypeAsync().Returns(LinkType.Commit);
 
-            loader = CreateLoader(Mock.Of<ILinkHandler>());
+            loader = CreateLoader(Substitute.For<ILinkHandler>());
 
             presets = await loader.LoadPresetsAsync();
 
@@ -35,9 +35,9 @@ public static class LinkTargetLoaderTests {
             IReadOnlyList<LinkTargetListItem> presets;
 
 
-            Settings.Setup((x) => x.GetDefaultLinkTypeAsync()).ReturnsAsync(LinkType.CurrentBranch);
+            Settings.GetDefaultLinkTypeAsync().Returns(LinkType.CurrentBranch);
 
-            loader = CreateLoader(Mock.Of<ILinkHandler>());
+            loader = CreateLoader(Substitute.For<ILinkHandler>());
 
             presets = await loader.LoadPresetsAsync();
 
@@ -58,9 +58,9 @@ public static class LinkTargetLoaderTests {
             IReadOnlyList<LinkTargetListItem> presets;
 
 
-            Settings.Setup((x) => x.GetDefaultLinkTypeAsync()).ReturnsAsync(LinkType.DefaultBranch);
+            Settings.GetDefaultLinkTypeAsync().Returns(LinkType.DefaultBranch);
 
-            loader = CreateLoader(Mock.Of<ILinkHandler>());
+            loader = CreateLoader(Substitute.For<ILinkHandler>());
 
             presets = await loader.LoadPresetsAsync();
 
@@ -83,24 +83,16 @@ public static class LinkTargetLoaderTests {
         public async Task UsesTheHandlerToGetTheRefNames() {
             LinkTargetLoader loader;
             IReadOnlyList<LinkTargetListItem> presets;
-            Mock<ILinkHandler> handler;
+            ILinkHandler handler;
 
 
-            handler = new Mock<ILinkHandler>();
+            handler = Substitute.For<ILinkHandler>();
 
-            handler
-                .Setup((x) => x.GetRefAsync(LinkType.Commit, It.IsAny<string>(), It.IsAny<Remote>()))
-                .ReturnsAsync("the commit");
+            handler.GetRefAsync(LinkType.Commit, Arg.Any<string>(), Arg.Any<Remote>()).Returns("the commit");
+            handler.GetRefAsync(LinkType.CurrentBranch, Arg.Any<string>(), Arg.Any<Remote>()).Returns("the branch");
+            handler.GetRefAsync(LinkType.DefaultBranch, Arg.Any<string>(), Arg.Any<Remote>()).Returns("the default");
 
-            handler
-                .Setup((x) => x.GetRefAsync(LinkType.CurrentBranch, It.IsAny<string>(), It.IsAny<Remote>()))
-                .ReturnsAsync("the branch");
-
-            handler
-                .Setup((x) => x.GetRefAsync(LinkType.DefaultBranch, It.IsAny<string>(), It.IsAny<Remote>()))
-                .ReturnsAsync("the default");
-
-            loader = CreateLoader(handler.Object);
+            loader = CreateLoader(handler);
 
             presets = new List<LinkTargetListItem> {
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "Commit", new LinkTargetPreset(LinkType.Commit)),
@@ -125,24 +117,18 @@ public static class LinkTargetLoaderTests {
         public async Task CatchesNoRemoteHeadException() {
             LinkTargetLoader loader;
             IReadOnlyList<LinkTargetListItem> presets;
-            Mock<ILinkHandler> handler;
+            ILinkHandler handler;
 
 
-            handler = new Mock<ILinkHandler>();
+            handler = Substitute.For<ILinkHandler>();
 
+            handler.GetRefAsync(LinkType.Commit, Arg.Any<string>(), Arg.Any<Remote>()).Returns("the commit");
+            handler.GetRefAsync(LinkType.CurrentBranch, Arg.Any<string>(), Arg.Any<Remote>()).Returns("the branch");
             handler
-                .Setup((x) => x.GetRefAsync(LinkType.Commit, It.IsAny<string>(), It.IsAny<Remote>()))
-                .ReturnsAsync("the commit");
+                .GetRefAsync(LinkType.DefaultBranch, Arg.Any<string>(), Arg.Any<Remote>())
+                .Returns(Task.FromException<string>(new NoRemoteHeadException("")));
 
-            handler
-                .Setup((x) => x.GetRefAsync(LinkType.CurrentBranch, It.IsAny<string>(), It.IsAny<Remote>()))
-                .ReturnsAsync("the branch");
-
-            handler
-                .Setup((x) => x.GetRefAsync(LinkType.DefaultBranch, It.IsAny<string>(), It.IsAny<Remote>()))
-                .ThrowsAsync(new NoRemoteHeadException(""));
-
-            loader = CreateLoader(handler.Object);
+            loader = CreateLoader(handler);
 
             presets = new List<LinkTargetListItem> {
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "CurrentBranch", new LinkTargetPreset(LinkType.CurrentBranch)),
@@ -177,10 +163,10 @@ public static class LinkTargetLoaderTests {
             IReadOnlyList<LinkTargetListItem> items;
 
 
-            Settings.Setup((x) => x.GetUseShortHashesAsync()).ReturnsAsync(true);
+            Settings.GetUseShortHashesAsync().Returns(true);
             await SetupRepositoryAsync();
 
-            loader = CreateLoader(Mock.Of<ILinkHandler>());
+            loader = CreateLoader(Substitute.For<ILinkHandler>());
 
             items = await loader.LoadBranchesAndCommitsAsync();
 
@@ -204,10 +190,10 @@ public static class LinkTargetLoaderTests {
             IReadOnlyList<LinkTargetListItem> items;
 
 
-            Settings.Setup((x) => x.GetUseShortHashesAsync()).ReturnsAsync(false);
+            Settings.GetUseShortHashesAsync().Returns(false);
             await SetupRepositoryAsync();
 
-            loader = CreateLoader(Mock.Of<ILinkHandler>());
+            loader = CreateLoader(Substitute.For<ILinkHandler>());
 
             items = await loader.LoadBranchesAndCommitsAsync();
 
@@ -280,18 +266,18 @@ public static class LinkTargetLoaderTests {
 
         public TestBase() {
             Repository = new Repository(RootDirectory, new Remote("origin", "http://example.com"));
-            Settings = new Mock<ISettings>();
+            Settings = Substitute.For<ISettings>();
         }
 
 
         protected Repository Repository { get; }
 
 
-        protected Mock<ISettings> Settings { get; }
+        protected ISettings Settings { get; }
 
 
         protected LinkTargetLoader CreateLoader(ILinkHandler handler) {
-            return new LinkTargetLoader(Settings.Object, Git, handler, Repository, NullLogger.Instance);
+            return new LinkTargetLoader(Settings, Git, handler, Repository, NullLogger.Instance);
         }
 
     }

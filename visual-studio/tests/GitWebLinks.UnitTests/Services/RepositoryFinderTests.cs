@@ -1,4 +1,4 @@
-using Moq;
+using NSubstitute;
 
 namespace GitWebLinks;
 
@@ -10,13 +10,13 @@ public static class RepositoryFinderTests {
 
 
         public HasRepositoriesMethod() {
-            Mock<ISettings> settings;
+            ISettings settings;
 
 
-            settings = new Mock<ISettings>();
-            settings.Setup((x) => x.GetPreferredRemoteNameAsync()).ReturnsAsync(() => "origin");
+            settings = Substitute.For<ISettings>();
+            settings.GetPreferredRemoteNameAsync().Returns("origin");
 
-            _finder = new(Git, settings.Object, NullLogger.Instance);
+            _finder = new(Git, settings, NullLogger.Instance);
         }
 
 
@@ -97,19 +97,19 @@ public static class RepositoryFinderTests {
 
 
         public FindRepositoryMethod() {
-            Mock<ISettings> settings;
+            ISettings settings;
 
 
             _preferredRemoteName = "origin";
-            settings = new Mock<ISettings>();
-            settings.Setup((x) => x.GetPreferredRemoteNameAsync()).ReturnsAsync(() => _preferredRemoteName);
+            settings = Substitute.For<ISettings>();
+            settings.GetPreferredRemoteNameAsync().Returns((_) => Task.FromResult(_preferredRemoteName));
 
-            _finder = new(Git, settings.Object, NullLogger.Instance);
+            _finder = new(Git, settings, NullLogger.Instance);
         }
 
 
         [Fact]
-        public async Task ShouldNotFindTheInfoWhenThePathIsNinInGitRepository() {
+        public async Task ShouldNotFindTheInfoWhenThePathIsNotInGitRepository() {
             Assert.Null(await _finder.FindRepositoryAsync(RootDirectory));
         }
 
@@ -226,13 +226,13 @@ public static class RepositoryFinderTests {
 
 
         public FindRepositoriesMethod() {
-            Mock<ISettings> settings;
+            ISettings settings;
 
 
-            settings = new Mock<ISettings>();
-            settings.Setup((x) => x.GetPreferredRemoteNameAsync()).ReturnsAsync(() => "origin");
+            settings = Substitute.For<ISettings>();
+            settings.GetPreferredRemoteNameAsync().Returns("origin");
 
-            _finder = new(Git, settings.Object, NullLogger.Instance);
+            _finder = new(Git, settings, NullLogger.Instance);
         }
 
 

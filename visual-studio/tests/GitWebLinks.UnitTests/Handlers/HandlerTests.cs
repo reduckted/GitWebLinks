@@ -1,6 +1,6 @@
 using DotLiquid;
-using Moq;
 using Newtonsoft.Json.Linq;
+using NSubstitute;
 
 namespace GitWebLinks;
 
@@ -441,7 +441,7 @@ public static class HandlerTests {
         protected const string TestBranchName = "feature/test";
 
 
-        private readonly Mock<ISettings> _settings;
+        private readonly ISettings _settings;
         private readonly Dictionary<string, IReadOnlyList<StaticServer>> _servers;
         private readonly Dictionary<string, object> _handlerSettings;
         private HandlerTestDefinition _definition;
@@ -457,25 +457,25 @@ public static class HandlerTests {
             _handlerSettings = new Dictionary<string, object>();
             _servers = new Dictionary<string, IReadOnlyList<StaticServer>>();
 
-            _settings = new Mock<ISettings>();
-            _settings.Setup((x) => x.GetDefaultBranchAsync()).ReturnsAsync(() => "");
-            _settings.Setup((x) => x.GetDefaultLinkTypeAsync()).ReturnsAsync(() => LinkType.Commit);
+            _settings = Substitute.For<ISettings>();
+            _settings.GetDefaultBranchAsync().Returns("");
+            _settings.GetDefaultLinkTypeAsync().Returns(LinkType.Commit);
 
-            _settings.Setup((x) => x.GetHandlerSettingAsync(It.IsAny<string>())).ReturnsAsync(
-                (string key) => {
-                    _handlerSettings.TryGetValue(key, out object value);
+            _settings.GetHandlerSettingAsync(Arg.Any<string>()).Returns(
+                (args) => {
+                    _handlerSettings.TryGetValue(args.ArgAt<string>(0), out object value);
                     return value;
                 }
             );
 
-            _settings.Setup((x) => x.GetServersAsync(It.IsAny<string>())).ReturnsAsync(
-                (string key) => {
-                    _servers.TryGetValue(key, out IReadOnlyList<StaticServer>? value);
-                    return value ?? Array.Empty<StaticServer>();
+            _settings.GetServersAsync(Arg.Any<string>()).Returns(
+                (args) => {
+                    _servers.TryGetValue(args.ArgAt<string>(0), out IReadOnlyList<StaticServer>? value);
+                    return Task.FromResult(value ?? Array.Empty<StaticServer>());
                 }
             );
 
-            Provider = new(_settings.Object, Git, NullLogger.Instance);
+            Provider = new(_settings, Git, NullLogger.Instance);
 
             _repositoryRoot = "";
             _definition = default!;

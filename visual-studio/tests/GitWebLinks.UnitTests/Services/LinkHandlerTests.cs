@@ -1,5 +1,5 @@
 using DotLiquid;
-using Moq;
+using NSubstitute;
 using System.Text.RegularExpressions;
 
 namespace GitWebLinks;
@@ -11,7 +11,7 @@ public static class LinkHandlerTests {
 
     public class CreateUrlAsyncMethod : RepositoryTestBase {
 
-        private readonly Mock<ISettings> _settings;
+        private readonly ISettings _settings;
         private Repository _repository;
 
 
@@ -21,7 +21,7 @@ public static class LinkHandlerTests {
 
 
         public CreateUrlAsyncMethod() {
-            _settings = new Mock<ISettings>();
+            _settings = Substitute.For<ISettings>();
 
             _repository = new Repository(
                 RootDirectory,
@@ -36,7 +36,7 @@ public static class LinkHandlerTests {
         public async Task ShouldUseTheDefaultLinkTypeIfNoTypeWasSpecified(LinkType type, string expected) {
             await SetupRepositoryAsync(RootDirectory);
 
-            _settings.Setup((x) => x.GetDefaultLinkTypeAsync()).ReturnsAsync(() => type);
+            _settings.GetDefaultLinkTypeAsync().Returns(type);
 
             Assert.Equal(
                 expected,
@@ -52,7 +52,7 @@ public static class LinkHandlerTests {
         public async Task ShouldUseTheFullCommitHashAsTheRefValueWhenTheLinkTypeIsCommitAndShortHashesShouldNotBeUsed() {
             await SetupRepositoryAsync(RootDirectory);
 
-            _settings.Setup((x) => x.GetUseShortHashesAsync()).ReturnsAsync(false);
+            _settings.GetUseShortHashesAsync().Returns(false);
 
             Assert.Equal(
                 string.Concat(await Git.ExecuteAsync(RootDirectory, "rev-parse", "HEAD")).Trim(),
@@ -65,7 +65,7 @@ public static class LinkHandlerTests {
         public async Task ShouldUseTheShortCommitHashAsTheRefValueWhenTheLinkTypeIsCommitAndShortHashesShouldBeUsed() {
             await SetupRepositoryAsync(RootDirectory);
 
-            _settings.Setup((x) => x.GetUseShortHashesAsync()).ReturnsAsync(true);
+            _settings.GetUseShortHashesAsync().Returns(true);
 
             Assert.Equal(
                 string.Concat(await Git.ExecuteAsync(RootDirectory, "rev-parse", "--short", "HEAD")).Trim(),
@@ -95,7 +95,7 @@ public static class LinkHandlerTests {
 
         [Fact]
         public async Task ShouldUseTheDefaultBranchNameAsTheRefValueWhenTheLinkTypeIsDefaultBranchAndDefaultBranchIsSpecified() {
-            _settings.Setup((x) => x.GetDefaultBranchAsync()).ReturnsAsync("bar");
+            _settings.GetDefaultBranchAsync().Returns("bar");
 
             await SetupRepositoryAsync(RootDirectory);
 
@@ -115,7 +115,7 @@ public static class LinkHandlerTests {
             string repo;
 
 
-            _settings.Setup((x) => x.GetDefaultBranchAsync()).ReturnsAsync("");
+            _settings.GetDefaultBranchAsync().Returns("");
 
             origin = CreateDirectory("origin");
             repo = CreateDirectory("repo");
@@ -140,7 +140,7 @@ public static class LinkHandlerTests {
             string repo;
 
 
-            _settings.Setup((x) => x.GetDefaultBranchAsync()).ReturnsAsync("");
+            _settings.GetDefaultBranchAsync().Returns("");
 
             origin = CreateDirectory("origin");
             repo = CreateDirectory("repo");
@@ -165,7 +165,7 @@ public static class LinkHandlerTests {
 
         [Fact]
         public async Task ShouldUseTheGivenShortCommitHashWhenShortHashesShouldBeUsed() {
-            _settings.Setup((x) => x.GetUseShortHashesAsync()).ReturnsAsync(true);
+            _settings.GetUseShortHashesAsync().Returns(true);
 
             await SetupRepositoryAsync(RootDirectory);
 
@@ -183,7 +183,7 @@ public static class LinkHandlerTests {
 
         [Fact]
         public async Task ShouldUseTheGivenLongCommitHashWhenShortHashesShouldNotBeUsed() {
-            _settings.Setup((x) => x.GetUseShortHashesAsync()).ReturnsAsync(false);
+            _settings.GetUseShortHashesAsync().Returns(false);
 
             await SetupRepositoryAsync(RootDirectory);
 
@@ -225,7 +225,7 @@ public static class LinkHandlerTests {
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
                         Url = "{{ ref }}.{{ type }}",
-                        BranchRef = BranchRefType.Symbolic 
+                        BranchRef = BranchRefType.Symbolic
                     },
                     new LinkTargetRef(new RefInfo("short", "long"), RefType.Branch)
                 )
@@ -565,7 +565,7 @@ public static class LinkHandlerTests {
 
 
         [Fact]
-        public async Task ShouldAddToTheExistingQueryStringIfOneExistsWheQueryModificationMatches() {
+        public async Task ShouldAddToTheExistingQueryStringIfOneExistsWhenQueryModificationMatches() {
             await SetupRepositoryAsync(RootDirectory);
 
             Assert.Equal(
@@ -637,7 +637,7 @@ public static class LinkHandlerTests {
                     ),
                     new[] { definition.Server ?? new StaticServer("http://example.com", "ssh://example.com") }
                 ),
-                _settings.Object,
+                _settings,
                 Git
             );
         }
@@ -813,7 +813,7 @@ public static class LinkHandlerTests {
                     ),
                     new[] { new StaticServer("http://example.com", "ssh://example.com") }
                 ),
-                Mock.Of<ISettings>(),
+                Substitute.For<ISettings>(),
                 Git
             );
         }
