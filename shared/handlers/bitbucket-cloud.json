@@ -6,7 +6,13 @@
         "ssh": "git@bitbucket.org"
     },
     "branchRef": "abbreviated",
-    "url": "{{ base }}/{{ repository }}/src/{{ commit | encode_uri }}/{{ file | encode_uri }}{% if type != 'commit' %}?at={{ ref | encode_uri_component }}{% endif %}",
+    "url": [
+        "{% if ref contains \"/\" %}",
+        "{{ base }}/{{ repository }}/src/{{ commit | encode_uri }}/{{ file | encode_uri }}{% if type != 'commit' %}?at={{ ref | encode_uri_component }}{% endif %}",
+        "{% else %}",
+        "{{ base }}/{{ repository }}/src/{{ ref | encode_uri_component }}/{{ file | encode_uri }}",
+        "{% endif %}"
+    ],
     "selection": "#lines-{{ startLine }}{% if startLine != endLine %}:{{ endLine }}{% endif %}",
     "reverse": {
         "pattern": [
@@ -37,11 +43,11 @@
                 "httpWithUsername": "https://username@bitbucket.org/foo/bar.git",
                 "ssh": "git@bitbucket.org:foo/bar.git",
                 "sshWithProtocol": "ssh://git@bitbucket.org:foo/bar.git",
-                "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt?at=master"
+                "result": "https://bitbucket.org/foo/bar/src/master/src/file.txt"
             },
             "spaces": {
                 "remote": "https://bitbucket.org/foo/bar.git",
-                "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/path%20spaces/file%20spaces.txt?at=master"
+                "result": "https://bitbucket.org/foo/bar/src/master/src/path%20spaces/file%20spaces.txt"
             },
             "branch": {
                 "remote": "https://bitbucket.org/foo/bar.git",
@@ -51,24 +57,40 @@
                 "remote": "https://bitbucket.org/foo/bar.git",
                 "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt"
             },
+            "misc": [
+                {
+                    "name": "Forward slash in branch name",
+                    "branch": "test/branch",
+                    "fileName": "src/file.txt",
+                    "remote": "https://bitbucket.org/foo/bar.git",
+                    "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt?at=test%2Fbranch"
+                },
+                {
+                    "name": "No forward slash in branch name",
+                    "branch": "test-branch",
+                    "fileName": "src/file.txt",
+                    "remote": "https://bitbucket.org/foo/bar.git",
+                    "result": "https://bitbucket.org/foo/bar/src/test-branch/src/file.txt"
+                }
+            ],
             "selection": {
                 "remote": "https://bitbucket.org/foo/bar.git",
                 "point": {
                     "line": 10,
-                    "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt?at=master#lines-10"
+                    "result": "https://bitbucket.org/foo/bar/src/master/src/file.txt#lines-10"
                 },
                 "singleLine": {
                     "line": 10,
                     "startColumn": 20,
                     "endColumn": 30,
-                    "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt?at=master#lines-10"
+                    "result": "https://bitbucket.org/foo/bar/src/master/src/file.txt#lines-10"
                 },
                 "multipleLines": {
                     "startLine": 10,
                     "startColumn": 20,
                     "endLine": 30,
                     "endColumn": 40,
-                    "result": "https://bitbucket.org/foo/bar/src/{{ commit }}/src/file.txt?at=master#lines-10:30"
+                    "result": "https://bitbucket.org/foo/bar/src/master/src/file.txt#lines-10:30"
                 }
             }
         }
