@@ -1,6 +1,5 @@
 {
     "files.exclude": {
-        "out-test/": true,
         "node_modules/": true,
         ".vscode-test/": true,
         "dist/": true

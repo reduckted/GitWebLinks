@@ -34,7 +34,7 @@
         "pretest:clean": "rimraf ./out-test",
         "pretest:build": "tsc -p ./",
         "pretest": "run-s pretest:clean pretest:build",
-        "test": "node ./out-test/test/run.js",
+        "test": "vscode-test",
         "watch": "webpack --mode development --watch",
         "debug-build": "webpack --mode development",
         "debug-test": "npm run pretest"
@@ -53,6 +53,7 @@
         "@types/webpack-env": "1.18.3",
         "@typescript-eslint/eslint-plugin": "6.9.0",
         "@typescript-eslint/parser": "6.9.0",
+        "@vscode/test-cli": "0.0.4",
         "@vscode/test-electron": "2.3.6",
         "@vscode/vsce": "2.22.0",
         "ajv": "8.12.0",
