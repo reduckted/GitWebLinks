@@ -40,7 +40,7 @@
         "debug-test": "npm run pretest"
     },
     "dependencies": {
-        "liquidjs": "10.9.4",
+        "liquidjs": "10.10.0",
         "spawn-rx": "3.0.0"
     },
     "devDependencies": {
@@ -51,8 +51,8 @@
         "@types/sinon-chai": "3.2.12",
         "@types/vscode": "1.64.0",
         "@types/webpack-env": "1.18.4",
-        "@typescript-eslint/eslint-plugin": "6.14.0",
-        "@typescript-eslint/parser": "6.14.0",
+        "@typescript-eslint/eslint-plugin": "6.15.0",
+        "@typescript-eslint/parser": "6.15.0",
         "@vscode/test-cli": "0.0.4",
         "@vscode/test-electron": "2.3.8",
         "@vscode/vsce": "2.22.0",
