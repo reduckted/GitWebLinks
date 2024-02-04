@@ -515,11 +515,13 @@ describe('LinkHandler', function () {
             options: LinkOptions | undefined = undefined,
             filePath: string = 'file.txt'
         ): Promise<string> {
-            return await createHandler(definition).createUrl(
-                repository,
-                { filePath, selection: undefined },
-                { target: { preset: 'commit' }, ...options }
-            );
+            return (
+                await createHandler(definition).createUrl(
+                    repository,
+                    { filePath, selection: undefined },
+                    { target: { preset: 'commit' }, ...options }
+                )
+            ).url;
         }
 
         function createHandler(definition: Partial<HandlerDefinition>): LinkHandler {

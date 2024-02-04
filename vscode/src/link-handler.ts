@@ -106,19 +106,21 @@ export class LinkHandler {
      * @param repository The repository that the file is in.
      * @param file The details of the file.
      * @param options The options for creating the link.
-     * @returns The URL.
+     * @returns Information about the URL.
      */
     public async createUrl(
         repository: RepositoryWithRemote,
         file: FileInfo,
         options: LinkOptions
-    ): Promise<string> {
+    ): Promise<CreateUrlResult> {
         let remote: string;
         let address: StaticServer;
         let type: LinkType;
         let ref: string;
         let url: string;
         let data: UrlData;
+        let relativePath: string;
+        let selection: string;
 
         // If a link type wasn't specified, then we'll use
         // the default type that's defined in the settings.
@@ -145,13 +147,14 @@ export class LinkHandler {
         remote = normalizeUrl(repository.remote.url);
 
         address = this.getAddress(remote);
+        relativePath = await this.getRelativePath(repository.root, file.filePath);
 
         data = {
             base: address.http,
             repository: this.getRepositoryPath(remote, address),
             ref,
             commit: await this.getRef('commit', repository),
-            file: await this.getRelativePath(repository.root, file.filePath),
+            file: relativePath,
             type: type === 'commit' ? 'commit' : 'branch',
             ...file.selection
         };
@@ -165,7 +168,10 @@ export class LinkHandler {
         url = this.urlTemplate.render(data);
 
         if (file.selection) {
-            url += this.selectionTemplate.render(data);
+            selection = this.selectionTemplate.render(data);
+            url += selection;
+        } else {
+            selection = '';
         }
 
         url = this.applyModifications(
@@ -173,7 +179,7 @@ export class LinkHandler {
             this.queryModifications.filter((x) => x.pattern.test(file.filePath))
         );
 
-        return url;
+        return { url, relativePath, selection };
     }
 
     /**
@@ -644,3 +650,23 @@ interface ParsedReverseSettings {
  * Parsed templates.
  */
 type ParsedTemplates<T> = { [K in keyof T]: ParsedTemplate };
+
+/**
+ * Information about the URL that was created.
+ */
+export interface CreateUrlResult {
+    /**
+     * The full URL.
+     */
+    readonly url: string;
+
+    /**
+     * The path of the file used in the URL, relative to the root of the repository.
+     */
+    readonly relativePath: string;
+
+    /**
+     * The selection that was appended to the URL.
+     */
+    readonly selection: string;
+}

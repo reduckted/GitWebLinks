@@ -18,12 +18,19 @@ import {
 
 import { GetLinkCommand, GetLinkCommandOptions } from '../../src/commands/get-link-command';
 import { git } from '../../src/git';
-import { LinkHandler } from '../../src/link-handler';
+import { CreateUrlResult, LinkHandler } from '../../src/link-handler';
 import { LinkHandlerProvider } from '../../src/link-handler-provider';
 import { RepositoryFinder } from '../../src/repository-finder';
 import { Settings } from '../../src/settings';
 import { STRINGS } from '../../src/strings';
-import { LinkType, Repository } from '../../src/types';
+import {
+    FileInfo,
+    LinkFormat,
+    LinkOptions,
+    LinkType,
+    Repository,
+    RepositoryWithRemote
+} from '../../src/types';
 import { Directory, markAsSlow, setupRepository } from '../helpers';
 
 const expect = chai.use(sinonChai).expect;
@@ -31,7 +38,10 @@ const expect = chai.use(sinonChai).expect;
 describe('GetLinkCommand', () => {
     let showErrorMessage: sinon.SinonStub;
     let showInformationMessage: sinon.SinonStub;
-    let createUrl: sinon.SinonStub;
+    let createUrl: sinon.SinonStub<
+        [repository: RepositoryWithRemote, file: FileInfo, options: LinkOptions],
+        Promise<CreateUrlResult>
+    >;
     let finder: RepositoryFinder;
     let provider: LinkHandlerProvider;
     let handler: LinkHandler | undefined;
@@ -78,6 +88,7 @@ describe('GetLinkCommand', () => {
             .returns(Promise.resolve(undefined));
 
         createUrl = sinon.stub(handler, 'createUrl');
+        createUrl.resolves({ url: 'test', relativePath: 'path', selection: '' });
 
         link = undefined;
         sinon.stub(env, 'clipboard').value({
@@ -209,9 +220,15 @@ describe('GetLinkCommand', () => {
     });
 
     it('should copy the link to the clipboard when the command action is "copy".', async () => {
+        setLinkFormat('raw');
+
         useTextEditor(undefined);
 
-        createUrl.resolves('http://example.com/foo/bar');
+        createUrl.resolves({
+            url: 'http://example.com/foo/bar',
+            relativePath: '/foo/bar',
+            selection: ''
+        });
 
         command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
@@ -219,45 +236,91 @@ describe('GetLinkCommand', () => {
         expect(link).to.equal('http://example.com/foo/bar');
     });
 
-    it('should show a message when the link is created when the command action is "copy".', async () => {
-        useTextEditor(undefined);
+    it('should format the copied link as markdown when the link format is "markdown".', async () => {
+        setLinkFormat('markdown');
+
+        useTextEditor(file, {
+            start: new Position(1, 2),
+            end: new Position(3, 4)
+        });
+
+        createUrl.resolves({
+            url: 'http://example.com/foo/bar',
+            relativePath: '/foo/bar',
+            selection: '#L1-3'
+        });
 
         command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
-        expect(showInformationMessage).to.have.been.calledWithExactly(
-            STRINGS.getLinkCommand.linkCopied(handler?.name ?? ''),
-            {
-                title: STRINGS.getLinkCommand.openInBrowser,
-                action: 'open'
-            }
-        );
+        expect(link).to.equal('[/foo/bar#L1-3](http://example.com/foo/bar)');
     });
 
-    it('should open the link in the browser when clicking on the success notification.', async () => {
-        let openItem: MessageItem & Record<string, unknown>;
-        let openExternal: sinon.SinonStub;
+    it('should format the copied link as markdown without a code block when the link format is "markdownWithPreview" but the link should not include the selection.', async () => {
+        setLinkFormat('markdownWithPreview');
 
-        useTextEditor(undefined);
-        createUrl.resolves('http://example.com/foo/bar');
+        useTextEditor(
+            file,
+            undefined,
+            ['first\n', ' second\n', '  third\n', '   fourth\n', '    fifth\n', '     sixth\n'],
+            'javascript'
+        );
 
-        openExternal = sinon.stub(env, 'openExternal').resolves();
+        createUrl.resolves({
+            url: 'http://example.com/foo/bar',
+            relativePath: '/foo/bar',
+            selection: ''
+        });
 
-        openItem = { title: STRINGS.getLinkCommand.openInBrowser, action: 'open' };
-        showInformationMessage.resolves(openItem);
+        command = createCommand({ linkType: 'commit', includeSelection: false, action: 'copy' });
+        await command.execute(file);
+
+        expect(link).to.equal('[/foo/bar](http://example.com/foo/bar)');
+    });
+
+    it('should format the copied link as markdown and include a code block when the link format is "markdownWithPreview".', async () => {
+        setLinkFormat('markdownWithPreview');
+
+        useTextEditor(
+            file,
+            {
+                start: new Position(1, 2),
+                end: new Position(3, 4)
+            },
+            ['first\n', ' second\n', '  third\n', '   fourth\n', '    fifth\n', '     sixth\n'],
+            'javascript'
+        );
+
+        createUrl.resolves({
+            url: 'http://example.com/foo/bar',
+            relativePath: '/foo/bar',
+            selection: '#L2-4'
+        });
 
         command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
-        // Should be called with a string instead of a Uri because of https://github.com/microsoft/vscode/issues/85930
-        expect(openExternal).to.have.been.calledWith('http://example.com/foo/bar');
+        expect(link).to.equal(
+            [
+                '[/foo/bar#L2-4](http://example.com/foo/bar)',
+                '```javascript',
+                ' second',
+                '  third',
+                '   fourth',
+                '```'
+            ].join('\n')
+        );
     });
 
     it('should open the link in the browser without showing a notification when the command action is "open".', async () => {
         let openExternal: sinon.SinonStub;
 
         useTextEditor(undefined);
-        createUrl.resolves('http://example.com/foo/bar');
+        createUrl.resolves({
+            url: 'http://example.com/foo/bar',
+            relativePath: '/foo/bar',
+            selection: '#L1-3'
+        });
 
         openExternal = sinon.stub(env, 'openExternal').resolves();
 
@@ -267,6 +330,222 @@ describe('GetLinkCommand', () => {
         expect(showInformationMessage).to.have.not.been.called;
         // Should be called with a string instead of a Uri because of https://github.com/microsoft/vscode/issues/85930
         expect(openExternal).to.have.been.calledWith('http://example.com/foo/bar');
+    });
+
+    describe('success notification', () => {
+        it('should show a message when the link is created when the command action is "copy".', async () => {
+            useTextEditor(undefined);
+
+            command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
+            await command.execute(file);
+
+            expect(showInformationMessage).to.have.been.calledWith(
+                STRINGS.getLinkCommand.linkCopied(handler?.name ?? '')
+            );
+        });
+
+        it('should show the correct actions when a raw url is copied with a selection.', async () => {
+            useTextEditor(file);
+            setLinkFormat('raw');
+
+            command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
+            await command.execute(file);
+
+            expect(showInformationMessage).to.have.been.calledWithExactly(
+                STRINGS.getLinkCommand.linkCopied(handler?.name ?? ''),
+                { title: STRINGS.getLinkCommand.openInBrowser, action: 'open' },
+                { title: STRINGS.getLinkCommand.copyAsMarkdownLink, action: 'copy-markdown' },
+                {
+                    title: STRINGS.getLinkCommand.copyAsMarkdownLinkWithPreview,
+                    action: 'copy-markdown-with-preview'
+                }
+            );
+        });
+
+        it('should show the correct actions when a raw url is copied without a selection.', async () => {
+            useTextEditor(file);
+            setLinkFormat('raw');
+
+            command = createCommand({
+                linkType: 'commit',
+                includeSelection: false,
+                action: 'copy'
+            });
+            await command.execute(file);
+
+            expect(showInformationMessage).to.have.been.calledWithExactly(
+                STRINGS.getLinkCommand.linkCopied(handler?.name ?? ''),
+                { title: STRINGS.getLinkCommand.openInBrowser, action: 'open' },
+                { title: STRINGS.getLinkCommand.copyAsMarkdownLink, action: 'copy-markdown' }
+            );
+        });
+
+        it('should show the correct actions when a markdown link is copied with a selection.', async () => {
+            useTextEditor(file);
+            setLinkFormat('markdown');
+
+            command = createCommand({
+                linkType: 'commit',
+                includeSelection: true,
+                action: 'copy'
+            });
+            await command.execute(file);
+
+            expect(showInformationMessage).to.have.been.calledWithExactly(
+                STRINGS.getLinkCommand.linkCopied(handler?.name ?? ''),
+                { title: STRINGS.getLinkCommand.openInBrowser, action: 'open' },
+                { title: STRINGS.getLinkCommand.copyAsRawUrl, action: 'copy-raw' },
+                {
+                    title: STRINGS.getLinkCommand.copyAsMarkdownLinkWithPreview,
+                    action: 'copy-markdown-with-preview'
+                }
+            );
+        });
+
+        it('should show the correct actions when a markdown link is copied without a selection.', async () => {
+            useTextEditor(file);
+            setLinkFormat('markdown');
+
+            command = createCommand({
+                linkType: 'commit',
+                includeSelection: false,
+                action: 'copy'
+            });
+            await command.execute(file);
+
+            expect(showInformationMessage).to.have.been.calledWithExactly(
+                STRINGS.getLinkCommand.linkCopied(handler?.name ?? ''),
+                { title: STRINGS.getLinkCommand.openInBrowser, action: 'open' },
+                { title: STRINGS.getLinkCommand.copyAsRawUrl, action: 'copy-raw' }
+            );
+        });
+
+        it('should show the correct actions when a markdown link with a preview is copied with a selection.', async () => {
+            useTextEditor(file);
+            setLinkFormat('markdownWithPreview');
+
+            command = createCommand({
+                linkType: 'commit',
+                includeSelection: true,
+                action: 'copy'
+            });
+            await command.execute(file);
+
+            expect(showInformationMessage).to.have.been.calledWithExactly(
+                STRINGS.getLinkCommand.linkCopied(handler?.name ?? ''),
+                { title: STRINGS.getLinkCommand.openInBrowser, action: 'open' },
+                { title: STRINGS.getLinkCommand.copyAsRawUrl, action: 'copy-raw' },
+                {
+                    title: STRINGS.getLinkCommand.copyAsMarkdownLinkWithoutPreview,
+                    action: 'copy-markdown'
+                }
+            );
+        });
+
+        it('should show the correct actions when a markdown link with a preview is copied without a selection.', async () => {
+            useTextEditor(file);
+            setLinkFormat('markdownWithPreview');
+
+            command = createCommand({
+                linkType: 'commit',
+                includeSelection: false,
+                action: 'copy'
+            });
+            await command.execute(file);
+
+            expect(showInformationMessage).to.have.been.calledWithExactly(
+                STRINGS.getLinkCommand.linkCopied(handler?.name ?? ''),
+                { title: STRINGS.getLinkCommand.openInBrowser, action: 'open' },
+                { title: STRINGS.getLinkCommand.copyAsRawUrl, action: 'copy-raw' }
+            );
+        });
+
+        it('should copy the raw link when clicking the "copy raw url" button.', async () => {
+            useTextEditor(file);
+            setLinkFormat('markdown');
+            createUrl.resolves({
+                url: 'http://example.com/foo/bar',
+                relativePath: '/foo/bar',
+                selection: '#L1-3'
+            });
+
+            showInformationMessage.resolves({ action: 'copy-raw' });
+
+            command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
+            await command.execute(file);
+
+            expect(link).to.equal('http://example.com/foo/bar');
+        });
+
+        it('should copy the raw link when clicking the "copy markdown" button.', async () => {
+            useTextEditor(file);
+            setLinkFormat('raw');
+            createUrl.resolves({
+                url: 'http://example.com/foo/bar',
+                relativePath: '/foo/bar',
+                selection: '#L1-3'
+            });
+
+            showInformationMessage.resolves({ action: 'copy-markdown' });
+
+            command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
+            await command.execute(file);
+
+            expect(link).to.equal('[/foo/bar#L1-3](http://example.com/foo/bar)');
+        });
+
+        it('should copy the raw link when clicking the "copy markdown with preview" button.', async () => {
+            useTextEditor(
+                file,
+                { start: new Position(1, 2), end: new Position(2, 3) },
+                ['one\n', 'two\n', 'three\n', 'four\n'],
+                'javascript'
+            );
+            setLinkFormat('raw');
+            createUrl.resolves({
+                url: 'http://example.com/foo/bar',
+                relativePath: '/foo/bar',
+                selection: '#L1-3'
+            });
+
+            showInformationMessage.resolves({ action: 'copy-markdown-with-preview' });
+
+            command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
+            await command.execute(file);
+
+            expect(link).to.equal(
+                [
+                    '[/foo/bar#L1-3](http://example.com/foo/bar)',
+                    '```javascript',
+                    'two',
+                    'three',
+                    '```'
+                ].join('\n')
+            );
+        });
+
+        it('should open the link in the browser when clicking the "open" button.', async () => {
+            let openItem: MessageItem & Record<string, unknown>;
+            let openExternal: sinon.SinonStub;
+
+            useTextEditor(undefined);
+            createUrl.resolves({
+                url: 'http://example.com/foo/bar',
+                relativePath: '/foo/bar',
+                selection: '#L1-3'
+            });
+
+            openExternal = sinon.stub(env, 'openExternal').resolves();
+
+            openItem = { title: STRINGS.getLinkCommand.openInBrowser, action: 'open' };
+            showInformationMessage.resolves(openItem);
+
+            command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
+            await command.execute(file);
+
+            // Should be called with a string instead of a Uri because of https://github.com/microsoft/vscode/issues/85930
+            expect(openExternal).to.have.been.calledWith('http://example.com/foo/bar');
+        });
     });
 
     describe('prompt', function () {
@@ -448,15 +727,31 @@ describe('GetLinkCommand', () => {
 
     function useTextEditor(
         uri: Uri | undefined,
-        selection?: Pick<Selection, 'start' | 'end'> | undefined
+        selection?: Pick<Selection, 'start' | 'end'> | undefined,
+        lines?: string[] | undefined,
+        languageId?: string | undefined
     ): void {
         if (!selection) {
             selection = { start: new Position(0, 0), end: new Position(0, 0) };
         }
 
-        sinon
-            .stub(window, 'activeTextEditor')
-            .value(uri ? { document: { uri } as TextDocument, selection } : undefined);
+        sinon.stub(window, 'activeTextEditor').value(
+            uri
+                ? {
+                      document: {
+                          uri,
+                          getText: (range) =>
+                              (lines ?? []).slice(range?.start.line, range?.end.line ?? 0).join(''),
+                          languageId: languageId ?? 'text'
+                      } as TextDocument,
+                      selection
+                  }
+                : undefined
+        );
+    }
+
+    function setLinkFormat(format: LinkFormat): void {
+        sinon.stub(Settings.prototype, 'getLinkFormat').returns(format);
     }
 
     function expectError(message: string): void {

@@ -6,6 +6,11 @@ import { StaticServer } from './schema';
 export type LinkType = 'commit' | 'branch' | 'defaultBranch';
 
 /**
+ * The format to use when copying a link.
+ */
+export type LinkFormat = 'raw' | 'markdown' | 'markdownWithPreview';
+
+/**
  * Information about a Git repository.
  */
 export interface Repository {

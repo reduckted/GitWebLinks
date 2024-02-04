@@ -9,6 +9,10 @@ export const STRINGS = {
         noFileSelected: 'Cannot copy a link because no file is selected.',
         openInBrowser: 'Open in Browser',
         openSettings: 'Open Settings',
+        copyAsRawUrl: 'Copy Raw URL',
+        copyAsMarkdownLink: 'Copy Markdown',
+        copyAsMarkdownLinkWithoutPreview: 'Copy without Code Block',
+        copyAsMarkdownLinkWithPreview: 'Copy with Code Block',
         linkCopied: (handlerName: string): string =>
             format('%s link copied to the clipboard.', handlerName),
         error: 'An error occurred while creating the link.',

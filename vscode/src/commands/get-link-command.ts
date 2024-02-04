@@ -4,20 +4,28 @@ import {
     MessageItem,
     QuickPickItem,
     QuickPickItemKind,
+    Range,
     TextEditor,
     Uri,
     window
 } from 'vscode';
 
 import { git } from '../git';
-import { LinkHandler } from '../link-handler';
+import { CreateUrlResult, LinkHandler } from '../link-handler';
 import { LinkHandlerProvider } from '../link-handler-provider';
 import { log } from '../log';
 import { NoRemoteHeadError } from '../no-remote-head-error';
 import { RepositoryFinder } from '../repository-finder';
 import { Settings } from '../settings';
 import { STRINGS } from '../strings';
-import { LinkTarget, LinkType, Repository, RepositoryWithRemote, SelectedRange } from '../types';
+import {
+    LinkFormat,
+    LinkTarget,
+    LinkType,
+    Repository,
+    RepositoryWithRemote,
+    SelectedRange
+} from '../types';
 import { getErrorMessage, getSelectedRange, hasRemote } from '../utilities';
 
 /**
@@ -84,7 +92,7 @@ export class GetLinkCommand {
 
             try {
                 let target: LinkTarget | undefined;
-                let link: string;
+                let result: CreateUrlResult;
 
                 if (this.options.linkType === 'prompt') {
                     target = await this.promptForLinkTarget(info);
@@ -96,32 +104,96 @@ export class GetLinkCommand {
                     target = { preset: this.options.linkType };
                 }
 
-                link = await info.handler.createUrl(
+                result = await info.handler.createUrl(
                     info.repository,
                     { filePath: info.uri.fsPath, selection },
                     { target }
                 );
 
-                log('Web link created: %s', link);
+                log('Web link created: %s', result.url);
 
                 switch (this.options.action) {
                     case 'copy':
-                        await env.clipboard.writeText(link);
+                        {
+                            let formats: Record<LinkFormat, string>;
+                            let format: LinkFormat;
+                            let actions: ActionMessageItem[];
+                            let copiedText: string;
 
-                        void window
-                            .showInformationMessage<ActionMessageItem>(
-                                STRINGS.getLinkCommand.linkCopied(info.handler.name),
+                            // Create all of the formats, because whichever
+                            // formats we don't copy to the clipboard, we'll
+                            // offer to copy in the notification that we show.
+                            formats = {
+                                raw: result.url,
+                                markdown: createMarkdownLink(result),
+                                markdownWithPreview:
+                                    createMarkdownLink(result) +
+                                    // Only include the preview if the
+                                    // selection was included in the link.
+                                    (editor && selection
+                                        ? `\n${getCodeBlockForSelection(editor, selection)}`
+                                        : '')
+                            };
+
+                            format = this.settings.getLinkFormat();
+                            copiedText = formats[format];
+                            await env.clipboard.writeText(copiedText);
+
+                            actions = [
                                 {
                                     title: STRINGS.getLinkCommand.openInBrowser,
                                     action: 'open'
                                 }
-                            )
-                            .then((x) => this.onNotificationItemClick(x, link));
+                            ];
 
+                            // If we didn't copy the raw link, add an action to copy it.
+                            if (copiedText !== formats.raw) {
+                                actions.push({
+                                    title: STRINGS.getLinkCommand.copyAsRawUrl,
+                                    action: 'copy-raw'
+                                });
+                            }
+
+                            // If we didn't copy the markdown link, add an action to copy it. Note that
+                            // we check the actual copied text rather than the format that was used, because
+                            // the format can be "markdownWithPreview" but we might not include the preview,
+                            // which causes what we copied to be the same as the basic markdown link.
+                            if (copiedText !== formats.markdown) {
+                                actions.push({
+                                    title:
+                                        format === 'markdownWithPreview' &&
+                                        formats.markdown !== formats.markdownWithPreview
+                                            ? STRINGS.getLinkCommand
+                                                  .copyAsMarkdownLinkWithoutPreview
+                                            : STRINGS.getLinkCommand.copyAsMarkdownLink,
+                                    action: 'copy-markdown'
+                                });
+                            }
+
+                            // If we didn't copy the markdown link with a preview,
+                            // add an action to copy it, but only if the text
+                            // will be different to the plain markdown link.
+                            if (
+                                copiedText !== formats.markdownWithPreview &&
+                                formats.markdownWithPreview !== formats.markdown
+                            ) {
+                                actions.push({
+                                    title: STRINGS.getLinkCommand.copyAsMarkdownLinkWithPreview,
+                                    action: 'copy-markdown-with-preview'
+                                });
+                            }
+
+                            void window
+                                .showInformationMessage<ActionMessageItem>(
+                                    STRINGS.getLinkCommand.linkCopied(info.handler.name),
+                                    ...actions
+                                )
+                                .then((x) => this.onNotificationItemClick(x, formats));
+                        }
                         break;
 
                     case 'open':
-                        openExternal(link);
+                        openExternal(result.url);
                 }
             } catch (ex) {
                 log('Error while generating a link: %o', ex);
@@ -344,21 +416,74 @@ export class GetLinkCommand {
      * Handles a button on a notification being clicked.
      *
      * @param item The item that was clicked on.
-     * @param link The link that has been created.
+     * @param linkFormats The formatted links that have been created.
      */
-    private onNotificationItemClick(item: ActionMessageItem | undefined, link?: string): void {
+    private onNotificationItemClick(
+        item: ActionMessageItem | undefined,
+        linkFormats?: Record<LinkFormat, string>
+    ): void {
         switch (item?.action) {
             case 'settings':
                 void commands.executeCommand('workbench.action.openSettings', 'gitweblinks');
                 break;
 
             case 'open':
-                if (link) {
-                    openExternal(link);
+                if (linkFormats) {
+                    openExternal(linkFormats.raw);
+                }
+                break;
+
+            case 'copy-raw':
+                if (linkFormats) {
+                    void env.clipboard.writeText(linkFormats.raw);
+                }
+                break;
+
+            case 'copy-markdown':
+                if (linkFormats) {
+                    void env.clipboard.writeText(linkFormats.markdown);
+                }
+                break;
+
+            case 'copy-markdown-with-preview':
+                if (linkFormats) {
+                    void env.clipboard.writeText(linkFormats.markdownWithPreview);
                 }
                 break;
         }
     }
+}
+
+/**
+ * Creates a markdown-formatted link for the URL that was created.
+ *
+ * @param result The result of creating the link.
+ * @returns The markdown link.
+ */
+function createMarkdownLink(result: CreateUrlResult): string {
+    return `[${result.relativePath}${result.selection ?? ''}](${result.url})`;
+}
+
+/**
+ * Creates a markdown code block for the lines specified in the given selection.
+ *
+ * @param editor The editor to get the text from.
+ * @param selection The selection to use in the code block.
+ * @returns The markdown code block.
+ */
+function getCodeBlockForSelection(editor: TextEditor, selection: SelectedRange): string {
+    let text: string;
+
+    // Always get complete lines, so start from character zero on the start line.
+    // To get the full end line, we need to get the text up to the start
+    // of the next line. We can then trim off the line break. Note that the
+    // given selection uses one-based lines, so we need to subtract one from
+    // the start and end lines when getting the text.
+    text = editor.document
+        .getText(new Range(selection.startLine - 1, 0, selection.endLine, 0))
+        .replace(/\r?\n$/, '');
+
+    return `\`\`\`${editor.document.languageId}\n${text}\n\`\`\``;
 }
 
 /**
@@ -437,5 +562,5 @@ interface ActionMessageItem extends MessageItem {
     /**
      * The action to perform.
      */
-    action: 'settings' | 'open';
+    action: 'settings' | 'open' | 'copy-raw' | 'copy-markdown' | 'copy-markdown-with-preview';
 }

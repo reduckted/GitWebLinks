@@ -6,7 +6,7 @@ import * as sinon from 'sinon';
 import { Uri, workspace } from 'vscode';
 
 import { git } from '../src/git';
-import { LinkHandler } from '../src/link-handler';
+import { CreateUrlResult, LinkHandler } from '../src/link-handler';
 import { LinkHandlerProvider } from '../src/link-handler-provider';
 import { findHandlersDirectory, load, Template } from '../src/schema';
 import { parseTemplate } from '../src/templates';
@@ -212,7 +212,7 @@ describe('Link handlers', function () {
                 ): Promise<void> {
                     let repository: RepositoryWithRemote;
                     let handler: LinkHandler | undefined;
-                    let link: string | undefined;
+                    let link: CreateUrlResult | undefined;
 
                     result = await prepareTest(settings, result, options);
 
@@ -237,7 +237,7 @@ describe('Link handlers', function () {
                         { target: options.target || { preset: 'branch' } }
                     );
 
-                    expect(link, 'Link does not match the expected result').to.equal(result);
+                    expect(link?.url, 'Link does not match the expected result').to.equal(result);
                 }
 
                 interface TestOptions extends Partial<LinkOptions> {

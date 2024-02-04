@@ -6,6 +6,7 @@ export const EXTENSION = {
 export const CONFIGURATION = {
     section: EXTENSION.id,
     linkType: 'linkType',
+    linkFormat: 'linkFormat',
     defaultBranch: 'defaultBranch',
     preferredRemoteName: 'preferredRemoteName',
     showCopy: 'showCopy',

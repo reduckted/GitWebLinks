@@ -2,7 +2,7 @@ import { workspace, WorkspaceConfiguration } from 'vscode';
 
 import { CONFIGURATION } from './constants';
 import { StaticServer } from './schema';
-import { LinkType } from './types';
+import { LinkFormat, LinkType } from './types';
 
 /**
  * Provides access to the extension's settings.
@@ -42,6 +42,25 @@ export class Settings {
 
             default:
                 return 'commit';
+        }
+    }
+
+    /**
+     * Gets the format to use when copying a link.
+     *
+     * @returns The link format to use.
+     */
+    public getLinkFormat(): LinkFormat {
+        // Ensure that the type is a valid value.
+        switch (this.getConfiguration().get<string>(CONFIGURATION.linkFormat)) {
+            case 'markdown':
+                return 'markdown';
+
+            case 'markdownWithPreview':
+                return 'markdownWithPreview';
+
+            default:
+                return 'raw';
         }
     }
 

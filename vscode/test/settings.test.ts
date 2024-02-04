@@ -70,6 +70,25 @@ describe('Settings', () => {
         });
     });
 
+    describe('getLinkFormat', () => {
+        it('should return "raw" if there is no stored value.', () => {
+            setup({ linkFormat: undefined });
+            expect(settings.getLinkFormat()).to.equal('raw');
+        });
+
+        ['raw', 'markdown', 'markdownWithPreview'].forEach((value) => {
+            it(`should return "${value}" when stored value is "${value}".`, () => {
+                setup({ linkFormat: value });
+                expect(settings.getLinkFormat()).to.equal(value);
+            });
+        });
+
+        it('should return "raw" when the stored value is invalid.', () => {
+            setup({ linkFormat: 'foo' });
+            expect(settings.getLinkFormat()).to.equal('raw');
+        });
+    });
+
     describe('getDefaultBranch', () => {
         it('should return undefined if there is no stored value.', () => {
             setup({ defaultBranch: undefined });

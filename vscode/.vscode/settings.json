@@ -2,6 +2,7 @@
     "files.exclude": {
         "node_modules/": true,
         ".vscode-test/": true,
+        "out-test/": true,
         "dist/": true
     },
     "editor.formatOnSave": true,

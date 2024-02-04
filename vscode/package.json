@@ -180,7 +180,7 @@
             ]
         },
         "configuration": {
-            "title": "Git Web Links configuration",
+            "title": "Git Web Links",
             "properties": {
                 "gitweblinks.linkType": {
                     "type": "string",
@@ -196,6 +196,21 @@
                         "Create a link to the current branch."
                     ],
                     "default": "commit"
+                },
+                "gitweblinks.linkFormat": {
+                    "type": "string",
+                    "description": "How copied links should be formatted.",
+                    "default": "raw",
+                    "enum": [
+                        "raw",
+                        "markdown",
+                        "markdownWithPreview"
+                    ],
+                    "enumDescriptions": [
+                        "The raw URL is copied.",
+                        "The URL is formatted as a markdown link.",
+                        "The URL is formatted as a markdown link with the selected code in a code block."
+                    ]
                 },
                 "gitweblinks.defaultBranch": {
                     "type": "string",
