@@ -611,11 +611,13 @@ public static class LinkHandlerTests {
 
 
         private async Task<string> CreateUrlAsync(PartialHandlerDefinition definition, ILinkTarget target, string filePath = "file.txt") {
-            return await CreateHandler(definition).CreateUrlAsync(
-                _repository,
-                new FileInfo(filePath, null),
-                new LinkOptions(target)
-            );
+            return (
+                await CreateHandler(definition).CreateUrlAsync(
+                    _repository,
+                    new FileInfo(filePath, null),
+                    new LinkOptions(target)
+                )
+            ).Url;
         }
 
 

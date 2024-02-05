@@ -183,11 +183,13 @@ public static class HandlerTests {
 
             Assert.Equal(Definition.Name, handler.Name);
 
-            link = await handler.CreateUrlAsync(
-                repository,
-                new FileInfo(Path.Combine(RepositoryRoot, options.FileName ?? TestFileName), options.Selection),
-                new LinkOptions(new LinkTargetPreset(options.Type ?? LinkType.CurrentBranch))
-            );
+            link = (
+                await handler.CreateUrlAsync(
+                    repository,
+                    new FileInfo(Path.Combine(RepositoryRoot, options.FileName ?? TestFileName), options.Selection),
+                    new LinkOptions(new LinkTargetPreset(options.Type ?? LinkType.CurrentBranch))
+                )
+            ).Url;
 
             Assert.Equal(result, link);
         }

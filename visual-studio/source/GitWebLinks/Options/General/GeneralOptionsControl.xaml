@@ -29,6 +29,19 @@
             Margin="{StaticResource LargeSpacerBottom}"
             />
 
+        <!-- Link Format -->
+        <TextBlock
+            Text="Link Format:"
+            Margin="{StaticResource SmallSpacerBottom}"
+            />
+
+        <ComboBox
+            ItemsSource="{Binding LinkFormats}"
+            SelectedItem="{Binding SelectedLinkFormat, UpdateSourceTrigger=PropertyChanged}"
+            DisplayMemberPath="Name"
+            Margin="{StaticResource LargeSpacerBottom}"
+            />
+
         <!-- Default Branch -->
         <TextBlock
             Text="Default Branch:"
@@ -62,7 +75,7 @@
             Margin="{StaticResource LargeSpacerBottom}"
             Padding="3"
             />
-        
+
         <!-- Use Short Hashes -->
         <CheckBox
             IsChecked="{Binding UseShortHashes, UpdateSourceTrigger=PropertyChanged}"

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
@@ -77,6 +77,7 @@
     <Compile Include="Options\General\GeneralOptionsControl.xaml.cs">
       <DependentUpon>GeneralOptionsControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Options\LinkFormatListItem.cs" />
     <Compile Include="Options\LinkTypeListItem.cs" />
     <Compile Include="Options\Gitiles\GitilesOptionsControl.xaml.cs">
       <DependentUpon>GitilesOptionsControl.xaml</DependentUpon>
@@ -100,10 +101,12 @@
     <Compile Include="Services\ILinkTargetLoader.cs" />
     <Compile Include="Services\LinkTargetLoader.cs" />
     <Compile Include="Services\LinkTargetSelector.cs" />
+    <Compile Include="Types\CreateUrlResult.cs" />
     <Compile Include="Types\ILinkTarget.cs" />
     <Compile Include="Types\LinkTargetPreset.cs" />
     <Compile Include="Types\LinkTargetRef.cs" />
     <Compile Include="Types\CommandLinkType.cs" />
+    <Compile Include="Types\LinkFormat.cs" />
     <Compile Include="Types\RefInfo.cs" />
     <Compile Include="Types\RefType.cs" />
     <Compile Include="UI\AttachedProperties\CancelOnEscape.cs" />

@@ -19,6 +19,7 @@ public class GeneralOptionsPage : OptionsPageBase {
     private string _defaultBranch;
     private string _preferredRemoteName;
     private LinkType _defaultLinkType;
+    private LinkFormat _linkFormat;
     private bool _showCopyLinkMenuItem;
     private bool _showOpenLinkMenuItem;
     private bool _useShortHashes;
@@ -36,6 +37,12 @@ public class GeneralOptionsPage : OptionsPageBase {
             new LinkTypeListItem(LinkType.Commit),
             new LinkTypeListItem(LinkType.CurrentBranch),
             new LinkTypeListItem(LinkType.DefaultBranch)
+        };
+
+        LinkFormats = new List<LinkFormatListItem> {
+            new LinkFormatListItem(LinkFormat.Raw),
+            new LinkFormatListItem(LinkFormat.Markdown),
+            new LinkFormatListItem(LinkFormat.MarkdownWithPreview)
         };
     }
 
@@ -62,6 +69,17 @@ public class GeneralOptionsPage : OptionsPageBase {
             OnPropertyChanged(nameof(SelectedDefaultLinkType));
         }
     }
+
+
+    [DefaultValue(LinkFormat.Raw)]
+    public LinkFormat LinkFormat {
+        get => _linkFormat;
+        set {
+            SetProperty(ref _linkFormat, value);
+            OnPropertyChanged(nameof(SelectedDefaultLinkType));
+        }
+    }
+
 
 
     [DefaultValue(true)]
@@ -93,9 +111,20 @@ public class GeneralOptionsPage : OptionsPageBase {
 
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public IReadOnlyList<LinkFormatListItem> LinkFormats { get; }
+
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public LinkTypeListItem SelectedDefaultLinkType {
         get => LinkTypes.FirstOrDefault((x) => x.Value == DefaultLinkType) ?? LinkTypes[0];
         set => DefaultLinkType = value.Value;
+    }
+
+
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public LinkFormatListItem SelectedLinkFormat {
+        get => LinkFormats.FirstOrDefault((x) => x.Value == LinkFormat) ?? LinkFormats[0];
+        set => LinkFormat = value.Value;
     }
 
 }

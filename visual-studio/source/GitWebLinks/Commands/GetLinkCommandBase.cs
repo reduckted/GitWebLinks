@@ -6,7 +6,10 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace GitWebLinks;
@@ -19,7 +22,57 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
     }
 
 
-    private GeneralOptionsPage _options = default!; // Initialized immiedately after the command is created.
+    private static readonly IReadOnlyDictionary<string, string> KnownLanguagesByFileExtension = new Dictionary<string, string> {
+        { ".bash", "bash" },
+        { ".bat", "bat" },
+        { ".c", "c" },
+        { ".cfg", "ini" },
+        { ".clj", "clojure" },
+        { ".cljs", "clojure" },
+        { ".cmake", "cmake" },
+        { ".cmd", "bat" },
+        { ".cpp", "cpp" },
+        { ".cs", "csharp" },
+        { ".csproj", "xml" },
+        { ".css", "css" },
+        { ".diff", "diff" },
+        { ".feature", "cucumber" },
+        { ".fsproj", "xml" },
+        { ".go", "go" },
+        { ".h", "c" },
+        { ".hpp", "cpp" },
+        { ".hs", "haskell" },
+        { ".htm", "html" },
+        { ".html", "html" },
+        { ".ini", "ini" },
+        { ".jade", "jade" },
+        { ".java", "java" },
+        { ".js", "js" },
+        { ".md", "markdown" },
+        { ".php", "php" },
+        { ".pl", "perl" },
+        { ".proj", "xml" },
+        { ".props", "xml" },
+        { ".sass", "sass" },
+        { ".scss", "scss" },
+        { ".sh", "bash" },
+        { ".sql", "sql" },
+        { ".targets", "xml" },
+        { ".ts", "ts" },
+        { ".vb", "vbnet" },
+        { ".vbproj", "xml" },
+        { ".wsdl", "xml" },
+        { ".xhtml", "html" },
+        { ".xml", "xml" },
+        { ".xsd", "xml" },
+        { ".xsl", "xslt" },
+        { ".xslt", "xslt" },
+        { ".yaml", "yaml" },
+        { ".yml", "yaml" }
+    };
+
+
+    private GeneralOptionsPage _options = default!; // Initialized immediately after the command is created.
 
 
     protected abstract bool IncludeSelection { get; }
@@ -62,12 +115,10 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
 
         if (info is not null) {
             SelectedRange? selection = null;
+            DocumentView? documentView = null;
 
 
             if (IncludeSelection) {
-                DocumentView? documentView;
-
-
                 // We are allowed to include the selection, but we can only get the
                 // selection from the active editor, so we'll only include the selection
                 // if the file we are generating the URL for is in the active editor.
@@ -83,7 +134,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
 
             try {
                 ILinkTarget? target;
-                string url;
+                CreateUrlResult result;
 
 
                 if (LinkType == CommandLinkType.Prompt) {
@@ -97,22 +148,22 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
                     target = new LinkTargetPreset(GetPresetLinkType(LinkType));
                 }
 
-                url = await info.Handler.CreateUrlAsync(
+                result = await info.Handler.CreateUrlAsync(
                     info.Repository,
                     new FileInfo(info.FilePath, selection),
                     new LinkOptions(target)
                 );
 
-                await logger.LogAsync($"URL created: {url}");
+                await logger.LogAsync($"URL created: {result.Url}");
 
                 switch (Action) {
                     case CommandAction.Copy:
-                        System.Windows.Clipboard.SetText(url);
+                        System.Windows.Clipboard.SetText(GetFormattedLink(result, _options.LinkFormat, documentView, selection));
                         await VS.StatusBar.ShowMessageAsync($"Link copied to {info.Handler.Name}");
                         break;
 
                     case CommandAction.Open:
-                        await OpenUrlAsync(url, logger);
+                        await OpenUrlAsync(result.Url, logger);
                         break;
 
                 }
@@ -228,6 +279,56 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
 
             default:
                 return null;
+        }
+    }
+
+
+    private string GetFormattedLink(CreateUrlResult result, LinkFormat format, DocumentView? documentView, SelectedRange? selection) {
+        switch (format) {
+            case LinkFormat.Markdown:
+            case LinkFormat.MarkdownWithPreview:
+                string link;
+
+
+                link = $"[{result.RelativePath}{result.Selection}]({result.Url})";
+
+                // Only include the preview if the
+                // selection was included in the link.
+                if ((format == LinkFormat.MarkdownWithPreview) && (documentView?.TextBuffer is not null) && (selection is not null)) {
+                    StringBuilder codeBlock;
+                    ITextSnapshot snapshot;
+                    string? language;
+
+
+                    snapshot = documentView.TextBuffer.CurrentSnapshot;
+
+                    // There isn't a simple way to get the language of the current file,
+                    // but we can use the file extension to map it to known languages.
+                    if (!string.IsNullOrEmpty(documentView.FilePath)) {
+                        KnownLanguagesByFileExtension.TryGetValue(
+                            Path.GetExtension(documentView.FilePath),
+                            out language
+                        );
+                    } else {
+                        language = null;
+                    }
+
+                    codeBlock = new StringBuilder();
+                    codeBlock.AppendLine($"```{language ?? ""}");
+
+                    for (int lineNumber = selection.StartLine - 1; lineNumber < selection.EndLine; lineNumber++) {
+                        codeBlock.AppendLine(snapshot.GetLineFromLineNumber(lineNumber).GetText());
+                    }
+
+                    codeBlock.AppendLine($"```");
+
+                    link += Environment.NewLine + codeBlock.ToString();
+                }
+
+                return link;
+
+            default: // LinkFormat.Raw.
+                return result.Url;
         }
     }
 

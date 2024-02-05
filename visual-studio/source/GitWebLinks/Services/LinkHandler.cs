@@ -43,7 +43,7 @@ public class LinkHandler : ILinkHandler {
     }
 
 
-    public async Task<string> CreateUrlAsync(Repository repository, FileInfo file, LinkOptions options) {
+    public async Task<CreateUrlResult> CreateUrlAsync(Repository repository, FileInfo file, LinkOptions options) {
         if (repository.Remote is null) {
             throw new InvalidOperationException("The repository must have a remote.");
         }
@@ -54,6 +54,8 @@ public class LinkHandler : ILinkHandler {
         RefType refType;
         LinkType linkType;
         string url;
+        string relativePath;
+        string selection;
         TemplateData data;
         Hash hash;
 
@@ -87,6 +89,7 @@ public class LinkHandler : ILinkHandler {
         remote = UrlHelpers.Normalize(repository.Remote.Url);
 
         address = await GetAddressAsync(remote);
+        relativePath = GetRelativePath(repository.Root, file.FilePath);
 
         data = TemplateData
             .Create()
@@ -94,7 +97,7 @@ public class LinkHandler : ILinkHandler {
             .Add("repository", GetRepositoryPath(remote, address))
             .Add("ref", refValue)
             .Add("commit", await GetRefAsync(LinkType.Commit, repository.Root, repository.Remote))
-            .Add("file", GetRelativePath(repository.Root, file.FilePath))
+            .Add("file", relativePath)
             .Add("type", refType == RefType.Commit ? "commit" : "branch");
 
         if (file.Selection is not null) {
@@ -112,7 +115,10 @@ public class LinkHandler : ILinkHandler {
         url = _definition.Url.Render(hash);
 
         if (file.Selection is not null) {
-            url += _definition.Selection.Render(hash);
+            selection = _definition.Selection.Render(hash);
+            url += selection;
+        } else {
+            selection = "";
         }
 
         url = ApplyModifications(
@@ -120,7 +126,7 @@ public class LinkHandler : ILinkHandler {
             _definition.Query.Where((x) => x.Pattern.IsMatch(file.FilePath)).ToList()
         );
 
-        return url;
+        return new CreateUrlResult(url, relativePath, selection);
     }
 
 
