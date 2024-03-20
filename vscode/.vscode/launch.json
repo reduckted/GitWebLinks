@@ -24,12 +24,8 @@
             "name": "Run Tests",
             "type": "extensionHost",
             "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": [
-                "--disable-extensions",
-                "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out-test/test/index"
-            ],
+            "testConfiguration": "${workspaceFolder}/.vscode-test.mjs",
+            "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceFolder}"],
             "outFiles": ["${workspaceFolder}/out-test/**/*.js"],
             "sourceMaps": true,
             "preLaunchTask": "npm: debug-test",
