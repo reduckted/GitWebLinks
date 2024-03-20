@@ -11,7 +11,7 @@ namespace GitWebLinks
         public const string Name = "Git Web Links";
         public const string Description = @"Copy links to files in their online Git repositories.";
         public const string Language = "en-US";
-        public const string Version = "2.10.0";
+        public const string Version = "2.11.0";
         public const string Author = "reduckted";
         public const string Tags = "";
     }
