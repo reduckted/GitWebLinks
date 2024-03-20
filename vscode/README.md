@@ -6,6 +6,7 @@ Works with:
 
 -   Azure DevOps Cloud and Server
 -   Bitbucket Cloud and Server
+-   Gitea
 -   GitHub and GitHub Enterprise
 -   Gitiles (Gerrit)
 -   GitLab (SaaS, Community Edition and Enterprise Edition)
@@ -97,6 +98,17 @@ Make sure you include any port numbers (if it's not port 80) and context paths.
     {
         "http": "https://local-bitbucket:7990/context",
         "ssh": "git@local-bitbucket:7999"
+    }
+]
+```
+
+### Gitea
+
+```json
+"gitweblinks.gitea": [
+    {
+        "http": "https://my.gitea.server:3000",
+        "ssh": "ssh://my.gitea.server"
     }
 ]
 ```

@@ -24,6 +24,7 @@ public class Settings : ISettings {
         _serverProviders = new Dictionary<string, ServerProvider>() {
              { "azureDevOpsServer", new ServerProvider(package, typeof(AzureDevOpsServerOptionsPage))},
              { "bitbucketServer", new ServerProvider(package, typeof(BitbucketServerOptionsPage))},
+             { "gitea", new ServerProvider(package, typeof(GiteaOptionsPage))},
              { "gitHubEnterprise", new ServerProvider(package, typeof(GitHubEnterpriseOptionsPage))},
              { "gitLabEnterprise", new ServerProvider(package, typeof(GitLabEnterpriseOptionsPage))},
              { "gitiles", new ServerProvider(package, typeof(GitilesOptionsPage))}

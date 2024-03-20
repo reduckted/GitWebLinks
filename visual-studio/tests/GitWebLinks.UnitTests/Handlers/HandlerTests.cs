@@ -543,6 +543,7 @@ public static class HandlerTests {
                 switch (item.Key) {
                     case "azureDevOpsServer":
                     case "bitbucketServer":
+                    case "gitea":
                     case "gitHubEnterprise":
                     case "gitiles":
                     case "gitLabEnterprise":

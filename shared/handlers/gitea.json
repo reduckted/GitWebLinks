@@ -1,0 +1,101 @@
+{
+    "$schema": "../handler-schema.json",
+    "name": "Gitea",
+    "private": "gitea",
+    "branchRef": "abbreviated",
+    "url": [
+        "{{ base }}/{{ repository }}/src/",
+        "{% if type == 'commit' %}commit{% else %}branch{% endif %}",
+        "/{{ ref | encode_uri }}/{{ file | encode_uri_component_segments }}"
+    ],
+    "query": [
+        { "pattern": "\\.(md|markdown)$", "key": "display", "value": "source" }
+    ],
+    "selection": "#L{{ startLine }}{% if startLine != endLine %}-L{{ endLine }}{% endif %}",
+    "reverse": {
+        "pattern": [
+            "/(?<username>[^/]+)",
+            "/(?<repository>[^/]+)",
+            "/src/(branch|commit|tag)",
+            "/(?:[^/]+)",
+            "/(?<file>[^#?]+)",
+            "(?:\\?[^#]*)?",
+            "(?:#L(?<start>\\d+)(?:-L(?<end>\\d+))?)?"
+        ],
+        "file": "{{ match.groups.file | decode_uri_component_segments }}",
+        "fileMayStartWithBranch": true,
+        "server": {
+            "http": "{{ http }}/{{ match.groups.username }}/{{ match.groups.repository }}.git",
+            "ssh": "{{ ssh }}:{{ match.groups.username }}/{{ match.groups.repository }}.git"
+        },
+        "selection": {
+            "startLine": "{{ match.groups.start }}",
+            "endLine": "{{ match.groups.end }}"
+        }
+    },
+    "tests": {
+        "settings": {
+            "gitea": [
+                {
+                    "http": "https://try.gitea.io",
+                    "ssh": "ssh://git@try.gitea.io"
+                }
+            ]
+        },
+        "createUrl": {
+            "remotes": {
+                "http": "https://try.gitea.io/foo/bar.git",
+                "httpWithUsername": "https://username@try.gitea.io/foo/bar.git",
+                "ssh": "git@try.gitea.io:foo/bar.git",
+                "sshWithProtocol": "ssh://git@try.gitea.io:foo/bar.git",
+                "result": "https://try.gitea.io/foo/bar/src/branch/master/src/file.txt"
+            },
+            "spaces": {
+                "remote": "https://try.gitea.io/foo/bar.git",
+                "result": "https://try.gitea.io/foo/bar/src/branch/master/src/path%20spaces/file%20spaces.txt"
+            },
+            "branch": {
+                "remote": "https://try.gitea.io/foo/bar.git",
+                "result": "https://try.gitea.io/foo/bar/src/branch/feature/test/src/file.txt"
+            },
+            "commit": {
+                "remote": "https://try.gitea.io/foo/bar.git",
+                "result": "https://try.gitea.io/foo/bar/src/commit/{{ commit }}/src/file.txt"
+            },
+            "misc": [
+                {
+                    "name": "Markdown files (.md)",
+                    "fileName": "test.md",
+                    "remote": "https://try.gitea.io/foo/bar.git",
+                    "result": "https://try.gitea.io/foo/bar/src/branch/master/test.md?display=source"
+                },
+                {
+                    "name": "Markdown files (.markdown)",
+                    "fileName": "test.markdown",
+                    "remote": "https://try.gitea.io/foo/bar.git",
+                    "result": "https://try.gitea.io/foo/bar/src/branch/master/test.markdown?display=source"
+                }
+            ],
+            "selection": {
+                "remote": "https://try.gitea.io/foo/bar.git",
+                "point": {
+                    "line": 10,
+                    "result": "https://try.gitea.io/foo/bar/src/branch/master/src/file.txt#L10"
+                },
+                "singleLine": {
+                    "line": 10,
+                    "startColumn": 20,
+                    "endColumn": 30,
+                    "result": "https://try.gitea.io/foo/bar/src/branch/master/src/file.txt#L10"
+                },
+                "multipleLines": {
+                    "startLine": 10,
+                    "startColumn": 20,
+                    "endLine": 30,
+                    "endColumn": 40,
+                    "result": "https://try.gitea.io/foo/bar/src/branch/master/src/file.txt#L10-L30"
+                }
+            }
+        }
+    }
+}

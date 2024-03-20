@@ -6,6 +6,7 @@ Works with:
 
 -   Azure DevOps Cloud and Server
 -   Bitbucket Cloud and Server
+-   Gitea
 -   GitHub and GitHub Enterprise
 -   Gitiles (Gerrit)
 -   GitLab (SaaS, Community Edition and Enterprise Edition)
@@ -61,6 +62,7 @@ The supported on-premise services are:
 
 -   Azure DevOps Server
 -   Bitbucket Server
+-   Gitea
 -   GitHub Enterprise
 -   Gitiles
 -   GitLab Enterprise/Community Edition

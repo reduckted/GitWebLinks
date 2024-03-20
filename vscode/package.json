@@ -264,6 +264,27 @@
                         "additionalProperties": false
                     }
                 },
+                "gitweblinks.gitea": {
+                    "type": "array",
+                    "description": "The URLs of your Gitea instances.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "http": {
+                                "type": "string",
+                                "description": "The base URL for the website. For example:\nhttps://my.gitea.server:8000"
+                            },
+                            "ssh": {
+                                "type": "string",
+                                "description": "The SSH URL for remotes. For example:\nssh://my.gitea.server"
+                            }
+                        },
+                        "required": [
+                            "http"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
                 "gitweblinks.gitHubEnterprise": {
                     "type": "array",
                     "description": "The URLs of your GitHub Enterprise instances.",

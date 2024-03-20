@@ -144,4 +144,7 @@
   <data name="207" xml:space="preserve">
     <value>Gitiles</value>
   </data>
+  <data name="208" xml:space="preserve">
+    <value>Gitea</value>
+  </data>
 </root>

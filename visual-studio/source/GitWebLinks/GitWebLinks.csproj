@@ -77,6 +77,10 @@
     <Compile Include="Options\General\GeneralOptionsControl.xaml.cs">
       <DependentUpon>GeneralOptionsControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Options\Gitea\GiteaOptionsControl.xaml.cs">
+      <DependentUpon>GiteaOptionsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Options\Gitea\GiteaOptionsPage.cs" />
     <Compile Include="Options\LinkFormatListItem.cs" />
     <Compile Include="Options\LinkTypeListItem.cs" />
     <Compile Include="Options\Gitiles\GitilesOptionsControl.xaml.cs">
@@ -240,6 +244,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Options\BitbucketServer\BitbucketServerOptionsControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Options\Gitea\GiteaOptionsControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

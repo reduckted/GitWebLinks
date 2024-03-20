@@ -7,6 +7,7 @@ Copy links to files in their online Git repositories. Works with:
 
 -   Azure DevOps Cloud and Server
 -   Bitbucket Cloud and Server
+-   Gitea
 -   GitHub and GitHub Enterprise
 -   Gitiles (Gerrit)
 -   GitLab (SaaS, Community Edition and Enterprise Edition)
