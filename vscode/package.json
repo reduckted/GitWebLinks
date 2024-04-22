@@ -40,7 +40,7 @@
         "debug-test": "npm run pretest"
     },
     "dependencies": {
-        "liquidjs": "10.10.2",
+        "liquidjs": "10.11.1",
         "spawn-rx": "3.0.0"
     },
     "devDependencies": {
@@ -51,18 +51,18 @@
         "@types/sinon-chai": "3.2.12",
         "@types/vscode": "1.64.0",
         "@types/webpack-env": "1.18.4",
-        "@typescript-eslint/eslint-plugin": "7.4.0",
-        "@typescript-eslint/parser": "7.4.0",
-        "@vscode/test-cli": "0.0.8",
+        "@typescript-eslint/eslint-plugin": "7.7.0",
+        "@typescript-eslint/parser": "7.7.0",
+        "@vscode/test-cli": "0.0.9",
         "@vscode/test-electron": "2.3.9",
-        "@vscode/vsce": "2.24.0",
+        "@vscode/vsce": "2.26.0",
         "ajv": "8.12.0",
         "chai": "4.3.10",
-        "eslint": "8.57.0",
+        "eslint": "9.1.0",
         "eslint-config-prettier": "9.1.0",
         "eslint-plugin-import": "2.29.1",
-        "eslint-plugin-jest": "27.9.0",
-        "eslint-plugin-jsdoc": "48.2.2",
+        "eslint-plugin-jest": "28.2.0",
+        "eslint-plugin-jsdoc": "48.2.3",
         "eslint-plugin-node": "11.1.0",
         "glob": "10.3.12",
         "mocha": "10.4.0",
@@ -72,7 +72,7 @@
         "sinon": "17.0.1",
         "sinon-chai": "3.7.0",
         "ts-loader": "9.5.1",
-        "typescript": "5.4.3",
+        "typescript": "5.4.5",
         "webpack": "5.91.0",
         "webpack-cli": "5.1.4"
     },
