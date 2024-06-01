@@ -13,6 +13,7 @@ updates:
           - dependency-name: "@types/node" # Pinned because VS Code uses Node.js v16.
           - dependency-name: "chai" # Pinned because v5 is ESM only.
           - dependency-name: "sinon-chai" # Pinned because chai@5 is ESM only.
+          - dependency-name: "eslint" # Pinned because of lack of support for eslint@9.
 
     - package-ecosystem: "nuget"
       directory: "/visual-studio"
