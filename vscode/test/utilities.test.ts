@@ -1,5 +1,5 @@
-import assert = require('assert');
 import { expect } from 'chai';
+import * as assert from 'node:assert';
 import { commands, Position, Selection, TextEditor, window } from 'vscode';
 
 import { getSelectedRange, hasRemote, normalizeUrl, toSelection } from '../src/utilities';

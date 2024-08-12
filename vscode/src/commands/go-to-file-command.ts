@@ -84,7 +84,7 @@ export class GoToFileCommand {
 
                 try {
                     document = await workspace.openTextDocument(file.fileName);
-                } catch (ex) {
+                } catch {
                     log(`Unable to open the file '%s' as a text document.`, file.fileName);
                 }
 

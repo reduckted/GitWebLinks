@@ -55,7 +55,7 @@ export function parseTemplate(template: Template | undefined): ParsedTemplate | 
     parsed = engine.parse(template);
 
     return {
-        render: (props) => engine.renderSync(parsed, props) as string // eslint-disable-line node/no-sync
+        render: (props) => engine.renderSync(parsed, props) as string // eslint-disable-line n/no-sync
     };
 }
 
@@ -92,5 +92,5 @@ export interface ParsedTemplate {
      * @param props The properties to make available to the template.
      * @returns The rendered output.
      */
-    render(props: object): string; // eslint-disable-line @typescript-eslint/ban-types
+    render(props: object): string;
 }
