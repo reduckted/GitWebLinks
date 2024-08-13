@@ -431,7 +431,7 @@ export class LinkHandler {
 
             try {
                 stats = await fs.lstat(filePath);
-            } catch (ex) {
+            } catch {
                 // Assume that the path isn't a symbolic link.
                 return false;
             }

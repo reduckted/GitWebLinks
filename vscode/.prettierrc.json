@@ -1,6 +1,6 @@
 {
     "arrowParens": "always",
-    "endOfLine": "crlf",
+    "endOfLine": "auto",
     "semi": true,
     "tabWidth": 4,
     "trailingComma": "none",

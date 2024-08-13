@@ -1,4 +1,4 @@
-/* eslint-disable node/no-sync */
+/* eslint-disable n/no-sync */
 
 import * as fs from 'fs';
 import * as path from 'path';
