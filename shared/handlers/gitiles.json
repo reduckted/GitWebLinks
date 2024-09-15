@@ -54,6 +54,22 @@
                 "remote": "https://git.company.com:1368/plugins/gitiles/foo/bar.git",
                 "result": "https://git.company.com:1368/plugins/gitiles/foo/bar/+/{{ commit }}/src/file.txt"
             },
+            "misc": [
+                {
+                    "name": "Web URL is different to clone URL",
+                    "settings": {
+                        "gitiles": [
+                            {
+                                "http": "https://git.company.com/a",
+                                "ssh": "ssh://git.company.com:29418",
+                                "web": "https://git.company.com/plugins/gitiles"
+                            }
+                        ]
+                    },
+                    "remote": "https://git.company.com/a/foo/bar.git",
+                    "result": "https://git.company.com/plugins/gitiles/foo/bar/+/master/src/file.txt"
+                }
+            ],
             "selection": {
                 "remote": "https://git.company.com:1368/plugins/gitiles/foo/bar.git",
                 "point": {

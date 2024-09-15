@@ -17,6 +17,7 @@ import {
     FileInfo,
     LinkOptions,
     LinkType,
+    Mutable,
     RepositoryWithRemote,
     SelectedRange,
     UrlInfo
@@ -72,7 +73,10 @@ export class LinkHandler {
             file: parseTemplate(definition.reverse.file),
             server: {
                 http: parseTemplate(definition.reverse.server.http),
-                ssh: parseTemplate(definition.reverse.server.ssh)
+                ssh: parseTemplate(definition.reverse.server.ssh),
+                web: definition.reverse.server.web
+                    ? parseTemplate(definition.reverse.server.web)
+                    : undefined
             },
             selection: {
                 startLine: parseTemplate(definition.reverse.selection.startLine),
@@ -96,8 +100,8 @@ export class LinkHandler {
      * @param remoteUrl The remote URL to check.
      * @returns True if this handler handles the given remote URL; otherwise, false.
      */
-    public isMatch(remoteUrl: string): boolean {
-        return this.server.match(normalizeUrl(remoteUrl)) !== undefined;
+    public handlesRemoteUrl(remoteUrl: string): boolean {
+        return this.server.matchRemoteUrl(normalizeUrl(remoteUrl)) !== undefined;
     }
 
     /**
@@ -150,7 +154,7 @@ export class LinkHandler {
         relativePath = await this.getRelativePath(repository.root, file.filePath);
 
         data = {
-            base: address.http,
+            base: address.web ?? address.http,
             repository: this.getRepositoryPath(remote, address),
             ref,
             commit: await this.getRef('commit', repository),
@@ -214,7 +218,7 @@ export class LinkHandler {
     private getAddress(remote: string): StaticServer {
         let address: StaticServer | undefined;
 
-        address = this.server.match(remote);
+        address = this.server.matchRemoteUrl(remote);
 
         if (!address) {
             throw new Error('Could not find a matching address.');
@@ -232,11 +236,13 @@ export class LinkHandler {
     private normalizeServerUrls(address: StaticServer): StaticServer {
         let http: string;
         let ssh: string | undefined;
+        let web: string | undefined;
 
         http = normalizeUrl(address.http);
         ssh = address.ssh ? normalizeUrl(address.ssh) : undefined;
+        web = address.web ? normalizeUrl(address.web) : undefined;
 
-        return { http, ssh };
+        return { http, ssh, web };
     }
 
     /**
@@ -385,7 +391,7 @@ export class LinkHandler {
     private async getRelativePath(from: string, to: string): Promise<string> {
         // If the file is a symbolic link, or is under a directory that's a
         // symbolic link, then we want to resolve the path to the real file
-        // because the sybmolic link won't be in the Git repository.
+        // because the symbolic link won't be in the Git repository.
         if (await this.isSymbolicLink(to, from)) {
             try {
                 to = await fs.realpath(to);
@@ -457,16 +463,16 @@ export class LinkHandler {
     /**
      * Gets information about the given URL.
      *
-     * @param url The URL to get the information from.
+     * @param webUrl The web interface URL to get the information from.
      * @param strict Whether to require the URL to match the server address of the handler.
      * @returns The URL information, or `undefined` if the information could not be determined.
      */
-    public getUrlInfo(url: string, strict: boolean): UrlInfo | undefined {
+    public getUrlInfo(webUrl: string, strict: boolean): UrlInfo | undefined {
         let address: StaticServer | undefined;
         let match: RegExpExecArray | null;
 
         // See if the URL matches the server address for the handler.
-        address = this.server.match(url);
+        address = this.server.matchWebUrl(webUrl);
 
         // If we are performing a strict match, then the
         // URL must match to this handler's server.
@@ -478,18 +484,19 @@ export class LinkHandler {
             address = this.normalizeServerUrls(address);
         }
 
-        match = this.reverse.pattern.exec(url);
+        match = this.reverse.pattern.exec(webUrl);
 
         if (match) {
             let data: FileData;
             let file: string;
-            let server: StaticServer;
+            let server: Mutable<StaticServer>;
             let selection: Partial<SelectedRange>;
 
             data = {
                 match,
                 http: address?.http,
-                ssh: address?.ssh
+                ssh: address?.ssh,
+                web: address?.web
             };
 
             file = this.reverse.file.render(data);
@@ -498,6 +505,10 @@ export class LinkHandler {
                 http: this.reverse.server.http.render(data),
                 ssh: this.reverse.server.ssh.render(data)
             };
+
+            if (this.reverse.server.web) {
+                server.web = this.reverse.server.web.render(data);
+            }
 
             selection = {
                 startLine: this.tryParseNumber(this.reverse.selection.startLine.render(data)),
@@ -599,6 +610,8 @@ interface FileData {
     readonly http?: string;
 
     readonly ssh?: string;
+
+    readonly web?: string;
 }
 
 /**

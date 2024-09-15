@@ -9,4 +9,7 @@ public class ServerListItem {
 
     public string? Ssh { get; set; } = "";
 
+
+    public string? Web { get; set; } = "";
+
 }

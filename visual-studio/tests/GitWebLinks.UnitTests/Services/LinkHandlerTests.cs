@@ -243,7 +243,7 @@ public static class LinkHandlerTests {
                 "http://example.com | foo/bar",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
-                        Server = new StaticServer("http://example.com/", ""),
+                        Server = new StaticServer("http://example.com/", "", null),
                         Url = "{{ base }} | {{ repository }}"
                     },
                     new LinkTargetPreset(null)
@@ -262,7 +262,7 @@ public static class LinkHandlerTests {
             "http://example.com | foo/bar",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
-                        Server = new StaticServer("http://example.com", ""),
+                        Server = new StaticServer("http://example.com", "", null),
                         Url = "{{ base }} | {{ repository }}"
                     },
                     new LinkTargetPreset(null)
@@ -281,7 +281,7 @@ public static class LinkHandlerTests {
                 "http://example.com | foo/bar",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
-                        Server = new StaticServer("http://example.com", "ssh://git@example.com/"),
+                        Server = new StaticServer("http://example.com", "ssh://git@example.com/", null),
                         Url = "{{ base }} | {{ repository }}"
                     },
                     new LinkTargetPreset(null)
@@ -300,7 +300,7 @@ public static class LinkHandlerTests {
                 "http://example.com | foo/bar",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
-                        Server = new StaticServer("http://example.com", "ssh://git@example.com"),
+                        Server = new StaticServer("http://example.com", "ssh://git@example.com", null),
                         Url = "{{ base }} | {{ repository }}"
                     },
                     new LinkTargetPreset(null)
@@ -319,7 +319,7 @@ public static class LinkHandlerTests {
               "http://example.com | foo/bar",
               await CreateUrlAsync(
                     new PartialHandlerDefinition {
-                        Server = new StaticServer("http://example.com/", "ssh://git@example.com"),
+                        Server = new StaticServer("http://example.com/", "ssh://git@example.com", null),
                         Url = "{{ base }} | {{ repository }}"
                     },
                     new LinkTargetPreset(null)
@@ -338,7 +338,7 @@ public static class LinkHandlerTests {
                 "http://example.com | foo/bar",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
-                        Server = new StaticServer("http://example.com/", "ssh://git@example.com:"),
+                        Server = new StaticServer("http://example.com/", "ssh://git@example.com:", null),
                         Url = "{{ base }} | {{ repository }}"
                     },
                     new LinkTargetPreset(null)
@@ -357,7 +357,7 @@ public static class LinkHandlerTests {
                 "http://example.com | foo/bar",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
-                        Server = new StaticServer("http://example.com", ""),
+                        Server = new StaticServer("http://example.com", "", null),
                         Url = "{{ base }} | {{ repository }}"
                     },
                     new LinkTargetPreset(null)
@@ -376,7 +376,7 @@ public static class LinkHandlerTests {
                 "http://example.com",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
-                        Server = new StaticServer("http://example.com/", "ssh://git@example.com"),
+                        Server = new StaticServer("http://example.com/", "ssh://git@example.com", null),
                         Url = "{{ base }}"
                     },
                     new LinkTargetPreset(null)
@@ -395,7 +395,7 @@ public static class LinkHandlerTests {
                 "http://example.com",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
-                        Server = new StaticServer("http://example.com/", "git@example.com"),
+                        Server = new StaticServer("http://example.com/", "git@example.com", null),
                         Url = "{{ base }}"
                     },
                     new LinkTargetPreset(null)
@@ -414,7 +414,7 @@ public static class LinkHandlerTests {
                 "http://example.com",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
-                        Server = new StaticServer("http://example.com/", "git@example.com"),
+                        Server = new StaticServer("http://example.com/", "git@example.com", null),
                         Url = "{{ base }}"
                     },
                     new LinkTargetPreset(null)
@@ -433,13 +433,33 @@ public static class LinkHandlerTests {
                 "http://example.com",
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
-                        Server = new StaticServer("http://example.com/", "example.com"),
+                        Server = new StaticServer("http://example.com/", "example.com", null),
                         Url = "{{ base }}"
                     },
                     new LinkTargetPreset(null)
                 )
             );
         }
+
+
+        [Fact]
+        public async Task ShouldUseTheWebAddressFromTheMatchingServer() {
+            SetRemoteUrl("http://example.com/foo/bar");
+
+            await SetupRepositoryAsync(RootDirectory);
+
+            Assert.Equal(
+                "http://web.example.com | foo/bar",
+                await CreateUrlAsync(
+                    new PartialHandlerDefinition {
+                        Server = new StaticServer("http://example.com/", "", "http://web.example.com/"),
+                        Url = "{{ base }} | {{ repository }}"
+                    },
+                    new LinkTargetPreset(null)
+                )
+            );
+        }
+
 
 
         [Fact]
@@ -634,10 +654,10 @@ public static class LinkHandlerTests {
                         new Regex(""),
                         EmptyTemplate,
                         false,
-                        new ReverseServerSettings(EmptyTemplate, EmptyTemplate),
+                        new ReverseServerSettings(EmptyTemplate, EmptyTemplate, null),
                         new ReverseSelectionSettings(EmptyTemplate, null, null, null)
                     ),
-                    new[] { definition.Server ?? new StaticServer("http://example.com", "ssh://example.com") }
+                    new[] { definition.Server ?? new StaticServer("http://example.com", "ssh://example.com", null) }
                 ),
                 _settings,
                 Git
@@ -664,6 +684,9 @@ public static class LinkHandlerTests {
 
 
     public class GetUrlInfoAsyncMethod : RepositoryTestBase {
+
+        private StaticServer _server = new("http://example.com", "ssh://example.com", null);
+
 
         static GetUrlInfoAsyncMethod() {
             TemplateEngine.Initialize();
@@ -711,7 +734,7 @@ public static class LinkHandlerTests {
             Assert.Equal(
                 new UrlInfo(
                     "bar.txt",
-                    new StaticServer("http", "ssh"),
+                    new StaticServer("http", "ssh", null),
                     new PartialSelectedRange(10, 20, 30, 40)),
                 await GetUrlInfoAsync(
                     new PartialReverseSettings {
@@ -719,7 +742,8 @@ public static class LinkHandlerTests {
                         File = "{{ match.groups.file }}",
                         Server = new ReverseServerSettings(
                             Template.Parse("http"),
-                            Template.Parse("ssh")
+                            Template.Parse("ssh"),
+                            null
                         ),
                         Selection = new ReverseSelectionSettings(
                             Template.Parse("10"),
@@ -741,7 +765,7 @@ public static class LinkHandlerTests {
             Assert.Equal(
                 new UrlInfo(
                     "bar.txt",
-                    new StaticServer("http", "ssh"),
+                    new StaticServer("http", "ssh", null),
                     new PartialSelectedRange(10, null, null, null)
                 ),
                 await GetUrlInfoAsync(
@@ -749,15 +773,16 @@ public static class LinkHandlerTests {
                         Pattern = "http://example\\.com/[^/]+/(?<file>.+)",
                         File = "{{ match.groups.file }}",
                         Server = new ReverseServerSettings(
-                        Template.Parse("http"),
-                        Template.Parse("ssh")
-                    ),
+                            Template.Parse("http"),
+                            Template.Parse("ssh"),
+                            null
+                        ),
                         Selection = new ReverseSelectionSettings(
-                        Template.Parse("10"),
-                        Template.Parse("x"),
-                        Template.Parse(""),
-                        null
-                    )
+                            Template.Parse("10"),
+                            Template.Parse("x"),
+                            Template.Parse(""),
+                            null
+                        )
                     },
                     "http://example.com/foo/bar.txt",
                     false
@@ -772,7 +797,7 @@ public static class LinkHandlerTests {
             Assert.Equal(
                 new UrlInfo(
                     "",
-                    new StaticServer("http://example.com", "example.com"),
+                    new StaticServer("http://example.com", "example.com", null),
                     new PartialSelectedRange(null, null, null, null)
                 ),
                 await GetUrlInfoAsync(
@@ -780,7 +805,8 @@ public static class LinkHandlerTests {
                         Pattern = "http://example\\.com/.+",
                         Server = new ReverseServerSettings(
                             Template.Parse("{{ http }}"),
-                            Template.Parse("{{ ssh }}")
+                            Template.Parse("{{ ssh }}"),
+                            null
                         )
                     },
                     "http://example.com/foo/bar.txt",
@@ -790,6 +816,36 @@ public static class LinkHandlerTests {
             );
         }
 
+
+        [Fact]
+        public async Task ShouldUseTheWebTemplateWhenThereIsOne() {
+            _server = new StaticServer("http://example.com", "ssh://example.com", "http://web.example.com");
+
+            Assert.Equal(
+                new UrlInfo(
+                    "",
+                    new StaticServer(
+                        "http://example.com",
+                        "example.com",
+                        "http://web.example.com"
+                    ),
+                    new PartialSelectedRange(null, null, null, null)
+                ),
+                await GetUrlInfoAsync(
+                    new PartialReverseSettings {
+                        Pattern = "http://(web\\.)?example\\.com/.+",
+                        Server = new ReverseServerSettings(
+                            Template.Parse("{{ http }}"),
+                            Template.Parse("{{ ssh }}"),
+                            Template.Parse("{{ web }}")
+                        )
+                    },
+                    "http://web.example.com/foo/bar.txt",
+                    false
+                ),
+                UrlInfoComparer.Instance
+            );
+        }
 
 
         private async Task<UrlInfo?> GetUrlInfoAsync(PartialReverseSettings settings, string url, bool strict) {
@@ -810,10 +866,10 @@ public static class LinkHandlerTests {
                         new Regex(reverse.Pattern ?? ""),
                         Template.Parse(reverse.File ?? ""),
                         false,
-                        reverse.Server ?? new ReverseServerSettings(EmptyTemplate, EmptyTemplate),
+                        reverse.Server ?? new ReverseServerSettings(EmptyTemplate, EmptyTemplate, null),
                         reverse.Selection ?? new ReverseSelectionSettings(EmptyTemplate, null, null, null)
                     ),
-                    new[] { new StaticServer("http://example.com", "ssh://example.com") }
+                    new[] { _server }
                 ),
                 Substitute.For<ISettings>(),
                 Git

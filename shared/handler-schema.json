@@ -28,20 +28,28 @@
             "items": {
                 "type": "object",
                 "properties": {
-                    "pattern": {
+                    "remotePattern": {
                         "type": "string",
                         "description": "A regular expression to match on a remote URL. The captured groups are provided to the `http` and `ssh` templates."
                     },
                     "http": {
                         "$ref": "#/definitions/template",
-                        "description": "The template to build the HTTP(S) URL of the remote server.\n\nCaptured groups from `pattern` are made available via the `match` variable."
+                        "description": "The template to build the HTTP(S) remote URL.\n\nCaptured groups from `pattern` are made available via the `match` variable."
                     },
                     "ssh": {
                         "$ref": "#/definitions/template",
-                        "description": "The template to build the SSH URL of the remote server.\n\nCaptured groups from `pattern` are made available via the `match` variable."
+                        "description": "The template to build the SSH remote URL.\n\nCaptured groups from `pattern` are made available via the `match` variable."
+                    },
+                    "webPattern": {
+                        "type": "string",
+                        "description": "A regular expression to match on a web interface URL. The captured groups are provided to the `http` and `ssh` templates."
+                    },
+                    "web": {
+                        "$ref": "#/definitions/template",
+                        "description": "The template to build the web interface URL.\n\nCaptured groups from `pattern` are made available via the `match` variable."
                     }
                 },
-                "required": ["pattern", "http", "ssh"],
+                "required": ["remotePattern", "http", "ssh"],
                 "additionalProperties": false
             }
         },

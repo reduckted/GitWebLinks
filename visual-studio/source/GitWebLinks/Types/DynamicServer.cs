@@ -7,19 +7,27 @@ namespace GitWebLinks;
 
 public class DynamicServer : IServer {
 
-    public DynamicServer(Regex pattern, Template http, Template ssh) {
-        Pattern = pattern;
+    public DynamicServer(Regex remotePattern, Template http, Template ssh, Regex? webPattern, Template? web) {
+        RemotePattern = remotePattern;
         Http = http;
         Ssh = ssh;
+        WebPattern = webPattern;
+        Web = web;
     }
 
 
-    public Regex Pattern { get; }
+    public Regex RemotePattern { get; }
 
 
     public Template Http { get; }
 
 
     public Template Ssh { get; }
+
+
+    public Regex? WebPattern { get; }
+
+
+    public Template? Web { get; }
 
 }

@@ -14,6 +14,7 @@
                 <ControlTemplate TargetType="{x:Type local:ServerDataGrid}">
                     <StackPanel Orientation="Vertical">
                         <DataGrid
+                            Name="PART_DataGrid"
                             ItemsSource="{TemplateBinding ItemsSource}"
                             AutoGenerateColumns="False"
                             CanUserAddRows="True"
@@ -25,22 +26,7 @@
                             RowHeaderWidth="32"
                             Height="200"
                             Margin="{StaticResource SmallSpacerBottom}"
-                            >
-
-                            <DataGrid.Columns>
-                                <DataGridTextColumn 
-                                    Width="*"
-                                    Header="HTTP URL"
-                                    Binding="{Binding Http, UpdateSourceTrigger=PropertyChanged}"
-                                    />
-
-                                <DataGridTextColumn 
-                                    Width="*"
-                                    Header="SSH URL"
-                                    Binding="{Binding Ssh, UpdateSourceTrigger=PropertyChanged}"
-                                    />
-                            </DataGrid.Columns>
-                        </DataGrid>
+                            />
 
                         <local:InfoTip>
                             <Grid>
@@ -54,12 +40,15 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
                                 <Grid.Resources>
                                     <Style x:Key="Example" TargetType="TextBlock">
                                         <Setter Property="FontFamily" Value="Consolas" />
                                         <Setter Property="Margin" Value="{StaticResource MediumSpacerBottom}" />
+                                        <Setter Property="TextWrapping" Value="Wrap"/>
                                     </Style>
                                 </Grid.Resources>
 
@@ -70,6 +59,10 @@
                                 <TextBlock Grid.Column="0" Grid.Row="2" Text="SSH URL:" Margin="{StaticResource LargeSpacerRight}"/>
                                 <TextBlock Grid.Column="1" Grid.Row="2" Text="The SSH URL for remotes. For example:"/>
                                 <TextBlock Grid.Column="1" Grid.Row="3" Text="{TemplateBinding SshExample}" Style="{StaticResource Example}"/>
+
+                                <TextBlock Grid.Column="0" Grid.Row="4" Text="Web URL:" Margin="{StaticResource LargeSpacerRight}" Visibility="{TemplateBinding WebExampleVisibility}"/>
+                                <TextBlock Grid.Column="1" Grid.Row="4" Text="The URl for the web interface if it is different to the HTTP URL for cloning. For example:" Visibility="{TemplateBinding WebExampleVisibility}"/>
+                                <TextBlock Grid.Column="1" Grid.Row="5" Text="{TemplateBinding WebExample}" Style="{StaticResource Example}" Visibility="{TemplateBinding WebExampleVisibility}"/>
                             </Grid>
                         </local:InfoTip>
                     </StackPanel>

@@ -147,3 +147,10 @@ export interface UrlInfo {
      */
     selection: Partial<SelectedRange>;
 }
+
+/**
+ * Makes all properties on an object read/write.
+ */
+export type Mutable<T> = {
+    -readonly [P in keyof T]: T[P];
+};

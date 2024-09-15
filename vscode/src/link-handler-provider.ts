@@ -30,7 +30,7 @@ export class LinkHandlerProvider {
         for (let handler of this.handlers) {
             log("Testing '%s'.", handler.name);
 
-            if (handler.isMatch(repository.remote.url)) {
+            if (handler.handlesRemoteUrl(repository.remote.url)) {
                 log("Handler '%s' is a match.", handler.name);
                 return handler;
             }

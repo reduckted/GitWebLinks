@@ -18,6 +18,6 @@ public interface ILinkHandler {
     Task<UrlInfo?> GetUrlInfoAsync(string url, bool strict);
 
 
-    Task<bool> IsMatchAsync(string remoteUrl);
+    Task<bool> HandlesRemoteUrlAsync(string remoteUrl);
 
 }

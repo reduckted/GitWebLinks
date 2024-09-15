@@ -3,12 +3,13 @@
     "name": "Visual Studio Team Services",
     "server": [
         {
-            "pattern": "^([^.]+)@vs-ssh\\.visualstudio\\.com:22(?:/(.+))?/_ssh/.+$",
+            "remotePattern": "^([^.]+)@vs-ssh\\.visualstudio\\.com:22(?:/(.+))?/_ssh/.+$",
             "http": "https://{{ match[1] }}.visualstudio.com{% if match[2] %}/{{ match[2] }}{% endif %}/_git",
-            "ssh": "{{ match[1] }}@vs-ssh.visualstudio.com:22{% if match[2] %}/{{ match[2] }}{% endif %}/_ssh"
+            "ssh": "{{ match[1] }}@vs-ssh.visualstudio.com:22{% if match[2] %}/{{ match[2] }}{% endif %}/_ssh",
+            "webPattern": "^ONLY MATCH TO SSH REMOTE URLS$"
         },
         {
-            "pattern": "^https://([^.]+).visualstudio.com(?:/(.+))?/_git/.+$",
+            "remotePattern": "^https://([^.]+).visualstudio.com(?:/(.+))?/_git/.+$",
             "http": "https://{{ match[1] }}.visualstudio.com{% if match[2] %}/{{ match[2] }}{% endif %}/_git",
             "ssh": "{{ match[1] }}@vs-ssh.visualstudio.com:22{% if match[2] %}/{{ match[2] }}{% endif %}/_ssh"
         }

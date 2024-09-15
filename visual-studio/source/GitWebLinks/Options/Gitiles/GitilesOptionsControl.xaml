@@ -23,8 +23,10 @@
 
         <local:ServerDataGrid
             ItemsSource="{Binding Servers}"
+            HasWebAddress="true"
             HttpExample="https://git.mygitiles.com:8080/plugins/gitiles"
             SshExample="ssh://git.mygitiles.com:29418"
+            WebExample="https://mygitiles.com/plugins/gitiles"
             />
     </StackPanel>
 </UserControl>

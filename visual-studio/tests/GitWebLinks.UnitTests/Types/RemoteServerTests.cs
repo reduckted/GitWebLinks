@@ -5,329 +5,477 @@ namespace GitWebLinks;
 
 public static class RemoteServerTests {
 
-    public class SingleStaticServer {
+    public class SingleStaticServer : TestBase {
 
-        private readonly RemoteServer _server = new(
-            new StaticServer(
-                "http://example.com:8000",
-                "ssh://git@example.com:9000"
+        public SingleStaticServer() : base(
+            new(
+                new StaticServer(
+                    "http://example.com:8000",
+                    "ssh://git@example.com:9000",
+                    null
+                )
             )
-        );
+        ) { }
 
 
         [Fact]
         public async Task ShouldReturnNullWhenThereIsNoMatch() {
-            Assert.Null(await _server.MatchAsync("http://example.com:10000/foo/bar"));
+            Url = "http://example.com:10000/foo/bar";
+            await MatchAsync(null);
         }
 
 
         [Fact]
         public async Task ShouldReturnTheServerWhenMatchingToTheHttpAddress() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000"),
-                await _server.MatchAsync("http://example.com:8000/foo/bar"),
-                StaticServerComparer.Instance
-            );
+            Url = "http://example.com:8000/foo/bar";
+            await MatchAsync(new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null));
         }
 
 
         [Fact]
         public async Task ShouldReturnTheServerwhenMatchingToTheSshAddressWithTheSshProtocol() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000"),
-                await _server.MatchAsync("ssh://git@example.com:9000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "ssh://git@example.com:9000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null),
+                null
             );
         }
 
 
         [Fact]
         public async Task ShouldReturnTheServerWhenMatchingToTheSshAddressWithoutTheSshProtocol() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000"),
-                await _server.MatchAsync("git@example.com:9000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "git@example.com:9000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null),
+                null
+            );
+        }
+
+
+        [Fact]
+        public async Task ShouldMatchTheWebAddressWhenThereIsAWebAddress() {
+            Server = new RemoteServer(
+                new StaticServer(
+                    "http://example.com:8000",
+                    "ssh://git@example.com:9000",
+                    "http://other.com:8000"
+                )
+            );
+
+            Url = "http://other.com:8000/foo/bar";
+
+            await MatchAsync(
+                null,
+                new StaticServer(
+                    "http://example.com:8000",
+                    "ssh://git@example.com:9000",
+                    "http://other.com:8000"
+                )
             );
         }
 
     }
 
 
-    public class MultipleStaticServers {
+    public class MultipleStaticServers : TestBase {
 
-        private readonly RemoteServer _server = new(
-            new IServer[] {
-                new StaticServer("http://example.com:8000","ssh://git@example.com:9000"),
-                new StaticServer("http://test.com:6000","ssh://git@test.com:7000")
-            }
-        );
+        public MultipleStaticServers() : base(
+            new(
+                new IServer[] {
+                    new StaticServer("http://example.com:8000","ssh://git@example.com:9000", null),
+                    new StaticServer("http://test.com:6000","ssh://git@test.com:7000", null)
+                }
+            )
+        ) { }
 
 
         [Fact]
         public async Task ShouldReturnNullWhenThereIsNoMatch() {
-            Assert.Null(await _server.MatchAsync("http://example.com:10000/foo/bar"));
+            Url = "http://example.com:10000/foo/bar";
+            await MatchAsync(null);
         }
 
 
         [Fact]
         public async Task ShouldReturnTheMatchingServerWhenMatchingToTheHttpAddress() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000"),
-                await _server.MatchAsync("http://example.com:8000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "http://example.com:8000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null)
             );
 
-            Assert.Equal(
-                new StaticServer("http://test.com:6000", "ssh://git@test.com:7000"),
-                await _server.MatchAsync("http://test.com:6000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "http://test.com:6000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://test.com:6000", "ssh://git@test.com:7000", null)
             );
         }
 
 
         [Fact]
         public async Task ShouldReturnTheMatchingServerWhenMatchingToTheSshAddressWithTheSshProtocol() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000"),
-                await _server.MatchAsync("ssh://git@example.com:9000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "ssh://git@example.com:9000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null),
+                null
             );
 
-            Assert.Equal(
-                new StaticServer("http://test.com:6000", "ssh://git@test.com:7000"),
-                await _server.MatchAsync("ssh://git@test.com:7000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "ssh://git@test.com:7000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://test.com:6000", "ssh://git@test.com:7000", null),
+                null
             );
         }
 
 
         [Fact]
         public async Task ShouldReturnTheMatchingServerWhenMatchingToTheSshAddressWithoutTheSshProtocol() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000"),
-                await _server.MatchAsync("git@example.com:9000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = ("git@example.com:9000/foo/bar");
+            await MatchAsync(
+                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null),
+                null
             );
 
-            Assert.Equal(
-                new StaticServer("http://test.com:6000", "ssh://git@test.com:7000"),
-                await _server.MatchAsync("git@test.com:7000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = ("git@test.com:7000/foo/bar");
+            await MatchAsync(
+                new StaticServer("http://test.com:6000", "ssh://git@test.com:7000", null),
+                null
             );
-        }
-
-    }
-
-
-    public class SingleDynamicServer {
-
-        private readonly RemoteServer _server = new(
-            new DynamicServer(
-                new Regex("http://(.+)\\.example\\.com:8000"),
-                Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
-                Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}")
-            )
-        );
-
-
-        [Fact]
-        public async Task ShouldReturnNullWhenThereIsNoMatch() {
-            Assert.Null(await _server.MatchAsync("http://example.com:8000/foo/bar"));
         }
 
 
         [Fact]
-        public async Task ShouldCreateTheDetailsOfTheMatchingServer() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000/repos/foo", "ssh://git@example.com:9000/_foo"),
-                await _server.MatchAsync("http://foo.example.com:8000/bar/meep"),
-                StaticServerComparer.Instance
-            );
-        }
-
-    }
-
-
-    public class MultipleDynamicServers {
-
-        private readonly RemoteServer _server = new(
-            new IServer[] {
-                new DynamicServer(
-                    new Regex("http://(.+)\\.example\\.com:8000"),
-                    Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
-                    Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}")
-                ),
-                new DynamicServer(
-                    new Regex("ssh://git@example\\.com:9000/_([^/]+)"),
-                    Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
-                    Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}")
-                )
-            }
-        );
-
-
-        [Fact]
-        public async Task ShouldReturnNullWhenThereIsNoMatch() {
-            Assert.Null(await _server.MatchAsync("http://example.com:8000/foo/bar"));
-        }
-
-
-        [Fact]
-        public async Task ShouldCreateTheDetailsOfTheMatchingServer() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000/repos/foo", "ssh://git@example.com:9000/_foo"),
-                await _server.MatchAsync("http://foo.example.com:8000/bar/meep"),
-                StaticServerComparer.Instance
+        public async Task ShouldMatchTheWebAddressWhenThereIsAWebAddress() {
+            Server = new RemoteServer(
+                new IServer[] {
+                    new StaticServer(
+                        "http://example.com:8000",
+                        "ssh://git@example.com:9000",
+                        "http://web.example.com"
+                    ),
+                    new StaticServer(
+                        "http://test.com:6000",
+                        "ssh://git@test.com:7000",
+                        "http://web.test.com"
+                    )
+                }
             );
 
-            Assert.Equal(
-                new StaticServer("http://example.com:8000/repos/foo", "ssh://git@example.com:9000/_foo"),
-                await _server.MatchAsync("ssh://git@example.com:9000/_foo/bar"),
-                StaticServerComparer.Instance
-            );
-        }
-
-    }
-
-
-    public class MixedStaticAndDynamicServers {
-
-        private readonly RemoteServer _server = new(
-            new IServer[] {
-                new DynamicServer(
-                    new Regex("http://(.+)\\.example\\.com:8000"),
-                    Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
-                    Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}")
-                ),
+            Url = "http://web.example.com/foo/bar";
+            await MatchAsync(
+                null,
                 new StaticServer(
-                    "http://example.com:10000",
-                    "ssh://git@example.com:11000"
+                    "http://example.com:8000",
+                    "ssh://git@example.com:9000",
+                    "http://web.example.com"
                 )
-            }
-        );
+            );
+
+            Url = "http://web.test.com/foo/bar";
+            await MatchAsync(
+                null,
+                new StaticServer(
+                    "http://test.com:6000",
+                    "ssh://git@test.com:7000",
+                    "http://web.test.com"
+                )
+            );
+        }
+    }
+
+
+    public class SingleDynamicServer : TestBase {
+
+        public SingleDynamicServer() : base(
+            new RemoteServer(
+                new DynamicServer(
+                    new Regex("http://(.+)\\.example\\.com:8000"),
+                    Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                    Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                    null,
+                    null
+                )
+            )
+        ) { }
 
 
         [Fact]
         public async Task ShouldReturnNullWhenThereIsNoMatch() {
-            Assert.Null(await _server.MatchAsync("http://example.com:7000/foo/bar"));
+            Url = "http://example.com:8000/foo/bar";
+            await MatchAsync(null);
+        }
+
+
+        [Fact]
+        public async Task ShouldCreateTheDetailsOfTheMatchingServer() {
+            Url = "http://foo.example.com:8000/bar/meep";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000/repos/foo", "ssh://git@example.com:9000/_foo", null)
+            );
+        }
+
+        [Fact]
+        public async Task ShouldMatchTheWebAddressWhenThereIsAWebAddress() {
+            Server = new RemoteServer(
+                new DynamicServer(
+                    new Regex("http://(.+)\\.example\\.com:8000"),
+                    Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                    Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                    new Regex("http://(.+)\\.test\\.com:8000"),
+                    Template.Parse("http://test.com:8000/repos/{{ match[1] }}")
+                )
+            );
+
+            Url = "http://foo.test.com:8000/bar/meep";
+            await MatchAsync(
+                null,
+                new StaticServer(
+                    "http://example.com:8000/repos/foo",
+                    "ssh://git@example.com:9000/_foo",
+                    "http://test.com:8000/repos/foo"
+                )
+            );
+        }
+
+    }
+
+
+    public class MultipleDynamicServers : TestBase {
+
+        public MultipleDynamicServers() : base(
+            new RemoteServer(
+                new IServer[] {
+                    new DynamicServer(
+                        new Regex("http://(.+)\\.example\\.com:8000"),
+                        Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                        Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                        null,
+                        null
+                    ),
+                    new DynamicServer(
+                        new Regex("ssh://git@example\\.com:9000/_([^/]+)"),
+                        Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                        Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                        new Regex("^$"), // This server should only match SSH remote URLs.
+                        null
+                    )
+                }
+            )
+        ) { }
+
+
+        [Fact]
+        public async Task ShouldReturnNullWhenThereIsNoMatch() {
+            Url = "http://example.com:8000/foo/bar";
+            await MatchAsync(null);
+        }
+
+
+        [Fact]
+        public async Task ShouldCreateTheDetailsOfTheMatchingServer() {
+            Url = "http://foo.example.com:8000/bar/meep";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000/repos/foo", "ssh://git@example.com:9000/_foo", null)
+            );
+
+            Url = "ssh://git@example.com:9000/_foo/bar";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000/repos/foo", "ssh://git@example.com:9000/_foo", null),
+                null
+            );
+        }
+
+
+        [Fact]
+        public async Task ShouldMatchTheWebAddressWhenThereIsAWebAddress() {
+            Server = new RemoteServer(
+                new IServer[] {
+                    new DynamicServer(
+                        new Regex("http://(.+)\\.example\\.com:8000"),
+                        Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                        Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                        new Regex("http://(.+)\\.test\\.com:8000"),
+                        Template.Parse("http://test.com:8000/repos/{{ match[1] }}")
+                    ),
+                    new DynamicServer(
+                        new Regex("ssh://git@example\\.com:9000/_([^/]+)"),
+                        Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                        Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                        new Regex("http://(.+)\\.other\\.com:8000"),
+                        Template.Parse("http://other.com:8000/repos/{{ match[1] }}")
+                    )
+                }
+            );
+
+            Url = "http://foo.test.com:8000/bar/meep";
+            await MatchAsync(
+                null,
+                new StaticServer(
+                    "http://example.com:8000/repos/foo",
+                    "ssh://git@example.com:9000/_foo",
+                    "http://test.com:8000/repos/foo"
+                )
+            );
+
+            Url = "http://foo.other.com:8000/bar/meep";
+            await MatchAsync(
+                null,
+                new StaticServer(
+                    "http://example.com:8000/repos/foo",
+                    "ssh://git@example.com:9000/_foo",
+                    "http://other.com:8000/repos/foo"
+                )
+            );
+        }
+
+    }
+
+
+    public class MixedStaticAndDynamicServers : TestBase {
+
+        public MixedStaticAndDynamicServers() : base(
+            new RemoteServer(
+                new IServer[] {
+                    new DynamicServer(
+                        new Regex("http://(.+)\\.example\\.com:8000"),
+                        Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                        Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                        null,
+                        null
+                    ),
+                    new StaticServer(
+                        "http://example.com:10000",
+                        "ssh://git@example.com:11000",
+                        null
+                    )
+                }
+            )
+        ) { }
+
+
+        [Fact]
+        public async Task ShouldReturnNullWhenThereIsNoMatch() {
+            Url = "http://example.com:7000/foo/bar";
+            await MatchAsync(null);
         }
 
 
         [Fact]
         public async Task ShouldReturnTheMatchingServerWhenMatchingToTheStaticServer() {
-            Assert.Equal(
-                new StaticServer("http://example.com:10000", "ssh://git@example.com:11000"),
-                await _server.MatchAsync("http://example.com:10000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "http://example.com:10000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://example.com:10000", "ssh://git@example.com:11000", null)
             );
         }
 
 
         [Fact]
         public async Task ShouldCreateTheDetailsOfTheMatchingServerWhenMatchingToTheDynamicServer() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000/repos/foo", "ssh://git@example.com:9000/_foo"),
-                await _server.MatchAsync("http://foo.example.com:8000/bar/meep"),
-                StaticServerComparer.Instance
+            Url = "http://foo.example.com:8000/bar/meep";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000/repos/foo", "ssh://git@example.com:9000/_foo", null)
             );
         }
 
     }
 
 
-    public class StaticServerFactory {
+    public class StaticServerFactory : TestBase {
 
         private IEnumerable<StaticServer> _source;
-        private readonly RemoteServer _server;
 
 
 
-        public StaticServerFactory() {
+        public StaticServerFactory() : base(new RemoteServer(new StaticServer("", null, null))) {
             _source = new[] {
-                new StaticServer("http://example.com:8000","ssh://git@example.com:9000"),
-                new StaticServer("http://test.com:6000","ssh://git@test.com:7000")
+                new StaticServer("http://example.com:8000","ssh://git@example.com:9000", null),
+                new StaticServer("http://test.com:6000","ssh://git@test.com:7000", "http://web.test.com")
             };
-
-            _server = new RemoteServer(() => Task.FromResult(_source));
+            Server = new RemoteServer(() => Task.FromResult(_source));
         }
 
 
         [Fact]
         public async Task ShouldReturnNullWhenThereIsNoMatch() {
-            Assert.Null(await _server.MatchAsync("http://example.com:9000/foo/bar"));
+            Url = "http://example.com:9000/foo/bar";
+            await MatchAsync(null);
         }
 
 
         [Fact]
         public async Task ShouldReturnTheMatchingServerWhenMatchingToTheHttpAddress() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000"),
-                await _server.MatchAsync("http://example.com:8000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "http://example.com:8000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null)
             );
 
-            Assert.Equal(
-                new StaticServer("http://test.com:6000", "ssh://git@test.com:7000"),
-                await _server.MatchAsync("http://test.com:6000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "http://test.com:6000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://test.com:6000", "ssh://git@test.com:7000", "http://web.test.com"),
+                null
+            );
+
+            Url = "http://web.test.com/foo/bar";
+            await MatchAsync(
+                null,
+                new StaticServer(
+                    "http://test.com:6000",
+                    "ssh://git@test.com:7000",
+                    "http://web.test.com"
+                )
             );
         }
 
 
         [Fact]
         public async Task ShouldReturnTheMatchingServerWhenMatchingToTheSshAddress() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000"),
-                await _server.MatchAsync("ssh://git@example.com:9000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "ssh://git@example.com:9000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null),
+                null
             );
 
-            Assert.Equal(
-                new StaticServer("http://test.com:6000", "ssh://git@test.com:7000"),
-                await _server.MatchAsync("ssh://git@test.com:7000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "ssh://git@test.com:7000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://test.com:6000", "ssh://git@test.com:7000", "http://web.test.com"),
+                null
             );
         }
 
 
         [Fact]
         public async Task ShouldReturnTheMatchingServerWhenTheRemoteUrlIsAnHttpAddresAndTheServerHasNoSshUrl() {
-            _source = new[] { new StaticServer("http://example.com:8000", null) };
+            _source = new[] { new StaticServer("http://example.com:8000", null, null) };
 
-            Assert.Equal(
-                new StaticServer("http://example.com:8000", null),
-                await _server.MatchAsync("http://example.com:8000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "http://example.com:8000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000", null, null)
             );
         }
 
 
         [Fact]
         public async Task ShouldNotReturnMatchWhenTheRemoteUrlIsAnSshAddressAndTheServerHNoSshURL() {
-            _source = new[] { new StaticServer("http://example.com:8000", null) };
+            _source = new[] { new StaticServer("http://example.com:8000", null, null) };
 
-            Assert.Null(await _server.MatchAsync("ssh://git@test.com:7000/foo/bar"));
+            Url = "ssh://git@test.com:7000/foo/bar";
+            await MatchAsync(null);
         }
 
 
         [Fact]
         public async Task ShouldNotCacheTheServersReturnedFromTheFactory() {
-            Assert.Equal(
-                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000"),
-                await _server.MatchAsync("http://example.com:8000/foo/bar"),
-                StaticServerComparer.Instance
+            Url = "http://example.com:8000/foo/bar";
+            await MatchAsync(
+                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null)
             );
 
-            _source = new[] { new StaticServer("http://test.com:6000", "ssh://git@test.com:7000") };
+            _source = new[] { new StaticServer("http://test.com:6000", "ssh://git@test.com:7000", null) };
 
-            Assert.Null(await _server.MatchAsync("http://example.com:8000/foo/bar"));
+            await MatchAsync(null);
 
-            _source = new[] { new StaticServer("http://example.com:8000", "ssh://git@example.com:9000") };
+            _source = new[] { new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null) };
 
-            Assert.Equal(
-                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000"),
-                await _server.MatchAsync("http://example.com:8000/foo/bar"),
-                StaticServerComparer.Instance
+            await MatchAsync(
+                new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null)
             );
         }
 
@@ -355,6 +503,44 @@ public static class RemoteServerTests {
 
         public int GetHashCode(StaticServer? obj) {
             return 0;
+        }
+
+    }
+
+
+    public abstract class TestBase {
+
+        protected TestBase(RemoteServer defaultServer) {
+            Server = defaultServer;
+        }
+
+
+        protected RemoteServer Server { get; set; }
+
+
+        protected string Url { get; set; } = "";
+
+
+        protected async Task MatchAsync(StaticServer? expectedMatch) {
+            await MatchAsync(expectedMatch, expectedMatch);
+        }
+
+
+        protected async Task MatchAsync(
+            StaticServer? expectedRemoteMatch,
+            StaticServer? expectedWebMatch
+        ) {
+            Assert.Equal(
+                expectedRemoteMatch,
+                await Server.MatchRemoteUrlAsync(Url),
+                StaticServerComparer.Instance
+            );
+
+            Assert.Equal(
+                expectedWebMatch,
+                await Server.MatchWebUrlAsync(Url),
+                StaticServerComparer.Instance
+            );
         }
 
     }

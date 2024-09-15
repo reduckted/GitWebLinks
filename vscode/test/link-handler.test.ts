@@ -6,7 +6,7 @@ import * as sinon from 'sinon';
 import { git } from '../src/git';
 import { LinkHandler } from '../src/link-handler';
 import { NoRemoteHeadError } from '../src/no-remote-head-error';
-import { HandlerDefinition, ReverseSettings } from '../src/schema';
+import { HandlerDefinition, ReverseSettings, StaticServer } from '../src/schema';
 import { Settings } from '../src/settings';
 import { LinkOptions, LinkType, RepositoryWithRemote, UrlInfo } from '../src/types';
 import { isErrorCode } from '../src/utilities';
@@ -368,6 +368,26 @@ describe('LinkHandler', function () {
             ).to.equal('http://example.com');
         });
 
+        it('should use the web address from the matching server.', async () => {
+            repository = {
+                ...repository,
+                remote: { url: 'http://example.com/foo/bar', name: 'origin' }
+            };
+
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl({
+                    server: {
+                        http: 'http://example.com/',
+                        ssh: '',
+                        web: 'http://web.example.com/'
+                    },
+                    url: '{{ base }} | {{ repository }}'
+                })
+            ).to.equal('http://web.example.com | foo/bar');
+        });
+
         it(`should use the real path for files under a directory that is a symbolic link.`, async function () {
             let real: string;
             let link: string;
@@ -563,6 +583,12 @@ describe('LinkHandler', function () {
     });
 
     describe('getUrlInfo', () => {
+        let server: StaticServer;
+
+        beforeEach(() => {
+            server = { http: 'http://example.com', ssh: 'ssh://example.com' };
+        });
+
         it('should return undefined in strict mode when the URL does not match the server.', () => {
             expect(getUrlInfo({ pattern: '.+' }, 'http://different.com/foo/bar.txt', true)).to.be
                 .undefined;
@@ -647,6 +673,29 @@ describe('LinkHandler', function () {
             });
         });
 
+        it('should use the web template when there is one.', () => {
+            server = {
+                http: 'http://example.com',
+                ssh: 'ssh://example.com',
+                web: 'http://web.example.com'
+            };
+
+            expect(
+                getUrlInfo(
+                    {
+                        pattern: 'http://(web\\.)?example\\.com/.+',
+                        server: { http: '{{ http }}', ssh: '{{ ssh }}', web: '{{ web }}' }
+                    },
+                    'http://web.example.com/foo/bar.txt',
+                    false
+                )?.server
+            ).to.deep.equal({
+                http: 'http://example.com',
+                ssh: 'example.com',
+                web: 'http://web.example.com'
+            });
+        });
+
         function getUrlInfo(
             settings: Partial<ReverseSettings>,
             url: string,
@@ -658,7 +707,7 @@ describe('LinkHandler', function () {
         function createHandler(reverse: Partial<ReverseSettings>): LinkHandler {
             return new LinkHandler({
                 name: 'Test',
-                server: { http: 'http://example.com', ssh: 'ssh://example.com' },
+                server,
                 branchRef: 'abbreviated',
                 url: '',
                 selection: '',

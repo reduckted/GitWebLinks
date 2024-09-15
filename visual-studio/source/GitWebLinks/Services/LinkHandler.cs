@@ -38,8 +38,8 @@ public class LinkHandler : ILinkHandler {
     public string Name => _definition.Name;
 
 
-    public async Task<bool> IsMatchAsync(string remoteUrl) {
-        return await _server.MatchAsync(UrlHelpers.Normalize(remoteUrl)) is not null;
+    public async Task<bool> HandlesRemoteUrlAsync(string remoteUrl) {
+        return await _server.MatchRemoteUrlAsync(UrlHelpers.Normalize(remoteUrl)) is not null;
     }
 
 
@@ -48,7 +48,7 @@ public class LinkHandler : ILinkHandler {
             throw new InvalidOperationException("The repository must have a remote.");
         }
 
-        string remote;
+        string remoteUrl;
         StaticServer address;
         string refValue;
         RefType refType;
@@ -86,15 +86,15 @@ public class LinkHandler : ILinkHandler {
 
         // Adjust the remote URL so that it's in a
         // standard format that we can manipulate.
-        remote = UrlHelpers.Normalize(repository.Remote.Url);
+        remoteUrl = UrlHelpers.Normalize(repository.Remote.Url);
 
-        address = await GetAddressAsync(remote);
+        address = await GetAddressAsync(remoteUrl);
         relativePath = GetRelativePath(repository.Root, file.FilePath);
 
         data = TemplateData
             .Create()
-            .Add("base", address.Http)
-            .Add("repository", GetRepositoryPath(remote, address))
+            .Add("base", address.Web ?? address.Http)
+            .Add("repository", GetRepositoryPath(remoteUrl, address))
             .Add("ref", refValue)
             .Add("commit", await GetRefAsync(LinkType.Commit, repository.Root, repository.Remote))
             .Add("file", relativePath)
@@ -151,11 +151,11 @@ public class LinkHandler : ILinkHandler {
     }
 
 
-    private async Task<StaticServer> GetAddressAsync(string remote) {
+    private async Task<StaticServer> GetAddressAsync(string remoteUrl) {
         StaticServer? address;
 
 
-        address = await _server.MatchAsync(remote);
+        address = await _server.MatchRemoteUrlAsync(remoteUrl);
 
         if (address is null) {
             throw new InvalidOperationException("Could not find a matching address.");
@@ -168,11 +168,13 @@ public class LinkHandler : ILinkHandler {
     private static StaticServer NormalizeServerUrls(StaticServer address) {
         string http;
         string? ssh;
+        string? web;
 
         http = UrlHelpers.Normalize(address.Http);
         ssh = address.Ssh is not null ? UrlHelpers.Normalize(address.Ssh) : null;
+        web = address.Web is not null ? UrlHelpers.Normalize(address.Web) : null;
 
-        return new StaticServer(http, ssh);
+        return new StaticServer(http, ssh, web);
     }
 
 
@@ -298,7 +300,7 @@ public class LinkHandler : ILinkHandler {
 
         // If the file is a symbolic link, or is under a directory that's a
         // symbolic link, then we want to resolve the path to the real file
-        // because the sybmolic link won't be in the Git repository.
+        // because the symbolic link won't be in the Git repository.
         if (IsSymbolicLink(to, from)) {
             try {
                 to = GetRealPath(to);
@@ -449,13 +451,13 @@ public class LinkHandler : ILinkHandler {
     }
 
 
-    public async Task<UrlInfo?> GetUrlInfoAsync(string url, bool strict) {
+    public async Task<UrlInfo?> GetUrlInfoAsync(string webUrl, bool strict) {
         StaticServer? address;
         Match match;
 
 
         // See if the URL matches the server address for the handler.
-        address = await _server.MatchAsync(url);
+        address = await _server.MatchWebUrlAsync(webUrl);
 
         // If we are performing a strict match, then the
         // URL must match to this handler's server.
@@ -467,7 +469,7 @@ public class LinkHandler : ILinkHandler {
             address = NormalizeServerUrls(address);
         }
 
-        match = _definition.Reverse.Pattern.Match(url);
+        match = _definition.Reverse.Pattern.Match(webUrl);
 
         if (match.Success) {
             Hash hash;
@@ -480,6 +482,7 @@ public class LinkHandler : ILinkHandler {
                 .Create()
                 .Add("http", address?.Http)
                 .Add("ssh", address?.Ssh)
+                .Add("web", address?.Web)
                 .Add(match)
                 .ToHash();
 
@@ -487,7 +490,8 @@ public class LinkHandler : ILinkHandler {
 
             server = new StaticServer(
                 _definition.Reverse.Server.Http.Render(hash),
-                _definition.Reverse.Server.Ssh.Render(hash)
+                _definition.Reverse.Server.Ssh.Render(hash),
+                _definition.Reverse.Server.Web?.Render(hash)
             );
 
             selection = new PartialSelectedRange(
