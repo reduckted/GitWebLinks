@@ -727,9 +727,9 @@ describe('GetLinkCommand', () => {
 
     function useTextEditor(
         uri: Uri | undefined,
-        selection?: Pick<Selection, 'start' | 'end'> | undefined,
-        lines?: string[] | undefined,
-        languageId?: string | undefined
+        selection?: Pick<Selection, 'start' | 'end'>,
+        lines?: string[],
+        languageId?: string
     ): void {
         if (!selection) {
             selection = { start: new Position(0, 0), end: new Position(0, 0) };
