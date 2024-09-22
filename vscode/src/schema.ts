@@ -125,14 +125,20 @@ export interface ReverseSettings {
  */
 export interface ReverseServerSettings {
     /**
-     * The template to produce the HTTP server URL.
+     * The template to produce the HTTP remote URL.
      */
     readonly http: Template;
 
     /**
-     * The template to produce the SSH server URL.
+     * The template to produce the SSH remote URL.
      */
     readonly ssh: Template;
+
+    /**
+     * The template to produce the URL for the web interface.
+     * When this is not specified, the `http` template is used.
+     */
+    readonly web?: Template | undefined;
 }
 
 /**
@@ -175,14 +181,20 @@ export type Server = StaticServer | DynamicServer[];
  */
 export interface StaticServer {
     /**
-     * The HTTP(S) URL of the remote server.
+     * The HTTP(S) remote URL.
      */
     readonly http: string;
 
     /**
-     * The SSH URL of the remote server.
+     * The SSH remote URL.
      */
     readonly ssh: string | undefined;
+
+    /**
+     * The HTTP(S) URL of the web interface. When not specified,
+     * the `http` property defines the URL of the web interface.
+     */
+    readonly web?: string | undefined;
 }
 
 /**
@@ -192,17 +204,27 @@ export interface DynamicServer {
     /**
      * A regular expression to match on a remote URL.
      */
-    readonly pattern: string;
+    readonly remotePattern: string;
 
     /**
-     * The template to build the HTTP(S) URL of the remote server.
+     * The template to build the HTTP(S) remote URL.
      */
     readonly http: Template;
 
     /**
-     * The template to build the SSH URL of the remote server.
+     * The template to build the SSH remote URL.
      */
     readonly ssh: Template;
+
+    /**
+     * A regular expression to match on a web interface URL.
+     */
+    readonly webPattern?: string | undefined;
+
+    /**
+     * The template to build the URL of the web interface.
+     */
+    readonly web?: Template | undefined;
 }
 
 /**

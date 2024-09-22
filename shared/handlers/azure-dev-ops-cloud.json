@@ -3,14 +3,15 @@
     "name": "Azure Dev Ops Cloud",
     "server": [
         {
-            "pattern": "^https:\\/\\/(?:.+@)?dev\\.azure\\.com\\/([^\\/]+)\\/([^\\/]+)\\/_git\\/.+",
+            "remotePattern": "^https:\\/\\/(?:.+@)?dev\\.azure\\.com\\/([^\\/]+)\\/([^\\/]+)\\/_git\\/.+",
             "http": "https://dev.azure.com/{{ match[1] }}/{{ match[2] }}/_git",
             "ssh": "git@ssh.dev.azure.com:v3/{{ match[1] }}/{{ match[2] }}"
         },
         {
-            "pattern": "^(?:git@)?ssh\\.dev\\.azure\\.com:v3\\/([^\\/]+)\\/([^\\/]+)\\/.+$",
+            "remotePattern": "^(?:git@)?ssh\\.dev\\.azure\\.com:v3\\/([^\\/]+)\\/([^\\/]+)\\/.+$",
             "http": "https://dev.azure.com/{{ match[1] }}/{{ match[2] }}/_git",
-            "ssh": "git@ssh.dev.azure.com:v3/{{ match[1] }}/{{ match[2] }}"
+            "ssh": "git@ssh.dev.azure.com:v3/{{ match[1] }}/{{ match[2] }}",
+            "webPattern": "^ONLY MATCH TO SSH REMOTE URLS$"
         }
     ],
     "branchRef": "abbreviated",

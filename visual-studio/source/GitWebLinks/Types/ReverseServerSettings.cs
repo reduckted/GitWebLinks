@@ -6,9 +6,10 @@ namespace GitWebLinks;
 
 public class ReverseServerSettings {
 
-    public ReverseServerSettings(Template http, Template ssh) {
+    public ReverseServerSettings(Template http, Template ssh, Template? web) {
         Http = http;
         Ssh = ssh;
+        Web = web;
     }
 
 
@@ -16,5 +17,8 @@ public class ReverseServerSettings {
 
 
     public Template Ssh { get; }
+
+
+    public Template? Web { get; }
 
 }

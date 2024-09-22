@@ -15,7 +15,13 @@ public abstract class ServerOptionsPageBase : OptionsPageBase {
 
 
     internal IReadOnlyList<StaticServer> GetServers() {
-        return Servers.Select((x) => new StaticServer(x.Http ?? "", x.Ssh)).ToList();
+        return Servers.Select(
+            (x) => new StaticServer(
+                x.Http ?? "",
+                string.IsNullOrEmpty(x.Ssh) ? null : x.Ssh,
+                string.IsNullOrEmpty(x.Web) ? null : x.Web
+            )
+        ).ToList();
     }
 
 
@@ -38,7 +44,11 @@ public abstract class ServerOptionsPageBase : OptionsPageBase {
 
     protected static string SerializeServers(IEnumerable<ServerListItem> servers) {
         return JsonConvert.SerializeObject(
-            servers.Select((x) => new ServerListItem { Http = x.Http ?? "", Ssh = x.Ssh ?? "" })
+            servers.Select((x) => new ServerListItem {
+                Http = x.Http ?? "",
+                Ssh = x.Ssh,
+                Web = x.Web
+            })
         );
     }
 

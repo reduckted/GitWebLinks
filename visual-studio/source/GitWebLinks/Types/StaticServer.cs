@@ -4,9 +4,10 @@ namespace GitWebLinks;
 
 public class StaticServer : IServer {
 
-    public StaticServer(string http, string? ssh) {
+    public StaticServer(string http, string? ssh, string? web) {
         Http = http;
         Ssh = ssh;
+        Web = web;
     }
 
 
@@ -14,5 +15,8 @@ public class StaticServer : IServer {
 
 
     public string? Ssh { get; }
+
+
+    public string? Web { get; }
 
 }

@@ -11,11 +11,11 @@ namespace GitWebLinks;
 
 public class RemoteServer {
 
-    private readonly List<AsyncMatcher> _matchers;
+    private readonly List<Matcher> _matchers;
 
 
     public RemoteServer(IServer server) {
-        _matchers = new List<AsyncMatcher> { CreateMatcher(server) };
+        _matchers = new List<Matcher> { CreateMatcher(server) };
     }
 
 
@@ -25,68 +25,85 @@ public class RemoteServer {
 
 
     public RemoteServer(Func<Task<IEnumerable<StaticServer>>> serverFactory) {
-        _matchers = new List<AsyncMatcher> { CreateLazyStaticServerMatcher(serverFactory) };
+        _matchers = new List<Matcher> { CreateLazyStaticServerMatcher(serverFactory) };
     }
 
 
-    private static AsyncMatcher CreateMatcher(IServer server) {
-        Matcher matcher;
-
-
+    private static Matcher CreateMatcher(IServer server) {
         if (server is DynamicServer dynamicServer) {
-            matcher = CreateDynamicServerMatcher(dynamicServer);
+            return CreateDynamicServerMatcher(dynamicServer);
         } else {
-            matcher = CreateStaticServerMatcher((StaticServer)server);
+            return CreateStaticServerMatcher((StaticServer)server);
         }
-
-        return (x) => Task.FromResult(matcher(x));
     }
 
 
     private static Matcher CreateDynamicServerMatcher(DynamicServer server) {
-        return (url) => {
-            Match match;
+        return new Matcher(
+            Create(server.RemotePattern),
+            Create(server.WebPattern ?? server.RemotePattern)
+        );
+
+        UrlMatcher Create(Regex pattern) {
+            return (url) => {
+                Match match;
+                StaticServer? result;
 
 
-            match = server.Pattern.Match(url);
+                match = pattern.Match(url);
 
-            if (match.Success) {
-                Hash hash;
+                if (match.Success) {
+                    Hash hash;
 
 
-                // The URL matched the pattern. Render the templates to get the HTTP
-                // and SSH URLs, making the match available for the templates to use.
-                hash = TemplateData.Create().Add(match).ToHash();
+                    // The URL matched the pattern. Render the templates to get the HTTP
+                    // and SSH URLs, making the match available for the templates to use.
+                    hash = TemplateData.Create().Add(match).ToHash();
 
-                return new StaticServer(
-                    server.Http.Render(hash),
-                    server.Ssh.Render(hash)
-                );
-            }
+                    result = new StaticServer(
+                        server.Http.Render(hash),
+                        server.Ssh.Render(hash),
+                        server.Web?.Render(hash)
+                    );
 
-            return null;
-        };
+                } else {
+                    result = null;
+                }
+
+                return Task.FromResult(result);
+            };
+        }
     }
 
 
     private static Matcher CreateStaticServerMatcher(StaticServer server) {
-        return (url) => IsMatch(url, server) ? server : null;
+        return new Matcher(
+            (url) => Task.FromResult(IsRemoteMatch(url, server) ? server : null),
+            (url) => Task.FromResult(IsWebMatch(url, server) ? server : null)
+        );
     }
 
 
-    private static AsyncMatcher CreateLazyStaticServerMatcher(Func<Task<IEnumerable<StaticServer>>> factory) {
-        return async (url) => (await factory()).Where((x) => IsMatch(url, x)).FirstOrDefault();
+    private static Matcher CreateLazyStaticServerMatcher(Func<Task<IEnumerable<StaticServer>>> factory) {
+        return new Matcher(
+            Create(IsRemoteMatch),
+            Create(IsWebMatch)
+        );
+
+        UrlMatcher Create(Func<string, StaticServer, bool> test) {
+            return async (url) => (await factory()).Where((x) => test(url, x)).FirstOrDefault();
+        }
     }
 
 
-    private static bool IsMatch(string url, StaticServer server) {
-        url = UrlHelpers.Normalize(url);
+    private static bool IsRemoteMatch(string remoteUrl, StaticServer server) {
+        remoteUrl = UrlHelpers.Normalize(remoteUrl);
 
-        if (url.StartsWith(UrlHelpers.Normalize(server.Http), StringComparison.Ordinal)) {
+        if (remoteUrl.StartsWith(UrlHelpers.Normalize(server.Http), StringComparison.Ordinal)) {
             return true;
         }
 
-        if ((server.Ssh is not null) && url.StartsWith(UrlHelpers.Normalize(server.Ssh), StringComparison.Ordinal)) {
+        if ((server.Ssh is not null) && remoteUrl.StartsWith(UrlHelpers.Normalize(server.Ssh), StringComparison.Ordinal)) {
             return true;
         }
 
@@ -94,12 +111,32 @@ public class RemoteServer {
     }
 
 
-    public async Task<StaticServer?> MatchAsync(string url) {
-        foreach (AsyncMatcher matcher in _matchers) {
+    private static bool IsWebMatch(string webUrl, StaticServer server) {
+        return UrlHelpers
+            .Normalize(webUrl)
+            .StartsWith(UrlHelpers.Normalize(server.Web ?? server.Http), StringComparison.Ordinal);
+    }
+
+
+    public Task<StaticServer?> MatchRemoteUrlAsync(string remoteUrl) {
+        return MatchUrlAsync(remoteUrl, static (x) => x.Remote);
+    }
+
+
+    public Task<StaticServer?> MatchWebUrlAsync(string webUrl) {
+        return MatchUrlAsync(webUrl, static (x) => x.Web);
+    }
+
+
+    private async Task<StaticServer?> MatchUrlAsync(
+        string url,
+        Func<Matcher, UrlMatcher> selectUrlMatcher
+    ) {
+        foreach (Matcher matcher in _matchers) {
             StaticServer? server;
 
 
-            server = await matcher(url);
+            server = await selectUrlMatcher(matcher)(url);
 
             if (server is not null) {
                 return server;
@@ -110,9 +147,22 @@ public class RemoteServer {
     }
 
 
-    private delegate Task<StaticServer?> AsyncMatcher(string url);
+    private delegate Task<StaticServer?> UrlMatcher(string url);
 
 
-    private delegate StaticServer? Matcher(string url);
+    private class Matcher {
+
+        public Matcher(UrlMatcher remote, UrlMatcher web) {
+            Remote = remote;
+            Web = web;
+        }
+
+
+        public UrlMatcher Remote { get; }
+
+
+        public UrlMatcher Web { get; }
+
+    }
 
 }

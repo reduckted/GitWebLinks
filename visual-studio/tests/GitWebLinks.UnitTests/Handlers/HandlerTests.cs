@@ -560,8 +560,8 @@ public static class HandlerTests {
 
 
         private static List<StaticServer> CreateStaticServers(JToken value) {
-            return Convert(value, new[] { new { Http = "", Ssh = "" } })
-                .Select((x) => new StaticServer(x.Http, x.Ssh))
+            return Convert(value, new[] { new { Http = "", Ssh = "", Web = "" } })
+                .Select((x) => new StaticServer(x.Http, x.Ssh, x.Web))
                 .ToList();
 
             static T Convert<T>(JToken value, T witness) => value.ToObject<T>()!;

@@ -241,7 +241,7 @@ export class GoToFileCommand {
                     // be because the remote URLs that we determined aren't quite correct,
                     // or perhaps the URL comes from a fork of the repository.
                     //
-                    // We'll use the existance of the URI in the repository to determine
+                    // We'll use the existence of the URI in the repository to determine
                     // whether this repository *could* be a match. If the URI does not exist
                     // in the repository, this this repository is not a match for the URI.
                     //
@@ -274,7 +274,7 @@ export class GoToFileCommand {
      */
     private isMatchingRepository(repository: Repository, server: StaticServer): boolean {
         if (repository.remote) {
-            if (new RemoteServer(server).match(repository.remote.url)) {
+            if (new RemoteServer(server).matchRemoteUrl(repository.remote.url)) {
                 return true;
             }
         }

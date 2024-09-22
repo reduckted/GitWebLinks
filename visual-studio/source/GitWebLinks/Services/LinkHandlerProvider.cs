@@ -33,7 +33,7 @@ public class LinkHandlerProvider {
         foreach (ILinkHandler handler in _handlers) {
             await _logger.LogAsync($"Testing '{handler.Name}");
 
-            if (await handler.IsMatchAsync(repository.Remote.Url)) {
+            if (await handler.HandlesRemoteUrlAsync(repository.Remote.Url)) {
                 await _logger.LogAsync($"Handler '{handler.Name}' is a match.");
                 return handler;
             }
@@ -44,23 +44,23 @@ public class LinkHandlerProvider {
     }
 
 
-    public async Task<IReadOnlyCollection<UrlInfo>> GetUrlInfoAsync(string url) {
+    public async Task<IReadOnlyCollection<UrlInfo>> GetUrlInfoAsync(string webUrl) {
         IReadOnlyCollection<UrlInfo> output;
 
 
-        await _logger.LogAsync($"Finding file info for URL '{url}'.");
-        output = await InternalGetUrlInfoAsync(url, true);
+        await _logger.LogAsync($"Finding file info for URL '{webUrl}'.");
+        output = await InternalGetUrlInfoAsync(webUrl, true);
 
         if (output.Count == 0) {
             await _logger.LogAsync("No strict matches found. Trying again with loose matching.");
-            output = await InternalGetUrlInfoAsync(url, false);
+            output = await InternalGetUrlInfoAsync(webUrl, false);
         }
 
         return output;
     }
 
 
-    private async Task<IReadOnlyCollection<UrlInfo>> InternalGetUrlInfoAsync(string url, bool strict) {
+    private async Task<IReadOnlyCollection<UrlInfo>> InternalGetUrlInfoAsync(string webUrl, bool strict) {
         List<UrlInfo> output;
 
 
@@ -70,7 +70,7 @@ public class LinkHandlerProvider {
             UrlInfo? info;
 
 
-            info = await handler.GetUrlInfoAsync(url, strict);
+            info = await handler.GetUrlInfoAsync(webUrl, strict);
 
             if (info is not null) {
                 await _logger.LogAsync($"The handler '{handler.Name}' mapped the file to '{info}'.");

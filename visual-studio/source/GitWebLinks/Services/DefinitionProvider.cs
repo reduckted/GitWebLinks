@@ -94,10 +94,18 @@ public static partial class DefinitionProvider {
         servers = new List<IServer>();
 
         foreach (var server in json) {
-            if (server.Pattern is not null) {
-                servers.Add(new DynamicServer(new Regex(server.Pattern), Template.Parse(server.Http), Template.Parse(server.Ssh)));
+            if (server.RemotePattern is not null) {
+                servers.Add(
+                    new DynamicServer(
+                        new Regex(server.RemotePattern),
+                        Template.Parse(server.Http),
+                        Template.Parse(server.Ssh),
+                        (server.WebPattern is not null) ? new Regex(server.WebPattern) : null,
+                        (server.Web is not null) ? Template.Parse(server.Web) : null
+                    )
+                );
             } else {
-                servers.Add(new StaticServer(server.Http, server.Ssh));
+                servers.Add(new StaticServer(server.Http, server.Ssh, server.Web));
             }
         }
 
@@ -117,7 +125,8 @@ public static partial class DefinitionProvider {
             json.FileMayStartWithBranch,
             new ReverseServerSettings(
                 Template.Parse(json.Server.Http),
-                Template.Parse(json.Server.Ssh)
+                Template.Parse(json.Server.Ssh),
+                (json.Server.Web is not null) ? Template.Parse(json.Server.Web) : null
             ),
             new ReverseSelectionSettings(
                 Template.Parse(json.Selection.StartLine),

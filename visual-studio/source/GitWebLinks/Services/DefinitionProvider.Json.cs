@@ -39,13 +39,19 @@ partial class DefinitionProvider {
 
     private class JsonServer {
 
-        public string? Pattern { get; set; }
+        public string? RemotePattern { get; set; }
 
 
         public string Http { get; set; } = "";
 
 
         public string Ssh { get; set; } = "";
+
+
+        public string? WebPattern { get; set; }
+
+
+        public string? Web { get; set; }
 
     }
 
@@ -88,6 +94,9 @@ partial class DefinitionProvider {
 
 
         public string Ssh { get; set; } = "";
+
+
+        public string? Web { get; set; }
 
     }
 
