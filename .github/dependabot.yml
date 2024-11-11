@@ -24,3 +24,12 @@ updates:
                   - "*"
       ignore:
           - dependency-name: "Microsoft.VisualStudio.SDK" # Pinned to support all versions of Visual Studio 2022.
+
+    - package-ecosystem: "github-actions"
+      directory: "/"
+      schedule:
+          interval: "weekly"
+      groups:
+          github-actions:
+              patterns:
+                  - "*"
