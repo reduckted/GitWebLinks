@@ -1,24 +1,24 @@
 #nullable enable
 
-using DotLiquid;
+using Fluid;
 
 namespace GitWebLinks;
 
 public class ReverseServerSettings {
 
-    public ReverseServerSettings(Template http, Template ssh, Template? web) {
+    public ReverseServerSettings(IFluidTemplate http, IFluidTemplate ssh, IFluidTemplate? web) {
         Http = http;
         Ssh = ssh;
         Web = web;
     }
 
 
-    public Template Http { get; }
+    public IFluidTemplate Http { get; }
 
 
-    public Template Ssh { get; }
+    public IFluidTemplate Ssh { get; }
 
 
-    public Template? Web { get; }
+    public IFluidTemplate? Web { get; }
 
 }

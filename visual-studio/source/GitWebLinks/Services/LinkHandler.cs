@@ -1,6 +1,6 @@
 #nullable enable
 
-using DotLiquid;
+using Fluid;
 using Microsoft.VisualStudio;
 using System;
 using System.Collections.Generic;
@@ -57,7 +57,7 @@ public class LinkHandler : ILinkHandler {
         string relativePath;
         string selection;
         TemplateData data;
-        Hash hash;
+        TemplateContext context;
 
 
         // If a link type wasn't specified, then we'll use
@@ -111,11 +111,11 @@ public class LinkHandler : ILinkHandler {
             data.Add(key, await _settings.GetHandlerSettingAsync(key));
         }
 
-        hash = data.ToHash();
-        url = _definition.Url.Render(hash);
+        context = data.AsTemplateContext();
+        url = _definition.Url.Render(context);
 
         if (file.Selection is not null) {
-            selection = _definition.Selection.Render(hash);
+            selection = _definition.Selection.Render(context);
             url += selection;
         } else {
             selection = "";
@@ -472,33 +472,33 @@ public class LinkHandler : ILinkHandler {
         match = _definition.Reverse.Pattern.Match(webUrl);
 
         if (match.Success) {
-            Hash hash;
+            TemplateContext context;
             string file;
             StaticServer server;
             PartialSelectedRange? selection;
 
 
-            hash = TemplateData
+            context = TemplateData
                 .Create()
                 .Add("http", address?.Http)
                 .Add("ssh", address?.Ssh)
                 .Add("web", address?.Web)
                 .Add(match)
-                .ToHash();
+                .AsTemplateContext();
 
-            file = _definition.Reverse.File.Render(hash);
+            file = _definition.Reverse.File.Render(context);
 
             server = new StaticServer(
-                _definition.Reverse.Server.Http.Render(hash),
-                _definition.Reverse.Server.Ssh.Render(hash),
-                _definition.Reverse.Server.Web?.Render(hash)
+                _definition.Reverse.Server.Http.Render(context),
+                _definition.Reverse.Server.Ssh.Render(context),
+                _definition.Reverse.Server.Web?.Render(context)
             );
 
             selection = new PartialSelectedRange(
-                TryParseNumber(_definition.Reverse.Selection.StartLine.Render(hash)),
-                TryParseNumber(_definition.Reverse.Selection.StartColumn?.Render(hash)),
-                TryParseNumber(_definition.Reverse.Selection.EndLine?.Render(hash)),
-                TryParseNumber(_definition.Reverse.Selection.EndColumn?.Render(hash))
+                TryParseNumber(_definition.Reverse.Selection.StartLine.Render(context)),
+                TryParseNumber(_definition.Reverse.Selection.StartColumn?.Render(context)),
+                TryParseNumber(_definition.Reverse.Selection.EndLine?.Render(context)),
+                TryParseNumber(_definition.Reverse.Selection.EndColumn?.Render(context))
             );
 
             return new UrlInfo(file, server, selection);

@@ -1,6 +1,6 @@
 #nullable enable
 
-using DotLiquid;
+using Fluid;
 using System.Text.RegularExpressions;
 
 namespace GitWebLinks;
@@ -9,7 +9,7 @@ public class ReverseSettings {
 
     public ReverseSettings(
         Regex pattern,
-        Template file,
+        IFluidTemplate file,
         bool fileMayStartWithBranch,
         ReverseServerSettings server,
         ReverseSelectionSettings selection
@@ -25,7 +25,7 @@ public class ReverseSettings {
     public Regex Pattern { get; }
 
 
-    public Template File { get; }
+    public IFluidTemplate File { get; }
 
 
     public bool FileMayStartWithBranch { get; }

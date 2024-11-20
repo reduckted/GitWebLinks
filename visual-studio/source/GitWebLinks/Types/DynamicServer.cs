@@ -1,13 +1,19 @@
 #nullable enable
 
-using DotLiquid;
+using Fluid;
 using System.Text.RegularExpressions;
 
 namespace GitWebLinks;
 
 public class DynamicServer : IServer {
 
-    public DynamicServer(Regex remotePattern, Template http, Template ssh, Regex? webPattern, Template? web) {
+    public DynamicServer(
+        Regex remotePattern,
+        IFluidTemplate http,
+        IFluidTemplate ssh,
+        Regex? webPattern,
+        IFluidTemplate? web
+    ) {
         RemotePattern = remotePattern;
         Http = http;
         Ssh = ssh;
@@ -19,15 +25,15 @@ public class DynamicServer : IServer {
     public Regex RemotePattern { get; }
 
 
-    public Template Http { get; }
+    public IFluidTemplate Http { get; }
 
 
-    public Template Ssh { get; }
+    public IFluidTemplate Ssh { get; }
 
 
     public Regex? WebPattern { get; }
 
 
-    public Template? Web { get; }
+    public IFluidTemplate? Web { get; }
 
 }

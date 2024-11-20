@@ -1,6 +1,6 @@
 #nullable enable
 
-using DotLiquid;
+using Fluid;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,7 +9,7 @@ namespace GitWebLinks;
 
 public class TemplateData {
 
-    private readonly Dictionary<string, object?> _data = new();
+    private readonly TemplateContext _context = new(TemplateEngine.Options);
 
 
     public static TemplateData Create() {
@@ -21,7 +21,7 @@ public class TemplateData {
 
 
     public TemplateData Add(string key, object? value) {
-        _data[key] = value;
+        _context.SetValue(key, value);
         return this;
     }
 
@@ -42,18 +42,18 @@ public class TemplateData {
             }
 
             matchData["groups"] = groupsData;
-            _data["match"] = matchData;
+            _context.SetValue("match", matchData);
 
         } else {
-            _data["match"] = match.Groups.OfType<Group>().Select((x) => x.Success ? x.Value : null).ToArray();
+            _context.SetValue("match", match.Groups.OfType<Group>().Select((x) => x.Success ? x.Value : null).ToArray());
         }
 
         return this;
     }
 
 
-    public Hash ToHash() {
-        return Hash.FromDictionary(_data);
+    public TemplateContext AsTemplateContext() {
+        return _context;
     }
 
 }

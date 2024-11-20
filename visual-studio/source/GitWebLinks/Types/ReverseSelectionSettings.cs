@@ -1,12 +1,17 @@
 #nullable enable
 
-using DotLiquid;
+using Fluid;
 
 namespace GitWebLinks;
 
 public class ReverseSelectionSettings {
 
-    public ReverseSelectionSettings(Template startLine, Template? startColumn, Template? endLine, Template? endColumn) {
+    public ReverseSelectionSettings(
+        IFluidTemplate startLine,
+        IFluidTemplate? startColumn,
+        IFluidTemplate? endLine,
+        IFluidTemplate? endColumn
+    ) {
         StartLine = startLine;
         StartColumn = startColumn;
         EndLine = endLine;
@@ -14,15 +19,15 @@ public class ReverseSelectionSettings {
     }
 
 
-    public Template StartLine { get; }
+    public IFluidTemplate StartLine { get; }
 
 
-    public Template? StartColumn { get; }
+    public IFluidTemplate? StartColumn { get; }
 
 
-    public Template? EndLine { get; }
+    public IFluidTemplate? EndLine { get; }
 
 
-    public Template? EndColumn { get; }
+    public IFluidTemplate? EndColumn { get; }
 
 }

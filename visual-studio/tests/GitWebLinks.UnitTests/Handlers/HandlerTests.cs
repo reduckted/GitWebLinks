@@ -1,4 +1,4 @@
-using DotLiquid;
+using Fluid;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 
@@ -520,11 +520,11 @@ public static class HandlerTests {
 
             // Treat the test URL as a template and allow
             // the current commit hash to be used in the result.
-            return Template.Parse(url).Render(
+            return new FluidParser().Parse(url).Render(
                 TemplateData
                     .Create()
                     .Add("commit", string.Concat(await Git.ExecuteAsync(_repositoryRoot, "rev-parse", "HEAD")).Trim())
-                    .ToHash()
+                    .AsTemplateContext()
             );
         }
 

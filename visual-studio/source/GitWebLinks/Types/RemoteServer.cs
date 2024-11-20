@@ -1,6 +1,6 @@
 #nullable enable
 
-using DotLiquid;
+using Fluid;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,17 +53,17 @@ public class RemoteServer {
                 match = pattern.Match(url);
 
                 if (match.Success) {
-                    Hash hash;
+                    TemplateContext context;
 
 
                     // The URL matched the pattern. Render the templates to get the HTTP
                     // and SSH URLs, making the match available for the templates to use.
-                    hash = TemplateData.Create().Add(match).ToHash();
+                    context = TemplateData.Create().Add(match).AsTemplateContext();
 
                     result = new StaticServer(
-                        server.Http.Render(hash),
-                        server.Ssh.Render(hash),
-                        server.Web?.Render(hash)
+                        server.Http.Render(context),
+                        server.Ssh.Render(context),
+                        server.Web?.Render(context)
                     );
 
                 } else {

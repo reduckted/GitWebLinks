@@ -1,6 +1,6 @@
 #nullable enable
 
-using DotLiquid;
+using Fluid;
 using System.Collections.Generic;
 
 namespace GitWebLinks;
@@ -11,9 +11,9 @@ public class HandlerDefinition {
         string name,
         BranchRefType branchRef,
         IReadOnlyList<string> settingsKeys,
-        Template url,
+        IFluidTemplate url,
         IReadOnlyList<QueryModification> query,
-        Template selection,
+        IFluidTemplate selection,
         ReverseSettings reverse
     ) {
         Name = name;
@@ -35,13 +35,13 @@ public class HandlerDefinition {
     public IReadOnlyList<string> SettingsKeys { get; }
 
 
-    public Template Url { get; }
+    public IFluidTemplate Url { get; }
 
 
     public IReadOnlyList<QueryModification> Query { get; }
 
 
-    public Template Selection { get; }
+    public IFluidTemplate Selection { get; }
 
 
     public ReverseSettings Reverse { get; }

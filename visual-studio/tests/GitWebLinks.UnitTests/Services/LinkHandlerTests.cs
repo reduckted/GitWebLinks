@@ -1,4 +1,4 @@
-using DotLiquid;
+using Fluid;
 using NSubstitute;
 using System.Text.RegularExpressions;
 
@@ -6,7 +6,8 @@ namespace GitWebLinks;
 
 public static class LinkHandlerTests {
 
-    private static readonly Template EmptyTemplate = Template.Parse("");
+    private static readonly FluidParser Parser = new();
+    private static readonly IFluidTemplate EmptyTemplate = Parser.Parse("");
 
 
     public class CreateUrlAsyncMethod : RepositoryTestBase {
@@ -647,7 +648,7 @@ public static class LinkHandlerTests {
                     "Test",
                     definition.BranchRef ?? BranchRefType.Abbreviated,
                     Array.Empty<string>(),
-                    Template.Parse(definition.Url ?? ""),
+                    Parser.Parse(definition.Url ?? ""),
                     definition.Query ?? Array.Empty<QueryModification>(),
                     EmptyTemplate,
                     new ReverseSettings(
@@ -741,15 +742,15 @@ public static class LinkHandlerTests {
                         Pattern = "http://example\\.com/[^/]+/(?<file>.+)",
                         File = "{{ match.groups.file }}",
                         Server = new ReverseServerSettings(
-                            Template.Parse("http"),
-                            Template.Parse("ssh"),
+                            Parser.Parse("http"),
+                            Parser.Parse("ssh"),
                             null
                         ),
                         Selection = new ReverseSelectionSettings(
-                            Template.Parse("10"),
-                            Template.Parse("20"),
-                            Template.Parse("30"),
-                            Template.Parse("40")
+                            Parser.Parse("10"),
+                            Parser.Parse("20"),
+                            Parser.Parse("30"),
+                            Parser.Parse("40")
                         )
                     },
                     "http://example.com/foo/bar.txt",
@@ -773,14 +774,14 @@ public static class LinkHandlerTests {
                         Pattern = "http://example\\.com/[^/]+/(?<file>.+)",
                         File = "{{ match.groups.file }}",
                         Server = new ReverseServerSettings(
-                            Template.Parse("http"),
-                            Template.Parse("ssh"),
+                            Parser.Parse("http"),
+                            Parser.Parse("ssh"),
                             null
                         ),
                         Selection = new ReverseSelectionSettings(
-                            Template.Parse("10"),
-                            Template.Parse("x"),
-                            Template.Parse(""),
+                            Parser.Parse("10"),
+                            Parser.Parse("x"),
+                            Parser.Parse(""),
                             null
                         )
                     },
@@ -804,8 +805,8 @@ public static class LinkHandlerTests {
                     new PartialReverseSettings {
                         Pattern = "http://example\\.com/.+",
                         Server = new ReverseServerSettings(
-                            Template.Parse("{{ http }}"),
-                            Template.Parse("{{ ssh }}"),
+                            Parser.Parse("{{ http }}"),
+                            Parser.Parse("{{ ssh }}"),
                             null
                         )
                     },
@@ -835,9 +836,9 @@ public static class LinkHandlerTests {
                     new PartialReverseSettings {
                         Pattern = "http://(web\\.)?example\\.com/.+",
                         Server = new ReverseServerSettings(
-                            Template.Parse("{{ http }}"),
-                            Template.Parse("{{ ssh }}"),
-                            Template.Parse("{{ web }}")
+                            Parser.Parse("{{ http }}"),
+                            Parser.Parse("{{ ssh }}"),
+                            Parser.Parse("{{ web }}")
                         )
                     },
                     "http://web.example.com/foo/bar.txt",
@@ -864,7 +865,7 @@ public static class LinkHandlerTests {
                     EmptyTemplate,
                     new ReverseSettings(
                         new Regex(reverse.Pattern ?? ""),
-                        Template.Parse(reverse.File ?? ""),
+                        Parser.Parse(reverse.File ?? ""),
                         false,
                         reverse.Server ?? new ReverseServerSettings(EmptyTemplate, EmptyTemplate, null),
                         reverse.Selection ?? new ReverseSelectionSettings(EmptyTemplate, null, null, null)

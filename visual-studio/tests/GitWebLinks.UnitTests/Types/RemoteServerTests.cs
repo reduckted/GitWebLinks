@@ -1,4 +1,4 @@
-using DotLiquid;
+using Fluid;
 using System.Text.RegularExpressions;
 
 namespace GitWebLinks;
@@ -188,8 +188,8 @@ public static class RemoteServerTests {
             new RemoteServer(
                 new DynamicServer(
                     new Regex("http://(.+)\\.example\\.com:8000"),
-                    Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
-                    Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                    Parser.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                    Parser.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
                     null,
                     null
                 )
@@ -217,10 +217,10 @@ public static class RemoteServerTests {
             Server = new RemoteServer(
                 new DynamicServer(
                     new Regex("http://(.+)\\.example\\.com:8000"),
-                    Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
-                    Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                    Parser.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                    Parser.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
                     new Regex("http://(.+)\\.test\\.com:8000"),
-                    Template.Parse("http://test.com:8000/repos/{{ match[1] }}")
+                    Parser.Parse("http://test.com:8000/repos/{{ match[1] }}")
                 )
             );
 
@@ -245,15 +245,15 @@ public static class RemoteServerTests {
                 new IServer[] {
                     new DynamicServer(
                         new Regex("http://(.+)\\.example\\.com:8000"),
-                        Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
-                        Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                        Parser.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                        Parser.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
                         null,
                         null
                     ),
                     new DynamicServer(
                         new Regex("ssh://git@example\\.com:9000/_([^/]+)"),
-                        Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
-                        Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                        Parser.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                        Parser.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
                         new Regex("^$"), // This server should only match SSH remote URLs.
                         null
                     )
@@ -290,17 +290,17 @@ public static class RemoteServerTests {
                 new IServer[] {
                     new DynamicServer(
                         new Regex("http://(.+)\\.example\\.com:8000"),
-                        Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
-                        Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                        Parser.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                        Parser.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
                         new Regex("http://(.+)\\.test\\.com:8000"),
-                        Template.Parse("http://test.com:8000/repos/{{ match[1] }}")
+                        Parser.Parse("http://test.com:8000/repos/{{ match[1] }}")
                     ),
                     new DynamicServer(
                         new Regex("ssh://git@example\\.com:9000/_([^/]+)"),
-                        Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
-                        Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                        Parser.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                        Parser.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
                         new Regex("http://(.+)\\.other\\.com:8000"),
-                        Template.Parse("http://other.com:8000/repos/{{ match[1] }}")
+                        Parser.Parse("http://other.com:8000/repos/{{ match[1] }}")
                     )
                 }
             );
@@ -336,8 +336,8 @@ public static class RemoteServerTests {
                 new IServer[] {
                     new DynamicServer(
                         new Regex("http://(.+)\\.example\\.com:8000"),
-                        Template.Parse("http://example.com:8000/repos/{{ match[1] }}"),
-                        Template.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
+                        Parser.Parse("http://example.com:8000/repos/{{ match[1] }}"),
+                        Parser.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
                         null,
                         null
                     ),
@@ -509,6 +509,9 @@ public static class RemoteServerTests {
 
 
     public abstract class TestBase {
+
+        protected static readonly FluidParser Parser = new();
+
 
         protected TestBase(RemoteServer defaultServer) {
             Server = defaultServer;

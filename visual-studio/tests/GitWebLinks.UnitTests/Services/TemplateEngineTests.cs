@@ -1,4 +1,4 @@
-using DotLiquid;
+using Fluid;
 using System.Text.RegularExpressions;
 
 namespace GitWebLinks;
@@ -14,7 +14,7 @@ public class TemplateEngineTests {
     public void CanRenderBasicTemplate() {
         Assert.Equal(
             "Hello world!",
-            Render("Hello {{ name }}!", Hash.FromAnonymousObject(new { name = "world" }))
+            Render("Hello {{ name }}!", TemplateData.Create().Add("name", "world"))
         );
     }
 
@@ -25,7 +25,7 @@ public class TemplateEngineTests {
             "Hello there, Bob!",
             Render(
                 "Hello {{ match[1] }}, {{ match[2] }}!",
-                TemplateData.Create().Add(Regex.Match("there once was a man named Bob", @"^(\w+)\s.+\s(\w+)$")).ToHash()
+                TemplateData.Create().Add(Regex.Match("there once was a man named Bob", @"^(\w+)\s.+\s(\w+)$"))
             )
         );
     }
@@ -37,7 +37,7 @@ public class TemplateEngineTests {
             "Hello there, Bob!",
             Render(
                 "Hello {{ match.groups.greeting }}, {{ match.groups.name }}!",
-                TemplateData.Create().Add(Regex.Match("there once was a man named Bob", @"^(?<greeting>\w+)\s.+\s(?<name>\w+)$")).ToHash()
+                TemplateData.Create().Add(Regex.Match("there once was a man named Bob", @"^(?<greeting>\w+)\s.+\s(?<name>\w+)$"))
             )
         );
     }
@@ -106,8 +106,8 @@ public class TemplateEngineTests {
     }
 
 
-    private static string Render(string template, Hash? hash = null) {
-        return Template.Parse(template).Render(hash ?? Hash.FromAnonymousObject(new object()));
+    private static string Render(string template, TemplateData? data = null) {
+        return new FluidParser().Parse(template).Render((data ?? TemplateData.Create()).AsTemplateContext());
     }
 
 }

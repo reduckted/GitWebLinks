@@ -1,6 +1,6 @@
 #nullable enable
 
-using DotLiquid;
+using Fluid;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -28,15 +28,17 @@ public static partial class DefinitionProvider {
         if (_definitions is null) {
             Assembly container;
             List<HandlerDefinition> definitions;
+            FluidParser parser;
 
 
             definitions = new List<HandlerDefinition>();
             container = typeof(LinkHandlerProvider).Assembly;
+            parser = new FluidParser();
 
             foreach (string name in container.GetManifestResourceNames()) {
                 if (Path.GetExtension(name) == ".json") {
                     using (Stream stream = container.GetManifestResourceStream(name)) {
-                        definitions.Add(LoadDefinition(stream));
+                        definitions.Add(LoadDefinition(stream, parser));
                     }
                 }
             }
@@ -48,7 +50,7 @@ public static partial class DefinitionProvider {
     }
 
 
-    private static HandlerDefinition LoadDefinition(Stream stream) {
+    private static HandlerDefinition LoadDefinition(Stream stream, FluidParser parser) {
         JsonHandlerDefinition? json;
 
 
@@ -65,10 +67,10 @@ public static partial class DefinitionProvider {
                 json.Name,
                 json.BranchRef,
                 json.SettingsKeys ?? Array.Empty<string>(),
-                Template.Parse(json.Url),
+                parser.Parse(json.Url),
                 json.Query is not null ? ParseQueryModifications(json.Query) : Array.Empty<QueryModification>(),
-                Template.Parse(json.Selection),
-                ParseReverseSettings(json.Reverse),
+                parser.Parse(json.Selection),
+                ParseReverseSettings(json.Reverse, parser),
                 json.Private
             );
 
@@ -77,17 +79,17 @@ public static partial class DefinitionProvider {
                 json.Name,
                 json.BranchRef,
                 json.SettingsKeys ?? Array.Empty<string>(),
-                Template.Parse(json.Url),
+                parser.Parse(json.Url),
                 json.Query is not null ? ParseQueryModifications(json.Query) : Array.Empty<QueryModification>(),
-                Template.Parse(json.Selection),
-                ParseReverseSettings(json.Reverse),
-                ParseServers(json.Server!)
+                parser.Parse(json.Selection),
+                ParseReverseSettings(json.Reverse, parser),
+                ParseServers(json.Server!, parser)
             );
         }
     }
 
 
-    private static IReadOnlyList<IServer> ParseServers(IReadOnlyList<JsonServer> json) {
+    private static IReadOnlyList<IServer> ParseServers(IReadOnlyList<JsonServer> json, FluidParser parser) {
         List<IServer> servers;
 
 
@@ -98,10 +100,10 @@ public static partial class DefinitionProvider {
                 servers.Add(
                     new DynamicServer(
                         new Regex(server.RemotePattern),
-                        Template.Parse(server.Http),
-                        Template.Parse(server.Ssh),
+                        parser.Parse(server.Http),
+                        parser.Parse(server.Ssh),
                         (server.WebPattern is not null) ? new Regex(server.WebPattern) : null,
-                        (server.Web is not null) ? Template.Parse(server.Web) : null
+                        (server.Web is not null) ? parser.Parse(server.Web) : null
                     )
                 );
             } else {
@@ -118,21 +120,21 @@ public static partial class DefinitionProvider {
     }
 
 
-    private static ReverseSettings ParseReverseSettings(JsonReverseSettings json) {
+    private static ReverseSettings ParseReverseSettings(JsonReverseSettings json, FluidParser parser) {
         return new ReverseSettings(
             new Regex(json.Pattern),
-            Template.Parse(json.File),
+            parser.Parse(json.File),
             json.FileMayStartWithBranch,
             new ReverseServerSettings(
-                Template.Parse(json.Server.Http),
-                Template.Parse(json.Server.Ssh),
-                (json.Server.Web is not null) ? Template.Parse(json.Server.Web) : null
+                parser.Parse(json.Server.Http),
+                parser.Parse(json.Server.Ssh),
+                (json.Server.Web is not null) ? parser.Parse(json.Server.Web) : null
             ),
             new ReverseSelectionSettings(
-                Template.Parse(json.Selection.StartLine),
-                json.Selection.StartColumn is not null ? Template.Parse(json.Selection.StartColumn) : null,
-                json.Selection.EndLine is not null ? Template.Parse(json.Selection.EndLine) : null,
-                json.Selection.EndColumn is not null ? Template.Parse(json.Selection.EndColumn) : null
+                parser.Parse(json.Selection.StartLine),
+                json.Selection.StartColumn is not null ? parser.Parse(json.Selection.StartColumn) : null,
+                json.Selection.EndLine is not null ? parser.Parse(json.Selection.EndLine) : null,
+                json.Selection.EndColumn is not null ? parser.Parse(json.Selection.EndColumn) : null
             )
         );
     }
