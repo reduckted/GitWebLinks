@@ -6,6 +6,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <AnalysisMode>AllEnabledByDefault</AnalysisMode>
         <RootNamespace>GitWebLinks</RootNamespace>
+        <RestoreLockedMode>true</RestoreLockedMode>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
 </Project>
