@@ -1,6 +1,8 @@
 <Project>
 
     <PropertyGroup>
+        <TargetFramework>net48</TargetFramework>
+        <RuntimeIdentifiers>win</RuntimeIdentifiers>
         <Nullable>enable</Nullable>
         <LangVersion>10.0</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
