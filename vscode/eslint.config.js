@@ -22,7 +22,8 @@ module.exports = tseslint.config(
             'dist',
             'eslint.config.js',
             'out-test',
-            'webpack.config.js'
+            'webpack.config.js',
+            'src/api/**/*'
         ]
     },
     {
