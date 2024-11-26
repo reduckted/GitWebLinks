@@ -23,7 +23,7 @@ export class WorkspaceTracker extends Disposable {
      * @constructor
      * @param repositoryFinder The `RepositoryFinder` to use.
      */
-    constructor(private readonly repositoryFinder: RepositoryFinder) {
+    public constructor(private readonly repositoryFinder: RepositoryFinder) {
         super(() => {
             this.disposable.dispose();
         });

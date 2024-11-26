@@ -12,7 +12,7 @@ export class LinkHandlerProvider {
     /**
      * @constructor
      */
-    constructor() {
+    public constructor() {
         this.handlers = load()
             .sort((x, y) => x.name.localeCompare(y.name))
             .map((definition) => new LinkHandler(definition));

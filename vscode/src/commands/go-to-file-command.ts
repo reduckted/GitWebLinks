@@ -32,7 +32,7 @@ export class GoToFileCommand {
      * @param repositoryFinder The repository finder to use for finding repository information for a URL.
      * @param handlerProvider The link handler provider to use.
      */
-    constructor(
+    public constructor(
         private readonly repositoryFinder: RepositoryFinder,
         private readonly handlerProvider: LinkHandlerProvider
     ) {}

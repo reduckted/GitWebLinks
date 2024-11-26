@@ -40,7 +40,7 @@ export class LinkHandler {
      * @constructor
      * @param definition The details of the handler.
      */
-    constructor(private readonly definition: HandlerDefinition) {
+    public constructor(private readonly definition: HandlerDefinition) {
         this.settings = new Settings();
 
         if ('private' in definition) {

@@ -15,7 +15,7 @@ export class ContextManager extends Disposable {
      * @constructor
      * @param workspaceTracker The workspace tracker to observe.
      */
-    constructor(workspaceTracker: WorkspaceTracker) {
+    public constructor(workspaceTracker: WorkspaceTracker) {
         super(() => {
             this.disposable.dispose();
         });

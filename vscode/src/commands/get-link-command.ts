@@ -40,7 +40,7 @@ export class GetLinkCommand {
      * @param handlerProvider The provider of link handlers.
      * @param options The options that control how the command behaves.
      */
-    constructor(
+    public constructor(
         private readonly repositoryFinder: RepositoryFinder,
         private readonly handlerProvider: LinkHandlerProvider,
         private readonly options: GetLinkCommandOptions
