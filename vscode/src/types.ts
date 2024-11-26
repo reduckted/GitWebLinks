@@ -1,3 +1,5 @@
+import { Uri } from 'vscode';
+
 import { StaticServer } from './schema';
 
 /**
@@ -17,10 +19,10 @@ export interface Repository {
     /**
      * The root directory of the repository.
      */
-    readonly root: string;
+    readonly root: Uri;
 
     /**
-     * The URL to the default remote, or `undefined` if the repository has no remotes.
+     * The remote to use for creating links, or `undefined` if the repository has no remotes.
      */
     readonly remote: Remote | undefined;
 }
@@ -45,9 +47,9 @@ export interface Remote {
     readonly name: string;
 
     /**
-     * The URL of the remote.
+     * The URLs of the remote.
      */
-    readonly url: string;
+    readonly urls: string[];
 }
 
 /**
@@ -118,9 +120,9 @@ export interface LinkTargetPreset {
  */
 export interface FileInfo {
     /**
-     * The path of the file from the root of the repository.
+     * The URI of the file.
      */
-    filePath: string;
+    uri: Uri;
 
     /**
      * The selected range in the file.

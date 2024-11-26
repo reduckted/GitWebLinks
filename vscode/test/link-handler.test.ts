@@ -2,8 +2,9 @@ import { expect } from 'chai';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as sinon from 'sinon';
+import { Uri } from 'vscode';
 
-import { git } from '../src/git';
+import { Git } from '../src/git';
 import { LinkHandler } from '../src/link-handler';
 import { NoRemoteHeadError } from '../src/no-remote-head-error';
 import { HandlerDefinition, ReverseSettings, StaticServer } from '../src/schema';
@@ -11,22 +12,24 @@ import { Settings } from '../src/settings';
 import { LinkOptions, LinkType, RepositoryWithRemote, UrlInfo } from '../src/types';
 import { isErrorCode } from '../src/utilities';
 
-import { Directory, markAsSlow, setupRemote, setupRepository } from './helpers';
+import { Directory, getGitService, markAsSlow, setupRemote, setupRepository } from './helpers';
 
 describe('LinkHandler', function () {
     let repository: RepositoryWithRemote;
     let root: Directory;
+    let git: Git;
 
     // We need to create repositories, so mark the
     // tests as being a bit slower than other tests.
     markAsSlow(this);
 
     beforeEach(async () => {
+        git = getGitService();
         root = await Directory.create();
 
         repository = {
-            root: root.path,
-            remote: { url: 'http://example.com', name: 'origin' }
+            root: root.uri,
+            remote: { name: 'origin', urls: ['http://example.com'] }
         };
     });
 
@@ -61,7 +64,7 @@ describe('LinkHandler', function () {
 
             expect(
                 await createUrl({ url: '{{ ref }}' }, { target: { preset: 'commit' } })
-            ).to.equal((await git(root.path, 'rev-parse', 'HEAD')).trim());
+            ).to.equal((await git.exec(root.path, 'rev-parse', 'HEAD')).trim());
         });
 
         it('should use a short commit hash as the "ref" value when the link type is "commit" and short hashes should be used.', async () => {
@@ -71,13 +74,13 @@ describe('LinkHandler', function () {
 
             expect(
                 await createUrl({ url: '{{ ref }}' }, { target: { preset: 'commit' } })
-            ).to.equal((await git(root.path, 'rev-parse', '--short', 'HEAD')).trim());
+            ).to.equal((await git.exec(root.path, 'rev-parse', '--short', 'HEAD')).trim());
         });
 
         it('should use the branch name as the "ref" value when the link type is "branch".', async () => {
             await setupRepository(root.path);
 
-            await git(root.path, 'checkout', '-b', 'foo');
+            await git.exec(root.path, 'checkout', '-b', 'foo');
 
             expect(
                 await createUrl(
@@ -126,12 +129,12 @@ describe('LinkHandler', function () {
             sinon.stub(Settings.prototype, 'getDefaultBranch').returns('');
 
             await setupRepository(root.path);
-            await git(root.path, 'checkout', '-b', 'foo');
+            await git.exec(root.path, 'checkout', '-b', 'foo');
 
             origin = await setupRemote(root.path, 'origin');
 
             try {
-                await git(root.path, 'remote', 'set-head', 'origin', 'master');
+                await git.exec(root.path, 'remote', 'set-head', 'origin', 'master');
 
                 expect(
                     await createUrl(
@@ -195,7 +198,7 @@ describe('LinkHandler', function () {
         it('should handle the matching server HTTP address ending with a slash.', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'http://example.com/foo/bar', name: 'origin' }
+                remote: { name: 'origin', urls: ['http://example.com/foo/bar'] }
             };
 
             await setupRepository(root.path);
@@ -211,7 +214,7 @@ describe('LinkHandler', function () {
         it('should handle the matching server HTTP address not ending with a slash.', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'http://example.com/foo/bar', name: 'origin' }
+                remote: { name: 'origin', urls: ['http://example.com/foo/bar'] }
             };
 
             await setupRepository(root.path);
@@ -227,7 +230,7 @@ describe('LinkHandler', function () {
         it('should handle the matching server SSH address ending with a slash.', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'ssh://git@example.com:foo/bar', name: 'origin' }
+                remote: { name: 'origin', urls: ['ssh://git@example.com:foo/bar'] }
             };
 
             await setupRepository(root.path);
@@ -243,7 +246,7 @@ describe('LinkHandler', function () {
         it('should handle the matching server SSH address not ending with a slash.', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'ssh://git@example.com:foo/bar', name: 'origin' }
+                remote: { name: 'origin', urls: ['ssh://git@example.com:foo/bar'] }
             };
 
             await setupRepository(root.path);
@@ -259,7 +262,7 @@ describe('LinkHandler', function () {
         it('should handle the matching server SSH address not ending with a colon.', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'ssh://git@example.com:foo/bar', name: 'origin' }
+                remote: { name: 'origin', urls: ['ssh://git@example.com:foo/bar'] }
             };
 
             await setupRepository(root.path);
@@ -275,7 +278,7 @@ describe('LinkHandler', function () {
         it('should handle the matching server SSH address ending with a colon.', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'ssh://git@example.com:foo/bar', name: 'origin' }
+                remote: { name: 'origin', urls: ['ssh://git@example.com:foo/bar'] }
             };
 
             await setupRepository(root.path);
@@ -291,7 +294,7 @@ describe('LinkHandler', function () {
         it('should trim ".git" from the end of the repository path.', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'http://example.com/foo/bar.git', name: 'origin' }
+                remote: { name: 'origin', urls: ['http://example.com/foo/bar.git'] }
             };
 
             await setupRepository(root.path);
@@ -307,7 +310,7 @@ describe('LinkHandler', function () {
         it('should handle SSH URL with a protocol.', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'git@example.com:foo/bar', name: 'origin' }
+                remote: { name: 'origin', urls: ['git@example.com:foo/bar'] }
             };
 
             await setupRepository(root.path);
@@ -323,7 +326,7 @@ describe('LinkHandler', function () {
         it('should handle SSH URL without a protocol.', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'git@example.com:foo/bar', name: 'origin' }
+                remote: { name: 'origin', urls: ['git@example.com:foo/bar'] }
             };
 
             await setupRepository(root.path);
@@ -339,7 +342,7 @@ describe('LinkHandler', function () {
         it('should handle SSH with "git@".', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'git@example.com:foo/bar', name: 'origin' }
+                remote: { name: 'origin', urls: ['git@example.com:foo/bar'] }
             };
 
             await setupRepository(root.path);
@@ -355,7 +358,7 @@ describe('LinkHandler', function () {
         it('should handle SSH without "git@".', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'git@example.com:foo/bar', name: 'origin' }
+                remote: { name: 'origin', urls: ['git@example.com:foo/bar'] }
             };
 
             await setupRepository(root.path);
@@ -371,7 +374,7 @@ describe('LinkHandler', function () {
         it('should use the web address from the matching server.', async () => {
             repository = {
                 ...repository,
-                remote: { url: 'http://example.com/foo/bar', name: 'origin' }
+                remote: { name: 'origin', urls: ['http://example.com/foo/bar'] }
             };
 
             await setupRepository(root.path);
@@ -441,21 +444,21 @@ describe('LinkHandler', function () {
 
         it('should not use the real path when the entire Git repository is under a symbolic link.', async function () {
             let real: string;
-            let link: string;
+            let link: Uri;
             let foo: string;
 
             real = await root.mkdirp('repo');
             await setupRepository(real);
 
-            link = path.join(root.path, 'link');
+            link = Uri.joinPath(root.uri, 'link');
 
-            if (!(await tryCreateSymlink(real, link, 'dir'))) {
+            if (!(await tryCreateSymlink(real, link.fsPath, 'dir'))) {
                 return this.skip();
             }
 
             repository = {
                 root: link,
-                remote: { url: 'http://example.com', name: 'origin' }
+                remote: { name: 'origin', urls: ['http://example.com'] }
             };
 
             foo = path.join(real, 'foo.js');
@@ -465,7 +468,7 @@ describe('LinkHandler', function () {
                 await createUrl(
                     { url: '{{ base }}/{{ file }}' },
                     { target: { preset: 'branch' } },
-                    path.join(link, 'foo.js')
+                    Uri.joinPath(link, 'foo.js').fsPath
                 )
             ).to.equal('http://example.com/foo.js');
         });
@@ -538,27 +541,31 @@ describe('LinkHandler', function () {
             return (
                 await createHandler(definition).createUrl(
                     repository,
-                    { filePath, selection: undefined },
+                    repository.remote.urls[0],
+                    { uri: Uri.file(filePath), selection: undefined },
                     { target: { preset: 'commit' }, ...options }
                 )
             ).url;
         }
 
         function createHandler(definition: Partial<HandlerDefinition>): LinkHandler {
-            return new LinkHandler({
-                name: 'Test',
-                server: { http: 'http://example.com', ssh: 'ssh://example.com' },
-                branchRef: 'abbreviated',
-                url: '',
-                selection: '',
-                ...definition,
-                reverse: {
-                    pattern: '',
-                    file: '',
-                    server: { http: '', ssh: '' },
-                    selection: { startLine: '', endLine: '' }
-                }
-            });
+            return new LinkHandler(
+                {
+                    name: 'Test',
+                    server: { http: 'http://example.com', ssh: 'ssh://example.com' },
+                    branchRef: 'abbreviated',
+                    url: '',
+                    selection: '',
+                    ...definition,
+                    reverse: {
+                        pattern: '',
+                        file: '',
+                        server: { http: '', ssh: '' },
+                        selection: { startLine: '', endLine: '' }
+                    }
+                },
+                git
+            );
         }
 
         async function tryCreateSymlink(
@@ -705,20 +712,23 @@ describe('LinkHandler', function () {
         }
 
         function createHandler(reverse: Partial<ReverseSettings>): LinkHandler {
-            return new LinkHandler({
-                name: 'Test',
-                server,
-                branchRef: 'abbreviated',
-                url: '',
-                selection: '',
-                reverse: {
-                    pattern: '',
-                    file: '',
-                    server: { http: '', ssh: '' },
-                    selection: { startLine: '', endLine: '' },
-                    ...reverse
-                }
-            });
+            return new LinkHandler(
+                {
+                    name: 'Test',
+                    server,
+                    branchRef: 'abbreviated',
+                    url: '',
+                    selection: '',
+                    reverse: {
+                        pattern: '',
+                        file: '',
+                        server: { http: '', ssh: '' },
+                        selection: { startLine: '', endLine: '' },
+                        ...reverse
+                    }
+                },
+                git
+            );
         }
     });
 });

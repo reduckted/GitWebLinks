@@ -1,9 +1,9 @@
 import { commands, Disposable, workspace } from 'vscode';
 
 import { CONFIGURATION, CONTEXT } from './constants';
+import { Git, GitRepository } from './git';
 import { log } from './log';
 import { Settings } from './settings';
-import { WorkspaceInfo, WorkspaceTracker } from './workspace-tracker';
 
 /**
  * Manages the context for commands.
@@ -13,18 +13,18 @@ export class ContextManager extends Disposable {
 
     /**
      * @constructor
-     * @param workspaceTracker The workspace tracker to observe.
+     * @param git The Git service.
      */
-    public constructor(workspaceTracker: WorkspaceTracker) {
+    public constructor(git: Git) {
         super(() => {
             this.disposable.dispose();
         });
 
         this.disposable = Disposable.from(
-            // When the workspaces change, update the context that
-            // indicates whether any workspaces have a repository.
-            workspaceTracker.onWorkspacesChanged((workspaces) => {
-                this.sethasRepositoriesContext(workspaces);
+            // Watch for changes to repositories being opened and closed and
+            // update the context that indicates whether there are any repositories.
+            git.onDidChangeRepositories(() => {
+                this.setHasRepositoriesContext(git.repositories);
             }),
             // When the configuration changes, re-apply the menu item visibility.
             workspace.onDidChangeConfiguration((e) => {
@@ -35,26 +35,18 @@ export class ContextManager extends Disposable {
             })
         );
 
-        this.setContext(
-            CONTEXT.hasRepositories,
-            workspaceTracker.workspaces.some((x) => x.hasRepositories)
-        );
-
         // Set the current values.
-        // this.sethasRepositoriesContext(workspaceTracker.workspaces);
+        this.setHasRepositoriesContext(git.repositories);
         this.applyMenuItemVisibility();
     }
 
     /**
      * Sets the "hasRepositories" context value.
      *
-     * @param workspaces The current workspaces.
+     * @param repositories The current repositories.
      */
-    private sethasRepositoriesContext(workspaces: readonly WorkspaceInfo[]): void {
-        this.setContext(
-            CONTEXT.hasRepositories,
-            workspaces.some((x) => x.hasRepositories)
-        );
+    private setHasRepositoriesContext(repositories: readonly GitRepository[]): void {
+        this.setContext(CONTEXT.hasRepositories, repositories.length > 0);
     }
 
     /**

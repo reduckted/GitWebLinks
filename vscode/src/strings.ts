@@ -3,7 +3,7 @@ import { Uri } from 'vscode';
 
 export const STRINGS = {
     extension: {
-        gitNotFound: 'Could not find Git. Make sure Git is installed and in the PATH.'
+        gitExtensionNotFound: 'Could not find the "vscode.git" extension.'
     },
     getLinkCommand: {
         noFileSelected: 'Cannot copy a link because no file is selected.',
@@ -17,13 +17,13 @@ export const STRINGS = {
             format('%s link copied to the clipboard.', handlerName),
         error: 'An error occurred while creating the link.',
         notTrackedByGit: (file: Uri): string =>
-            format("The file '%s' is not tracked by Git.", file),
-        noRemote: (repositoryRoot: string): string =>
-            format("The repository '%s' does not have any remotes.", repositoryRoot),
-        noRemoteHead: (repositoryRoot: string, remoteName: string): string =>
+            format("The file '%s' is not tracked by Git.", file.toString()),
+        noRemote: (repositoryRoot: Uri): string =>
+            format("The repository '%s' does not have any remotes.", repositoryRoot.toString()),
+        noRemoteHead: (repositoryRoot: Uri, remoteName: string): string =>
             format(
                 "The repository '%s' does not have a 'HEAD' ref for the '%s' remote. You can fix this by running the command: git remote set-head %s --auto",
-                repositoryRoot,
+                repositoryRoot.toString(),
                 remoteName,
                 remoteName
             ),

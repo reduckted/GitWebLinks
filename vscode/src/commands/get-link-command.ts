@@ -10,9 +10,9 @@ import {
     window
 } from 'vscode';
 
-import { git } from '../git';
+import { Git } from '../git';
 import { CreateUrlResult, LinkHandler } from '../link-handler';
-import { LinkHandlerProvider } from '../link-handler-provider';
+import { LinkHandlerProvider, SelectedLinkHandler } from '../link-handler-provider';
 import { log } from '../log';
 import { NoRemoteHeadError } from '../no-remote-head-error';
 import { RepositoryFinder } from '../repository-finder';
@@ -38,11 +38,13 @@ export class GetLinkCommand {
      * @constructor
      * @param repositoryFinder The repository finder to use for finding repository information for a file.
      * @param handlerProvider The provider of link handlers.
+     * @param git The Git service.
      * @param options The options that control how the command behaves.
      */
     public constructor(
         private readonly repositoryFinder: RepositoryFinder,
         private readonly handlerProvider: LinkHandlerProvider,
+        private readonly git: Git,
         private readonly options: GetLinkCommandOptions
     ) {
         this.settings = new Settings();
@@ -75,7 +77,7 @@ export class GetLinkCommand {
             return;
         }
 
-        info = await this.getResourceInfo(resource);
+        info = this.getResourceInfo(resource);
 
         if (info) {
             let selection: SelectedRange | undefined;
@@ -106,7 +108,8 @@ export class GetLinkCommand {
 
                 result = await info.handler.createUrl(
                     info.repository,
-                    { filePath: info.uri.fsPath, selection },
+                    info.remoteUrl,
+                    { uri: info.uri, selection },
                     { target }
                 );
 
@@ -218,11 +221,11 @@ export class GetLinkCommand {
      * @param resource The URI of the resource to get the info for.
      * @returns The resource information.
      */
-    private async getResourceInfo(resource: Uri): Promise<ResourceInfo | undefined> {
+    private getResourceInfo(resource: Uri): ResourceInfo | undefined {
         let repository: Repository | undefined;
-        let handler: LinkHandler | undefined;
+        let match: SelectedLinkHandler | undefined;
 
-        repository = await this.repositoryFinder.findRepository(resource.fsPath);
+        repository = this.repositoryFinder.findRepository(resource);
 
         if (!repository) {
             log('File is not tracked by Git.');
@@ -236,13 +239,13 @@ export class GetLinkCommand {
             return undefined;
         }
 
-        handler = this.handlerProvider.select(repository);
+        match = this.handlerProvider.select(repository);
 
-        if (!handler) {
+        if (!match) {
             log("No handler for remote '%s'.", repository.remote);
             void window
                 .showErrorMessage<ActionMessageItem>(
-                    STRINGS.getLinkCommand.noHandler(repository.remote.url),
+                    STRINGS.getLinkCommand.noHandler(repository.remote.urls.at(0) ?? ''),
                     {
                         title: STRINGS.getLinkCommand.openSettings,
                         action: 'settings'
@@ -252,7 +255,7 @@ export class GetLinkCommand {
             return undefined;
         }
 
-        return { uri: resource, repository, handler };
+        return { uri: resource, repository, ...match };
     }
 
     /**
@@ -369,7 +372,7 @@ export class GetLinkCommand {
         let useShortHashes: boolean;
 
         lines = (
-            await git(
+            await this.git.exec(
                 info.repository.root,
                 'branch',
                 '--list',
@@ -504,7 +507,7 @@ function openExternal(link: string): void {
 }
 
 /**
- * Options for controling the behaviouor of the command.
+ * Options for controlling the behavior of the command.
  */
 export interface GetLinkCommandOptions {
     /**
@@ -535,7 +538,7 @@ interface ResourceInfo {
     uri: Uri;
 
     /**
-     * The repository that the resource is in.
+     * The information about the repository that the resource is in.
      */
     readonly repository: RepositoryWithRemote;
 
@@ -543,6 +546,11 @@ interface ResourceInfo {
      * The link handler for the resource.
      */
     readonly handler: LinkHandler;
+
+    /**
+     * The remote URL that was used to select the handler.
+     */
+    readonly remoteUrl: string;
 }
 
 /**

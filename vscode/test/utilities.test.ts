@@ -1,17 +1,22 @@
 import { expect } from 'chai';
 import * as assert from 'node:assert';
-import { commands, Position, Selection, TextEditor, window } from 'vscode';
+import { commands, Position, Selection, TextEditor, Uri, window } from 'vscode';
 
 import { getSelectedRange, hasRemote, normalizeUrl, toSelection } from '../src/utilities';
 
 describe('utilities', () => {
     describe('hasRemote', () => {
         it('returns true when repository has a remote.', () => {
-            expect(hasRemote({ remote: { url: 'a', name: 'origin' }, root: 'b' })).to.be.true;
+            expect(
+                hasRemote({
+                    remote: { name: 'origin', urls: ['a'] },
+                    root: Uri.file(process.cwd())
+                })
+            ).to.be.true;
         });
 
         it('returns false when repository does not have a remote.', () => {
-            expect(hasRemote({ remote: undefined, root: 'b' })).to.be.false;
+            expect(hasRemote({ remote: undefined, root: Uri.file(process.cwd()) })).to.be.false;
         });
     });
 

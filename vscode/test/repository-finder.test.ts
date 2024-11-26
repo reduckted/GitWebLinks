@@ -1,298 +1,166 @@
 import { expect } from 'chai';
-import { promises as fs } from 'fs';
-import { join } from 'path';
 import * as sinon from 'sinon';
+import { Uri } from 'vscode';
 
-import { git } from '../src/git';
+import { RepositoryState } from '../src/api/git';
+import { Git, GitRemote, GitRepository } from '../src/git';
 import { RepositoryFinder } from '../src/repository-finder';
 import { Settings } from '../src/settings';
-import { Repository } from '../src/types';
 
-import { Directory, markAsSlow, setupRepository } from './helpers';
+import { getGitService } from './helpers';
 
 describe('RepositoryFinder', function () {
     let finder: RepositoryFinder;
-    let root: Directory;
-    let worktree: Directory | undefined;
+    let git: Git;
 
-    // We need to create repositories, so mark the
-    // tests as being a bit slower than other tests.
-    markAsSlow(this);
-
-    beforeEach(async () => {
-        finder = new RepositoryFinder();
-        root = await Directory.create();
+    beforeEach(() => {
+        git = getGitService();
+        finder = new RepositoryFinder(git);
     });
 
-    afterEach(async () => {
+    afterEach(() => {
         sinon.restore();
-        await root.dispose();
-    });
-
-    describe('hasRepositories', () => {
-        it('should return false when the workspace is not in a Git repository.', async () => {
-            expect(await finder.hasRepositories(root.path)).to.be.false;
-        });
-
-        it('should return false when the workspace does not contain any Git repositories.', async () => {
-            await root.mkdirp('a/b/c');
-            await root.mkdirp('d/e/f');
-            expect(await finder.hasRepositories(root.path)).to.be.false;
-        });
-
-        it('should return true when the workspace is at the root of the repository.', async () => {
-            await setupRepository(root.path);
-
-            expect(await finder.hasRepositories(root.path)).to.be.true;
-        });
-
-        it('should return true when the workspace is within a repository.', async () => {
-            let child: string;
-
-            await setupRepository(root.path);
-
-            child = await root.mkdirp('child');
-
-            expect(await finder.hasRepositories(child)).to.be.true;
-        });
-
-        ['first', 'first/second', 'first/second/third'].forEach((path) => {
-            it(`should return true when the workspace contains a repository in a child directory of '${path}'.`, async () => {
-                let child: string;
-
-                child = await root.mkdirp(path);
-                await setupRepository(child);
-
-                expect(await finder.hasRepositories(root.path)).to.be.true;
-            });
-        });
-
-        ['node_modules', 'bin', 'obj', '.vscode', '.github'].forEach((dir) => {
-            it(`should ignore the child directory '${dir}'.`, async () => {
-                let child: string;
-
-                child = await root.mkdirp(dir);
-                await setupRepository(child);
-
-                expect(await finder.hasRepositories(root.path)).to.be.false;
-            });
-        });
     });
 
     describe('findRepository', () => {
-        afterEach(async () => {
-            if (worktree) {
-                await worktree.dispose();
-                worktree = undefined;
-            }
+        let match: GitRepository | undefined;
+
+        beforeEach(() => {
+            sinon.stub(git, 'getRepository').callsFake(() => match);
         });
 
-        it('should not find the info when the path is not in a Git repository.', async () => {
-            expect(await finder.findRepository(root.path)).to.be.undefined;
+        it('should not find the info when the path is not in a Git repository.', () => {
+            match = undefined;
+            expect(finder.findRepository(Uri.file(process.cwd()))).to.be.undefined;
         });
 
-        it('should find the info when the path is the root of the repository.', async () => {
-            await setupRepository(root.path);
-            await git(root.path, 'remote', 'add', 'origin', 'https://github.com/example/repo');
+        it('should find the info when the path is in a repository.', () => {
+            let origin: GitRemote;
 
-            expect(await finder.findRepository(root.path)).to.deep.equal({
-                root: root.path,
-                remote: { url: 'https://github.com/example/repo', name: 'origin' }
+            origin = { name: 'origin', isReadOnly: false };
+
+            match = repository('a', { remotes: [origin] });
+
+            expect(finder.findRepository(Uri.file(process.cwd()))).to.deep.equal({
+                root: match.rootUri,
+                remote: { name: 'origin', urls: [] }
             });
         });
 
-        it('should find the info when the path is below the root of the repository.', async () => {
-            let child: string;
+        it('should use the remote specified in the settings if it exists.', () => {
+            let alpha: GitRemote;
+            let beta: GitRemote;
+            let testing: GitRemote;
 
-            await setupRepository(root.path);
-            await git(root.path, 'remote', 'add', 'origin', 'https://github.com/example/repo');
-
-            child = await root.mkdirp('child');
-
-            expect(await finder.findRepository(child)).to.deep.equal({
-                root: root.path,
-                remote: { url: 'https://github.com/example/repo', name: 'origin' }
-            });
-        });
-
-        it('should find the info when starting from a file.', async () => {
-            let file: string;
-
-            await setupRepository(root.path);
-            await git(root.path, 'remote', 'add', 'origin', 'https://github.com/example/repo');
-
-            file = join(root.path, 'file.txt');
-            await fs.writeFile(file, '');
-
-            expect(await finder.findRepository(file)).to.deep.equal({
-                root: root.path,
-                remote: { url: 'https://github.com/example/repo', name: 'origin' }
-            });
-        });
-
-        it('should find the info when the file is in a Git worktree.', async () => {
-            worktree = await Directory.create();
-            await setupRepository(root.path);
-            await git(root.path, 'remote', 'add', 'origin', 'https://github.com/example/repo');
-            await git(root.path, 'worktree', 'add', worktree.path);
-
-            expect(await finder.findRepository(worktree.path)).to.deep.equal({
-                root: worktree.path,
-                remote: { url: 'https://github.com/example/repo', name: 'origin' }
-            });
-        });
-
-        it('should use the remote specified in the settings if it exists.', async () => {
             sinon.stub(Settings.prototype, 'getPreferredRemoteName').returns('testing');
 
-            await setupRepository(root.path);
-            await git(root.path, 'remote', 'add', 'alpha', 'https://github.com/example/alpha');
-            await git(root.path, 'remote', 'add', 'beta', 'https://github.com/example/beta');
-            await git(root.path, 'remote', 'add', 'testing', 'https://github.com/example/repo');
+            alpha = { name: 'alpha', isReadOnly: false };
+            beta = { name: 'beta', isReadOnly: false };
+            testing = { name: 'testing', isReadOnly: false };
 
-            expect(await finder.findRepository(root.path)).to.deep.equal({
-                root: root.path,
-                remote: { url: 'https://github.com/example/repo', name: 'testing' }
+            match = repository('b', { remotes: [alpha, beta, testing] });
+
+            expect(finder.findRepository(Uri.file(process.cwd()))).to.deep.equal({
+                root: match.rootUri,
+                remote: { name: 'testing', urls: [] }
             });
         });
 
-        it('should use the first remote alphabetically when the remote specified in the settings does not exist.', async () => {
+        it('should use the first remote alphabetically when the remote specified in the settings does not exist.', () => {
+            let alpha: GitRemote;
+            let beta: GitRemote;
+            let gamma: GitRemote;
+
             sinon.stub(Settings.prototype, 'getPreferredRemoteName').returns('testing');
 
-            await setupRepository(root.path);
-            await git(root.path, 'remote', 'add', 'beta', 'https://github.com/example/beta');
-            await git(root.path, 'remote', 'add', 'alpha', 'https://github.com/example/alpha');
-            await git(root.path, 'remote', 'add', 'gamma', 'https://github.com/example/gamma');
+            alpha = { name: 'alpha', isReadOnly: false };
+            beta = { name: 'beta', isReadOnly: false };
+            gamma = { name: 'gamma', isReadOnly: false };
 
-            expect(await finder.findRepository(root.path)).to.deep.equal({
-                root: root.path,
-                remote: { url: 'https://github.com/example/alpha', name: 'alpha' }
+            match = repository('c', { remotes: [alpha, beta, gamma] });
+
+            expect(finder.findRepository(Uri.file(process.cwd()))).to.deep.equal({
+                root: match.rootUri,
+                remote: { name: 'alpha', urls: [] }
             });
+        });
+
+        it('should use the remote URLs that are defined.', () => {
+            let getPreferredRemoteName: sinon.SinonStub<[], string>;
+            let alpha: GitRemote;
+            let beta: GitRemote;
+            let gamma: GitRemote;
+            let delta: GitRemote;
+            let path: Uri;
+
+            getPreferredRemoteName = sinon.stub(Settings.prototype, 'getPreferredRemoteName');
+
+            alpha = { name: 'alpha', isReadOnly: false, fetchUrl: 'a', pushUrl: 'b' };
+            beta = { name: 'beta', isReadOnly: false, fetchUrl: 'c' };
+            gamma = { name: 'gamma', isReadOnly: false, pushUrl: 'd' };
+            delta = { name: 'delta', isReadOnly: false };
+
+            match = repository('d', { remotes: [alpha, beta, gamma, delta] });
+            path = Uri.file(process.cwd());
+
+            getPreferredRemoteName.returns('alpha');
+            expect(finder.findRepository(path)?.remote?.urls).to.deep.equal(['a', 'b']);
+
+            getPreferredRemoteName.returns('beta');
+            expect(finder.findRepository(path)?.remote?.urls).to.deep.equal(['c']);
+
+            getPreferredRemoteName.returns('gamma');
+            expect(finder.findRepository(path)?.remote?.urls).to.deep.equal(['d']);
+
+            getPreferredRemoteName.returns('delta');
+            expect(finder.findRepository(path)?.remote?.urls).to.be.empty;
         });
     });
 
-    describe('findRepositories', () => {
-        it('should return an empty collection when the workspace is not in a Git repository.', async () => {
-            expect(await findRoots(root.path)).to.be.empty;
-        });
+    describe('getAllRepositories', () => {
+        let repositories: GitRepository[];
 
-        it('should return an empty collection when the workspace does not contain any Git repositories.', async () => {
-            await root.mkdirp('a/b/c');
-            await root.mkdirp('d/e/f');
-            expect(await findRoots(root.path)).to.be.empty;
-        });
-
-        it('should return one repository when the workspace is at the root of the repository.', async () => {
-            await setupRepository(root.path);
-
-            expect(await findRoots(root.path)).to.deep.equal([root.path]);
-        });
-
-        it('should return one repository when the workspace is within a repository.', async () => {
-            let child: string;
-
-            await setupRepository(root.path);
-
-            child = await root.mkdirp('child');
-
-            expect(await findRoots(child)).to.deep.equal([root.path]);
-        });
-
-        ['first', 'first/second', 'first/second/third'].forEach((path) => {
-            it(`should return one repository when the workspace contains a repository in a child directory of '${path}'.`, async () => {
-                let child: string;
-
-                child = await root.mkdirp(path);
-                await setupRepository(child);
-
-                expect(await findRoots(root.path)).to.deep.equal([child]);
-            });
-        });
-
-        ['node_modules', 'bin', 'obj', '.vscode', '.github'].forEach((dir) => {
-            it(`should ignore the child directory '${dir}'.`, async () => {
-                let child: string;
-
-                child = await root.mkdirp(dir);
-                await setupRepository(child);
-
-                expect(await findRoots(root.path)).to.be.empty;
-            });
-        });
-
-        it('should find all repositories within the workspace.', async function () {
-            let alpha: string;
-            let beta: string;
-            let gamma: string;
-            let delta: string;
-
-            // We have to make a few repositories,
-            // so increase the "slow" threshold.
-            this.slow(4000);
-
-            alpha = await root.mkdirp('top/alpha');
-            beta = await root.mkdirp('top/beta');
-            gamma = await root.mkdirp('top/second/gamma');
-            delta = await root.mkdirp('top/second/third/fourth/delta');
-            await root.mkdirp('top/second/other');
-
-            await setupRepository(alpha);
-            await setupRepository(beta);
-            await setupRepository(gamma);
-            await setupRepository(delta);
-
-            expect((await findRoots(root.path)).sort()).to.deep.equal([alpha, beta, gamma, delta]);
-        });
-
-        it('should get the remote for each repository.', async function () {
-            let alpha: string;
-            let beta: string;
-            let gamma: string;
-            let repositories: Repository[];
-
-            // We have to make a few repositories,
-            // so increase the "slow" threshold.
-            this.slow(3000);
-
-            alpha = await root.mkdirp('alpha');
-            beta = await root.mkdirp('beta');
-            gamma = await root.mkdirp('gamma');
-
-            await setupRepository(alpha);
-            await setupRepository(beta);
-            await setupRepository(gamma);
-
-            await git(alpha, 'remote', 'add', 'origin', 'https://github.com/example/alpha');
-            await git(gamma, 'remote', 'add', 'origin', 'https://github.com/example/gamma');
-
+        beforeEach(() => {
             repositories = [];
+            sinon.stub(git, 'repositories').value(repositories);
+        });
 
-            for await (let repository of finder.findRepositories(root.path)) {
-                repositories.push(repository);
-            }
+        it('should return an empty collection when there are no repositories.', () => {
+            repositories.length = 0;
+            expect(finder.getAllRepositories()).to.be.empty;
+        });
 
-            repositories.sort((x, y) => x.root.localeCompare(y.root));
+        it('should return information for each repository from the `vscode.git` extension.', () => {
+            let alpha: GitRepository;
+            let beta: GitRepository;
 
-            expect(repositories).to.deep.equal([
-                {
-                    root: alpha,
-                    remote: { url: 'https://github.com/example/alpha', name: 'origin' }
-                },
-                { root: beta, remote: undefined },
-                { root: gamma, remote: { url: 'https://github.com/example/gamma', name: 'origin' } }
+            alpha = repository('a', { remotes: [{ name: 'origin', isReadOnly: true }] });
+            beta = repository('b', { remotes: [{ name: 'origin', isReadOnly: true }] });
+
+            repositories.push(alpha, beta);
+
+            expect(finder.getAllRepositories()).to.deep.equal([
+                { root: alpha.rootUri, remote: { name: 'origin', urls: [] } },
+                { root: beta.rootUri, remote: { name: 'origin', urls: [] } }
             ]);
         });
-
-        async function findRoots(folder: string): Promise<string[]> {
-            let repositories: string[];
-
-            repositories = [];
-
-            for await (let repository of finder.findRepositories(folder)) {
-                repositories.push(repository.root);
-            }
-
-            return repositories;
-        }
     });
 });
+
+function repository(root: string, state: Partial<RepositoryState>): GitRepository {
+    return {
+        rootUri: Uri.file(root),
+        state: {
+            HEAD: undefined,
+            indexChanges: [],
+            mergeChanges: [],
+            rebaseCommit: undefined,
+            refs: [],
+            remotes: [],
+            submodules: [],
+            untrackedChanges: [],
+            workingTreeChanges: [],
+            ...state
+        } satisfies Partial<RepositoryState> as unknown as RepositoryState
+    } satisfies Partial<GitRepository> as unknown as GitRepository;
+}

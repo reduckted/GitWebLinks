@@ -1,3 +1,4 @@
+import { Git } from './git';
 import { LinkHandler } from './link-handler';
 import { log } from './log';
 import { load } from './schema';
@@ -11,28 +12,31 @@ export class LinkHandlerProvider {
 
     /**
      * @constructor
+     * @param git The Git service.
      */
-    public constructor() {
+    public constructor(git: Git) {
         this.handlers = load()
             .sort((x, y) => x.name.localeCompare(y.name))
-            .map((definition) => new LinkHandler(definition));
+            .map((definition) => new LinkHandler(definition, git));
     }
 
     /**
      * Selects the link handler to generate links for the given repository.
      *
      * @param repository The repository to select the handler for.
-     * @returns The handler to use, or `undefined` if the repository is not supported.
+     * @returns The handler to use and the remote URL that was matched, or `undefined` if the repository is not supported.
      */
-    public select(repository: RepositoryWithRemote): LinkHandler | undefined {
+    public select(repository: RepositoryWithRemote): SelectedLinkHandler | undefined {
         log('Finding a handler for repository %O.', repository.remote);
 
         for (let handler of this.handlers) {
             log("Testing '%s'.", handler.name);
 
-            if (handler.handlesRemoteUrl(repository.remote.url)) {
-                log("Handler '%s' is a match.", handler.name);
-                return handler;
+            for (let url of repository.remote.urls) {
+                if (handler.handlesRemoteUrl(url)) {
+                    log("Handler '%s' is a match.", handler.name);
+                    return { handler, remoteUrl: url };
+                }
             }
         }
 
@@ -85,4 +89,16 @@ export class LinkHandlerProvider {
 
         return output;
     }
+}
+
+export interface SelectedLinkHandler {
+    /**
+     * The selected handler.
+     */
+    readonly handler: LinkHandler;
+
+    /**
+     * The remote URL that was used to select the handler.
+     */
+    readonly remoteUrl: string;
 }

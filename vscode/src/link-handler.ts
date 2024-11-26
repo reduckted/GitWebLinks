@@ -2,7 +2,7 @@ import { promises as fs, Stats } from 'fs';
 import * as path from 'path';
 import { URL } from 'url';
 
-import { git } from './git';
+import { Git } from './git';
 import { NoRemoteHeadError } from './no-remote-head-error';
 import { RemoteServer } from './remote-server';
 import {
@@ -39,8 +39,12 @@ export class LinkHandler {
     /**
      * @constructor
      * @param definition The details of the handler.
+     * @param git The Git service.
      */
-    public constructor(private readonly definition: HandlerDefinition) {
+    public constructor(
+        private readonly definition: HandlerDefinition,
+        private readonly git: Git
+    ) {
         this.settings = new Settings();
 
         if ('private' in definition) {
@@ -108,12 +112,14 @@ export class LinkHandler {
      * Creates a link for the specified file.
      *
      * @param repository The repository that the file is in.
+     * @param remoteUrl The remote URL that was matched to this handler.
      * @param file The details of the file.
      * @param options The options for creating the link.
      * @returns Information about the URL.
      */
     public async createUrl(
         repository: RepositoryWithRemote,
+        remoteUrl: string,
         file: FileInfo,
         options: LinkOptions
     ): Promise<CreateUrlResult> {
@@ -148,10 +154,10 @@ export class LinkHandler {
 
         // Adjust the remote URL so that it's in a
         // standard format that we can manipulate.
-        remote = normalizeUrl(repository.remote.url);
+        remote = normalizeUrl(remoteUrl);
 
         address = this.getAddress(remote);
-        relativePath = await this.getRelativePath(repository.root, file.filePath);
+        relativePath = await this.getRelativePath(repository.root.fsPath, file.uri.fsPath);
 
         data = {
             base: address.web ?? address.http,
@@ -180,7 +186,7 @@ export class LinkHandler {
 
         url = this.applyModifications(
             url,
-            this.queryModifications.filter((x) => x.pattern.test(file.filePath))
+            this.queryModifications.filter((x) => x.pattern.test(file.uri.fsPath))
         );
 
         return { url, relativePath, selection };
@@ -291,7 +297,7 @@ export class LinkHandler {
         switch (type) {
             case 'branch':
                 return (
-                    await git(
+                    await this.git.exec(
                         repository.root,
                         'rev-parse',
                         this.getRevParseOutputArgument(),
@@ -300,9 +306,11 @@ export class LinkHandler {
                 ).trim();
             case 'commit':
                 if (this.settings.getUseShortHash()) {
-                    return (await git(repository.root, 'rev-parse', '--short', 'HEAD')).trim();
+                    return (
+                        await this.git.exec(repository.root, 'rev-parse', '--short', 'HEAD')
+                    ).trim();
                 } else {
-                    return (await git(repository.root, 'rev-parse', 'HEAD')).trim();
+                    return (await this.git.exec(repository.root, 'rev-parse', 'HEAD')).trim();
                 }
 
             default:
@@ -326,7 +334,7 @@ export class LinkHandler {
 
         try {
             branch = (
-                await git(
+                await this.git.exec(
                     repository.root,
                     'rev-parse',
                     this.getRevParseOutputArgument(),

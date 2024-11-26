@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import * as os from 'os';
 import { join } from 'path';
 import { rimraf } from 'rimraf';
+import { Uri } from 'vscode';
 
 import { isErrorCode } from '../../src/utilities';
 
@@ -28,7 +29,14 @@ export class Directory {
      * @constructor
      * @param path The directory path.
      */
-    private constructor(public readonly path: string) {}
+    private constructor(public readonly path: string) {
+        this.uri = Uri.file(path);
+    }
+
+    /**
+     * The path as a URI.
+     */
+    public readonly uri: Uri;
 
     /**
      * Creates a new child directory.

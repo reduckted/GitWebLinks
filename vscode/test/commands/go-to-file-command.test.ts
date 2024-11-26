@@ -15,17 +15,17 @@ import {
     TextLine,
     Uri,
     window,
-    workspace,
-    WorkspaceFolder
+    workspace
 } from 'vscode';
 
 import { GoToFileCommand } from '../../src/commands/go-to-file-command';
+import { Git } from '../../src/git';
 import { LinkHandlerProvider } from '../../src/link-handler-provider';
 import { RepositoryFinder } from '../../src/repository-finder';
 import { STRINGS } from '../../src/strings';
 import { Repository, SelectedRange, UrlInfo } from '../../src/types';
 import { toSelection } from '../../src/utilities';
-import { Directory } from '../helpers';
+import { Directory, getGitService, matchUri } from '../helpers';
 
 const expect = chai.use(sinonChai).expect;
 
@@ -40,8 +40,7 @@ describe('GoToFileLinkCommand', () => {
     let input: string | undefined;
     let clipboard: string;
     let urlInfo: UrlInfo[];
-    let workspaceFolders: WorkspaceFolder[];
-    let repositories: Record<string, Repository[]>;
+    let repositories: Repository[];
     let root: Directory;
     let selectionIndex: number;
     let document: TextDocument;
@@ -50,14 +49,16 @@ describe('GoToFileLinkCommand', () => {
     let lines: TextLine[];
 
     beforeEach(() => {
-        repositories = {};
-        finder = new RepositoryFinder();
-        sinon
-            .stub(finder, 'findRepositories')
-            .callsFake((folder) => asyncIterable(repositories[folder] ?? []));
+        let git: Git;
+
+        git = getGitService();
+
+        repositories = [];
+        finder = new RepositoryFinder(git);
+        sinon.stub(finder, 'getAllRepositories').callsFake(() => repositories);
 
         urlInfo = [];
-        provider = new LinkHandlerProvider();
+        provider = new LinkHandlerProvider(git);
         sinon.stub(provider, 'getUrlInfo').callsFake(() => urlInfo);
 
         showErrorMessage = sinon
@@ -89,8 +90,6 @@ describe('GoToFileLinkCommand', () => {
         editor = { revealRange: () => undefined } as unknown as TextEditor;
         revealRange = sinon.stub(editor, 'revealRange');
 
-        workspaceFolders = [];
-        sinon.stub(workspace, 'workspaceFolders').get(() => workspaceFolders);
         openTextDocument = sinon.stub(workspace, 'openTextDocument').resolves(document);
 
         sinon.stub(window, 'showTextDocument').resolves(editor);
@@ -165,9 +164,9 @@ describe('GoToFileLinkCommand', () => {
             expectError(STRINGS.goToFileCommand.unknownUrl);
         });
 
-        it('should show an error when there are no repositories in the workspaces.', async () => {
+        it('should show an error when there are no repositories.', async () => {
             urlInfo = [createUrlInfo('readme.md', 'http://example.com')];
-            repositories = {};
+            repositories = [];
 
             await command.execute();
 
@@ -177,7 +176,6 @@ describe('GoToFileLinkCommand', () => {
         it('should show an error when the file does not exist in the matching repository.', async () => {
             await setupFileSystem({
                 repository: 'http://example.com/repo',
-                workspace: true,
                 children: {}
             });
 
@@ -190,7 +188,6 @@ describe('GoToFileLinkCommand', () => {
 
         it('should show an error if the URL points to a directory.', async () => {
             await setupFileSystem({
-                workspace: true,
                 repository: 'http://example.com/repo',
                 children: { dir: { children: {} } }
             });
@@ -204,7 +201,6 @@ describe('GoToFileLinkCommand', () => {
 
         it('should open the single file that matches the URL.', async () => {
             await setupFileSystem({
-                workspace: true,
                 repository: 'http://example.com/repo',
                 children: { 'readme.md': 'file' }
             });
@@ -213,12 +209,11 @@ describe('GoToFileLinkCommand', () => {
 
             await command.execute();
 
-            expectFiles(join(root.path, 'readme.md'));
+            expectFiles(Uri.joinPath(root.uri, 'readme.md'));
         });
 
         it('should not prompt to select a file when the file exists in multiple repositories, but one repository matches the remote.', async () => {
             await setupFileSystem({
-                workspace: true,
                 children: {
                     alpha: {
                         repository: 'http://example.com/alpha',
@@ -235,12 +230,11 @@ describe('GoToFileLinkCommand', () => {
 
             await command.execute();
 
-            expectFiles(join(root.path, 'alpha/readme.md'));
+            expectFiles(Uri.joinPath(root.uri, 'alpha/readme.md'));
         });
 
         it('should prompt to select a file when the file exists in multiple repositories and no repository matches the remote.', async () => {
             await setupFileSystem({
-                workspace: true,
                 children: {
                     alpha: {
                         repository: 'http://example.com/alpha',
@@ -257,12 +251,14 @@ describe('GoToFileLinkCommand', () => {
 
             await command.execute();
 
-            expectFiles(join(root.path, 'alpha/readme.md'), join(root.path, 'beta/readme.md'));
+            expectFiles(
+                Uri.joinPath(root.uri, 'alpha/readme.md'),
+                Uri.joinPath(root.uri, 'beta/readme.md')
+            );
         });
 
         it('should not prompt to select a file when the file exists in multiple repositories but under different paths.', async () => {
             await setupFileSystem({
-                workspace: true,
                 children: {
                     alpha: {
                         repository: 'http://example.com/alpha',
@@ -283,57 +279,11 @@ describe('GoToFileLinkCommand', () => {
 
             await command.execute();
 
-            expectFiles(join(root.path, 'beta/readme.md'));
+            expectFiles(Uri.joinPath(root.uri, 'beta/readme.md'));
         });
 
-        it('should find the file when there are multiple workspaces with their own repositories.', async () => {
+        it('should find the file when there are multiple repositories and none match the remote, but the file is in only one repository.', async () => {
             await setupFileSystem({
-                children: {
-                    alpha: {
-                        workspace: true,
-                        repository: 'http://example.com/alpha',
-                        children: { 'one.md': 'file' }
-                    },
-                    beta: {
-                        workspace: true,
-                        repository: 'http://example.com/beta',
-                        children: { 'two.md': 'file' }
-                    }
-                }
-            });
-
-            urlInfo = [createUrlInfo('two.md', 'http://example.com/other')];
-
-            await command.execute();
-
-            expectFiles(join(root.path, 'beta/two.md'));
-        });
-
-        it('should find the file when there are multiple workspaces within one repository.', async () => {
-            await setupFileSystem({
-                repository: 'http://example.com/root',
-                children: {
-                    alpha: {
-                        workspace: true,
-                        children: { 'one.md': 'file' }
-                    },
-                    beta: {
-                        workspace: true,
-                        children: { 'two.md': 'file' }
-                    }
-                }
-            });
-
-            urlInfo = [createUrlInfo('alpha/one.md', 'http://example.com/root')];
-
-            await command.execute();
-
-            expectFiles(join(root.path, 'alpha/one.md'));
-        });
-
-        it('should find the file when there are multiple repositories within one workspace.', async () => {
-            await setupFileSystem({
-                workspace: true,
                 children: {
                     alpha: {
                         repository: 'http://example.com/alpha',
@@ -350,51 +300,11 @@ describe('GoToFileLinkCommand', () => {
 
             await command.execute();
 
-            expectFiles(join(root.path, 'beta/two.md'));
-        });
-
-        it('should find the file when there are multiple repositories within multiple workspaces.', async () => {
-            await setupFileSystem({
-                children: {
-                    alpha: {
-                        workspace: true,
-                        children: {
-                            first: {
-                                repository: 'http://example.com/first',
-                                children: { 'one.md': 'file' }
-                            },
-                            second: {
-                                repository: 'http://example.com/second',
-                                children: { 'two.md': 'file' }
-                            }
-                        }
-                    },
-                    beta: {
-                        workspace: true,
-                        children: {
-                            third: {
-                                repository: 'http://example.com/third',
-                                children: { 'three.md': 'file' }
-                            },
-                            fourth: {
-                                repository: 'http://example.com/fourth',
-                                children: { 'four.md': 'file' }
-                            }
-                        }
-                    }
-                }
-            });
-
-            urlInfo = [createUrlInfo('three.md', 'http://example.com/other')];
-
-            await command.execute();
-
-            expectFiles(join(root.path, 'beta/third/three.md'));
+            expectFiles(Uri.joinPath(root.uri, 'beta/two.md'));
         });
 
         it('should open the selected file as a text document.', async () => {
             await setupFileSystem({
-                workspace: true,
                 children: {
                     alpha: {
                         repository: 'http://example.com/alpha',
@@ -417,7 +327,7 @@ describe('GoToFileLinkCommand', () => {
             await command.execute();
 
             expect(openTextDocument).to.have.been.calledOnceWithExactly(
-                join(root.path, 'beta/readme.md')
+                matchUri(Uri.joinPath(root.uri, 'beta/readme.md'))
             );
         });
 
@@ -425,7 +335,6 @@ describe('GoToFileLinkCommand', () => {
             let executeCommand: sinon.SinonStub;
 
             await setupFileSystem({
-                workspace: true,
                 repository: 'http://example.com/alpha',
                 children: { 'readme.md': 'file' }
             });
@@ -438,12 +347,12 @@ describe('GoToFileLinkCommand', () => {
             await command.execute();
 
             expect(openTextDocument).to.have.been.calledOnceWithExactly(
-                join(root.path, 'readme.md')
+                matchUri(Uri.joinPath(root.uri, 'readme.md'))
             );
 
             expect(executeCommand).to.have.been.calledOnceWithExactly(
                 'vscode.open',
-                Uri.file(join(root.path, 'readme.md'))
+                matchUri(Uri.joinPath(root.uri, 'readme.md'))
             );
         });
     });
@@ -457,7 +366,6 @@ describe('GoToFileLinkCommand', () => {
             let selection: Selection;
 
             await setupFileSystem({
-                workspace: true,
                 repository: 'http://example.com/repo',
                 children: { 'readme.md': 'file' }
             });
@@ -469,13 +377,12 @@ describe('GoToFileLinkCommand', () => {
 
             await command.execute();
 
-            expectFiles(join(root.path, 'readme.md'));
+            expectFiles(Uri.joinPath(root.uri, 'readme.md'));
             expect(editor.selection).to.deep.equal(selection);
         });
 
         it('should create the correct selection when the URL only contains a start line.', async () => {
             await setupFileSystem({
-                workspace: true,
                 repository: 'http://example.com/repo',
                 children: { 'readme.md': 'file' }
             });
@@ -505,7 +412,6 @@ describe('GoToFileLinkCommand', () => {
 
         it('should create the correct selection when the URL only contains a start line and end line.', async () => {
             await setupFileSystem({
-                workspace: true,
                 repository: 'http://example.com/repo',
                 children: { 'readme.md': 'file' }
             });
@@ -535,7 +441,6 @@ describe('GoToFileLinkCommand', () => {
 
         it('should create the correct selection when the URL only contains a start line, start column and end column.', async () => {
             await setupFileSystem({
-                workspace: true,
                 repository: 'http://example.com/repo',
                 children: { 'readme.md': 'file' }
             });
@@ -564,7 +469,6 @@ describe('GoToFileLinkCommand', () => {
 
         it('should create the correct selection when the URL contains a start line, start column, end line and end column.', async () => {
             await setupFileSystem({
-                workspace: true,
                 repository: 'http://example.com/repo',
                 children: { 'readme.md': 'file' }
             });
@@ -594,7 +498,6 @@ describe('GoToFileLinkCommand', () => {
 
         it('should scroll to the selected range.', async () => {
             await setupFileSystem({
-                workspace: true,
                 repository: 'http://example.com/repo',
                 children: { 'readme.md': 'file' }
             });
@@ -628,37 +531,12 @@ describe('GoToFileLinkCommand', () => {
         await setupFolder(folder, root.path);
     }
 
-    async function setupFolder(
-        folder: Folder,
-        path: string,
-        currentWorkspace?: WorkspaceFolder,
-        currentRepository?: Repository
-    ): Promise<void> {
-        if (folder.workspace) {
-            currentWorkspace = createWorkspace(path);
-            workspaceFolders.push(currentWorkspace);
-
-            // Store the current repository against this new workspace.
-            if (currentRepository) {
-                repositories[currentWorkspace.uri.fsPath] = [currentRepository];
-            }
-        }
-
+    async function setupFolder(folder: Folder, path: string): Promise<void> {
         if (folder.repository) {
-            currentRepository = { root: path, remote: { url: folder.repository, name: 'origin' } };
-
-            if (currentWorkspace) {
-                let workspaceRepositories: Repository[];
-
-                workspaceRepositories = repositories[currentWorkspace.uri.fsPath];
-
-                if (!workspaceRepositories) {
-                    workspaceRepositories = [];
-                    repositories[currentWorkspace.uri.fsPath] = workspaceRepositories;
-                }
-
-                workspaceRepositories.push(currentRepository);
-            }
+            repositories.push({
+                root: Uri.file(path),
+                remote: { name: 'origin', urls: [folder.repository] }
+            });
         }
 
         for (let name in folder.children) {
@@ -672,19 +550,9 @@ describe('GoToFileLinkCommand', () => {
                 await fs.writeFile(childPath, '');
             } else {
                 await fs.mkdir(childPath, { recursive: true });
-                await setupFolder(childFolder, childPath, currentWorkspace, currentRepository);
+                await setupFolder(childFolder, childPath);
             }
         }
-    }
-
-    function asyncIterable(items: Repository[]): AsyncIterable<Repository> {
-        return {
-            async *[Symbol.asyncIterator](): AsyncIterator<Repository> {
-                for (let item of items) {
-                    yield await Promise.resolve(item);
-                }
-            }
-        };
     }
 
     function setupDocument(...content: string[]): void {
@@ -696,10 +564,6 @@ describe('GoToFileLinkCommand', () => {
             firstNonWhitespaceCharacterIndex: 0,
             isEmptyOrWhitespace: false
         }));
-    }
-
-    function createWorkspace(directory: string): WorkspaceFolder {
-        return { uri: Uri.file(directory), index: 0, name: '' };
     }
 
     function createUrlInfo(
@@ -724,7 +588,7 @@ describe('GoToFileLinkCommand', () => {
         expect(showErrorMessage).to.have.been.calledWith(message);
     }
 
-    function expectFiles(...fileNames: string[]): void {
+    function expectFiles(...fileNames: Uri[]): void {
         switch (fileNames.length) {
             case 0:
                 expect(showQuickPick).to.have.not.been.called;
@@ -733,20 +597,18 @@ describe('GoToFileLinkCommand', () => {
 
             case 1:
                 expect(showQuickPick).to.have.not.been.called;
-                expect(openTextDocument).to.have.been.calledOnceWithExactly(fileNames[0]);
+                expect(openTextDocument).to.have.been.calledOnceWithExactly(matchUri(fileNames[0]));
                 break;
 
             default:
                 expect(showQuickPick).to.have.been.calledOnceWith(
-                    fileNames.map((x) => sinon.match({ label: x }))
+                    fileNames.map((x) => sinon.match({ label: x.fsPath }))
                 );
                 break;
         }
     }
 
     interface Folder {
-        workspace?: true;
-
         repository?: string;
 
         children: Record<string, Folder | 'file'>;

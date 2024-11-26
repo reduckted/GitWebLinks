@@ -5,15 +5,15 @@ import * as path from 'path';
 import * as sinon from 'sinon';
 import { Uri, workspace } from 'vscode';
 
-import { git } from '../src/git';
-import { CreateUrlResult, LinkHandler } from '../src/link-handler';
-import { LinkHandlerProvider } from '../src/link-handler-provider';
+import { Git } from '../src/git';
+import { CreateUrlResult } from '../src/link-handler';
+import { LinkHandlerProvider, SelectedLinkHandler } from '../src/link-handler-provider';
 import { findHandlersDirectory, load, Template } from '../src/schema';
 import { parseTemplate } from '../src/templates';
 import { LinkOptions, RepositoryWithRemote, SelectedRange, UrlInfo } from '../src/types';
 import { normalizeUrl } from '../src/utilities';
 
-import { Directory, markAsSlow, setupRemote, setupRepository } from './helpers';
+import { Directory, getGitService, markAsSlow, setupRemote, setupRepository } from './helpers';
 import {
     HandlerWithTests,
     RemoteUrlTests,
@@ -34,14 +34,16 @@ definitions = load<HandlerWithTests>().sort();
 describe('Link handlers', function () {
     let provider: LinkHandlerProvider;
     let root: Directory;
-    let remote: Directory | undefined;
+    let remoteDirectory: Directory | undefined;
+    let git: Git;
 
     // We need to create repositories, so mark the
     // tests as being a bit slower than other tests.
     markAsSlow(this);
 
     before(() => {
-        provider = new LinkHandlerProvider();
+        git = getGitService();
+        provider = new LinkHandlerProvider(git);
     });
 
     beforeEach(async () => {
@@ -53,8 +55,8 @@ describe('Link handlers', function () {
         sinon.restore();
         await root.dispose();
 
-        if (remote) {
-            await remote.dispose();
+        if (remoteDirectory) {
+            await remoteDirectory.dispose();
         }
     });
 
@@ -207,31 +209,31 @@ describe('Link handlers', function () {
                 }
 
                 async function runTest(
-                    { remote, result, settings }: UrlTest,
+                    { remote: remoteUrl, result, settings }: UrlTest,
                     options: TestOptions = {}
                 ): Promise<void> {
                     let repository: RepositoryWithRemote;
-                    let handler: LinkHandler | undefined;
+                    let match: SelectedLinkHandler | undefined;
                     let link: CreateUrlResult | undefined;
 
                     result = await prepareTest(settings, result, options);
 
                     repository = {
-                        root: root.path,
-                        remote: { url: remote, name: 'origin' }
+                        root: root.uri,
+                        remote: { name: 'origin', urls: [remoteUrl] }
                     };
 
-                    handler = provider.select(repository);
+                    match = provider.select(repository);
 
-                    expect(handler, 'A handler was not found').to.exist;
-                    expect(handler?.name).to.equal(definition.name);
+                    expect(match, 'A handler was not found').to.exist;
+                    expect(match?.handler.name).to.equal(definition.name);
+                    expect(match?.remoteUrl).to.equal(remoteUrl);
 
-                    link = await handler?.createUrl(
+                    link = await match?.handler.createUrl(
                         repository,
+                        remoteUrl,
                         {
-                            filePath: Uri.file(
-                                path.join(root.path, options.fileName || TEST_FILE_NAME)
-                            ).fsPath,
+                            uri: Uri.joinPath(root.uri, options.fileName || TEST_FILE_NAME),
                             selection: options.selection
                         },
                         { target: options.target || { preset: 'branch' } }
@@ -419,18 +421,18 @@ describe('Link handlers', function () {
                 setupSettings(settings);
 
                 if (options.branch) {
-                    await git(root.path, 'checkout', '-b', options.branch);
+                    await git.exec(root.path, 'checkout', '-b', options.branch);
                 }
 
                 if (options.remoteName) {
-                    remote = await setupRemote(root.path, options.remoteName);
-                    await git(root.path, 'remote', 'set-head', options.remoteName, 'master');
+                    remoteDirectory = await setupRemote(root.path, options.remoteName);
+                    await git.exec(root.path, 'remote', 'set-head', options.remoteName, 'master');
                 }
 
                 // Treat the test URL as a template and allow
                 // the current commit hash to be used in the result.
                 return parseTemplate(url).render({
-                    commit: (await git(root.path, 'rev-parse', 'HEAD')).trim()
+                    commit: (await git.exec(root.path, 'rev-parse', 'HEAD')).trim()
                 });
             }
 

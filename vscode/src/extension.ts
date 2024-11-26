@@ -1,35 +1,64 @@
-import { ExtensionContext, window } from 'vscode';
+import { ExtensionContext, window, extensions, Disposable } from 'vscode';
 
+import { GitExtension } from './api/git';
 import { registerCommands } from './commands';
 import { ContextManager } from './context-manager';
-import { initialize } from './git';
+import { Git } from './git';
 import { LinkHandlerProvider } from './link-handler-provider';
 import { log } from './log';
 import { RepositoryFinder } from './repository-finder';
 import { STRINGS } from './strings';
-import { WorkspaceTracker } from './workspace-tracker';
 
 /**
  * Activates the extension.
  *
  * @param context The extension's context.
  */
-export async function activate(context: ExtensionContext): Promise<void> {
-    let repositoryFinder: RepositoryFinder;
-    let workspaceTracker: WorkspaceTracker;
+export function activate(context: ExtensionContext): void {
+    let gitExtension: GitExtension | undefined;
 
     log('Activating extension.');
 
-    if (!(await initialize())) {
-        void window.showErrorMessage(STRINGS.extension.gitNotFound);
+    gitExtension = extensions.getExtension<GitExtension>('vscode.git')?.exports;
+
+    if (!gitExtension) {
+        log('Could not find the `vscode.git` extension.');
+        void window.showErrorMessage(STRINGS.extension.gitExtensionNotFound);
         return;
     }
 
-    repositoryFinder = new RepositoryFinder();
-    workspaceTracker = new WorkspaceTracker(repositoryFinder);
+    if (gitExtension.enabled) {
+        initialize(context, gitExtension);
+    } else {
+        let enabledListener: Disposable;
 
-    context.subscriptions.push(new ContextManager(workspaceTracker));
-    context.subscriptions.push(workspaceTracker);
+        log('The `vscode.git` extension is disabled. Waiting for it to become enabled.');
 
-    registerCommands(context.subscriptions, repositoryFinder, new LinkHandlerProvider());
+        enabledListener = gitExtension.onDidChangeEnablement((enabled) => {
+            if (enabled) {
+                log('The `vscode.git` extension is now enabled.');
+                initialize(context, gitExtension);
+                enabledListener.dispose();
+            }
+        });
+    }
+}
+
+/**
+ * Initializes the extension.
+ *
+ * @param context The extension's context.
+ * @param extension The `vscode.git` extension.
+ */
+function initialize(context: ExtensionContext, extension: GitExtension): void {
+    let repositoryFinder: RepositoryFinder;
+    let git: Git;
+
+    git = new Git(extension.getAPI(1));
+
+    repositoryFinder = new RepositoryFinder(git);
+
+    context.subscriptions.push(new ContextManager(git));
+
+    registerCommands(context.subscriptions, repositoryFinder, new LinkHandlerProvider(git), git);
 }
