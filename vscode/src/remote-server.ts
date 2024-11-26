@@ -14,7 +14,7 @@ export class RemoteServer {
      * @constructor
      * @param servers The server definitions to use when matching.
      */
-    constructor(
+    public constructor(
         servers:
             | StaticServer
             | DynamicServer

@@ -62,12 +62,7 @@ module.exports = tseslint.config(
             ],
             '@typescript-eslint/explicit-member-accessibility': [
                 'warn',
-                {
-                    accessibility: 'explicit',
-                    overrides: {
-                        constructors: 'no-public'
-                    }
-                }
+                { accessibility: 'explicit' }
             ],
             '@typescript-eslint/no-confusing-non-null-assertion': 'error',
             '@typescript-eslint/prefer-readonly': 'warn',
