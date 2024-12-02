@@ -17,7 +17,7 @@ updates:
     - package-ecosystem: "nuget"
       directory: "/visual-studio"
       schedule:
-          interval: "weekly"
+          interval: "monthly"
       groups:
           visual-studio-dependencies:
               patterns:
