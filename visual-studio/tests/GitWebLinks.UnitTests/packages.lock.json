@@ -815,8 +815,8 @@
       },
       "Parlot": {
         "type": "Transitive",
-        "resolved": "1.1.0",
-        "contentHash": "4oesnjw6QkOrNDvqjOe0HcqqhjbEp2QPsCxuPbeRO3vd8qaDmEzTJSdh6hz8qAnxVXN2D6r9PijIeQqz2E+Jyw==",
+        "resolved": "1.2.2",
+        "contentHash": "Vz4SFXeF5BKiQ8jjnkYxw3B8ZVXrl/TcT6RM9hH8+HGLeSqpnWmYi1BidUlchwVFlliW6lorv4TAcGPFvhPj0Q==",
         "dependencies": {
           "System.Memory": "4.6.0"
         }
@@ -1197,7 +1197,7 @@
         "type": "Project",
         "dependencies": {
           "Community.VisualStudio.Toolkit.17": "[17.0.527, )",
-          "Fluid.Core": "[2.13.1, )",
+          "Fluid.Core": "[2.14.0, )",
           "Microsoft.VisualStudio.SDK": "[17.0.31902.203, )"
         }
       },
@@ -1213,13 +1213,13 @@
       },
       "Fluid.Core": {
         "type": "CentralTransitive",
-        "requested": "[2.13.1, )",
-        "resolved": "2.13.1",
-        "contentHash": "/m4ytKlapXgTzBLMTC2cYn/Fz5KdaBeMbLEohWCZfsyilmbTp/jQzUs8+bdivK2OCn4s0MjWrKRMBnyf0B3X8A==",
+        "requested": "[2.14.0, )",
+        "resolved": "2.14.0",
+        "contentHash": "ZdE7Q8zPmIZZVbTAPwPScyGUzBkP1WKLr7oVpntKhW32PocsHDprDSpG8GTgP3DbhV2MuRDttFluSb8sC9JgqQ==",
         "dependencies": {
           "Microsoft.CSharp": "4.7.0",
           "Microsoft.Extensions.FileProviders.Abstractions": "8.0.0",
-          "Parlot": "1.1.0",
+          "Parlot": "1.2.2",
           "System.Reflection.Emit.Lightweight": "4.7.0",
           "System.Text.Json": "8.0.5",
           "TimeZoneConverter": "6.1.0"
