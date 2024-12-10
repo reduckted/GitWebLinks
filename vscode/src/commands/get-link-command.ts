@@ -10,7 +10,7 @@ import {
     window
 } from 'vscode';
 
-import { git } from '../git';
+import { Git } from '../git';
 import { CreateUrlResult, LinkHandler } from '../link-handler';
 import { LinkHandlerProvider } from '../link-handler-provider';
 import { log } from '../log';
@@ -22,11 +22,11 @@ import {
     LinkFormat,
     LinkTarget,
     LinkType,
-    Repository,
-    RepositoryWithRemote,
+    RepositoryInfo,
+    RepositoryInfoWithRemote,
     SelectedRange
 } from '../types';
-import { getErrorMessage, getSelectedRange, hasRemote } from '../utilities';
+import { getErrorMessage, getRemoteUrl, getSelectedRange, hasRemote } from '../utilities';
 
 /**
  * The command to get a URL from a file.
@@ -38,11 +38,13 @@ export class GetLinkCommand {
      * @constructor
      * @param repositoryFinder The repository finder to use for finding repository information for a file.
      * @param handlerProvider The provider of link handlers.
+     * @param git The Git service.
      * @param options The options that control how the command behaves.
      */
     public constructor(
         private readonly repositoryFinder: RepositoryFinder,
         private readonly handlerProvider: LinkHandlerProvider,
+        private readonly git: Git,
         private readonly options: GetLinkCommandOptions
     ) {
         this.settings = new Settings();
@@ -75,7 +77,7 @@ export class GetLinkCommand {
             return;
         }
 
-        info = await this.getResourceInfo(resource);
+        info = this.getResourceInfo(resource);
 
         if (info) {
             let selection: SelectedRange | undefined;
@@ -105,8 +107,8 @@ export class GetLinkCommand {
                 }
 
                 result = await info.handler.createUrl(
-                    info.repository,
-                    { filePath: info.uri.fsPath, selection },
+                    info.repositoryInfo,
+                    { uri: info.uri, selection },
                     { target }
                 );
 
@@ -201,8 +203,8 @@ export class GetLinkCommand {
                 if (ex instanceof NoRemoteHeadError) {
                     void window.showErrorMessage(
                         STRINGS.getLinkCommand.noRemoteHead(
-                            info.repository.root,
-                            info.repository.remote.name
+                            info.repositoryInfo.repository.rootUri,
+                            info.repositoryInfo.remote.name
                         )
                     );
                 } else {
@@ -218,31 +220,31 @@ export class GetLinkCommand {
      * @param resource The URI of the resource to get the info for.
      * @returns The resource information.
      */
-    private async getResourceInfo(resource: Uri): Promise<ResourceInfo | undefined> {
-        let repository: Repository | undefined;
+    private getResourceInfo(resource: Uri): ResourceInfo | undefined {
+        let info: RepositoryInfo | undefined;
         let handler: LinkHandler | undefined;
 
-        repository = await this.repositoryFinder.findRepository(resource.fsPath);
+        info = this.repositoryFinder.findRepositoryInfo(resource);
 
-        if (!repository) {
+        if (!info) {
             log('File is not tracked by Git.');
             void window.showErrorMessage(STRINGS.getLinkCommand.notTrackedByGit(resource));
             return undefined;
         }
 
-        if (!hasRemote(repository)) {
+        if (!hasRemote(info)) {
             log('Repository does not have a remote.');
-            void window.showErrorMessage(STRINGS.getLinkCommand.noRemote(repository.root));
+            void window.showErrorMessage(STRINGS.getLinkCommand.noRemote(info.repository.rootUri));
             return undefined;
         }
 
-        handler = this.handlerProvider.select(repository);
+        handler = this.handlerProvider.select(info);
 
         if (!handler) {
-            log("No handler for remote '%s'.", repository.remote);
+            log("No handler for remote '%s'.", info.remote);
             void window
                 .showErrorMessage<ActionMessageItem>(
-                    STRINGS.getLinkCommand.noHandler(repository.remote.url),
+                    STRINGS.getLinkCommand.noHandler(getRemoteUrl(info.remote)),
                     {
                         title: STRINGS.getLinkCommand.openSettings,
                         action: 'settings'
@@ -252,7 +254,7 @@ export class GetLinkCommand {
             return undefined;
         }
 
-        return { uri: resource, repository, handler };
+        return { repositoryInfo: info, uri: resource, handler };
     }
 
     /**
@@ -347,7 +349,7 @@ export class GetLinkCommand {
      */
     private async tryGetRef(info: ResourceInfo, type: LinkType): Promise<string> {
         try {
-            return await info.handler.getRef(type, info.repository);
+            return await info.handler.getRef(type, info.repositoryInfo);
         } catch (ex) {
             log("Error when getting ref for link type '%s': %s", type, getErrorMessage(ex));
             return '';
@@ -369,8 +371,8 @@ export class GetLinkCommand {
         let useShortHashes: boolean;
 
         lines = (
-            await git(
-                info.repository.root,
+            await this.git.exec(
+                info.repositoryInfo.repository,
                 'branch',
                 '--list',
                 '--no-color',
@@ -504,7 +506,7 @@ function openExternal(link: string): void {
 }
 
 /**
- * Options for controling the behaviouor of the command.
+ * Options for controlling the behavior of the command.
  */
 export interface GetLinkCommandOptions {
     /**
@@ -535,9 +537,9 @@ interface ResourceInfo {
     uri: Uri;
 
     /**
-     * The repository that the resource is in.
+     * The information about the repository that the resource is in.
      */
-    readonly repository: RepositoryWithRemote;
+    readonly repositoryInfo: RepositoryInfoWithRemote;
 
     /**
      * The link handler for the resource.

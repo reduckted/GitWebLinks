@@ -2,7 +2,7 @@ import { promises as fs, Stats } from 'fs';
 import * as path from 'path';
 import { URL } from 'url';
 
-import { git } from './git';
+import { Git } from './git';
 import { NoRemoteHeadError } from './no-remote-head-error';
 import { RemoteServer } from './remote-server';
 import {
@@ -18,11 +18,11 @@ import {
     LinkOptions,
     LinkType,
     Mutable,
-    RepositoryWithRemote,
+    RepositoryInfoWithRemote,
     SelectedRange,
     UrlInfo
 } from './types';
-import { getErrorMessage, normalizeUrl } from './utilities';
+import { getErrorMessage, getRemoteUrl, normalizeUrl } from './utilities';
 
 /**
  * Handles the generation of links for a particular type of Git server.
@@ -39,8 +39,12 @@ export class LinkHandler {
     /**
      * @constructor
      * @param definition The details of the handler.
+     * @param git The Git service.
      */
-    public constructor(private readonly definition: HandlerDefinition) {
+    public constructor(
+        private readonly definition: HandlerDefinition,
+        private readonly git: Git
+    ) {
         this.settings = new Settings();
 
         if ('private' in definition) {
@@ -107,13 +111,13 @@ export class LinkHandler {
     /**
      * Creates a link for the specified file.
      *
-     * @param repository The repository that the file is in.
+     * @param repositoryInfo The info for the repository that the file is in.
      * @param file The details of the file.
      * @param options The options for creating the link.
      * @returns Information about the URL.
      */
     public async createUrl(
-        repository: RepositoryWithRemote,
+        repositoryInfo: RepositoryInfoWithRemote,
         file: FileInfo,
         options: LinkOptions
     ): Promise<CreateUrlResult> {
@@ -130,7 +134,7 @@ export class LinkHandler {
         // the default type that's defined in the settings.
         if ('preset' in options.target) {
             type = options.target.preset ?? this.settings.getDefaultLinkType();
-            ref = await this.getRef(type, repository);
+            ref = await this.getRef(type, repositoryInfo);
         } else {
             if (options.target.type === 'branch') {
                 type = 'branch';
@@ -148,16 +152,19 @@ export class LinkHandler {
 
         // Adjust the remote URL so that it's in a
         // standard format that we can manipulate.
-        remote = normalizeUrl(repository.remote.url);
+        remote = normalizeUrl(getRemoteUrl(repositoryInfo.remote));
 
         address = this.getAddress(remote);
-        relativePath = await this.getRelativePath(repository.root, file.filePath);
+        relativePath = await this.getRelativePath(
+            repositoryInfo.repository.rootUri.fsPath,
+            file.uri.fsPath
+        );
 
         data = {
             base: address.web ?? address.http,
             repository: this.getRepositoryPath(remote, address),
             ref,
-            commit: await this.getRef('commit', repository),
+            commit: await this.getRef('commit', repositoryInfo),
             file: relativePath,
             type: type === 'commit' ? 'commit' : 'branch',
             ...file.selection
@@ -180,7 +187,7 @@ export class LinkHandler {
 
         url = this.applyModifications(
             url,
-            this.queryModifications.filter((x) => x.pattern.test(file.filePath))
+            this.queryModifications.filter((x) => x.pattern.test(file.uri.fsPath))
         );
 
         return { url, relativePath, selection };
@@ -284,15 +291,15 @@ export class LinkHandler {
      * Gets the ref to use when creating the link.
      *
      * @param type The type of ref to get.
-     * @param repository The repository.
+     * @param repositoryInfo The repository info.
      * @returns The ref to use.
      */
-    public async getRef(type: LinkType, repository: RepositoryWithRemote): Promise<string> {
+    public async getRef(type: LinkType, repositoryInfo: RepositoryInfoWithRemote): Promise<string> {
         switch (type) {
             case 'branch':
                 return (
-                    await git(
-                        repository.root,
+                    await this.git.exec(
+                        repositoryInfo.repository,
                         'rev-parse',
                         this.getRevParseOutputArgument(),
                         'HEAD'
@@ -300,9 +307,18 @@ export class LinkHandler {
                 ).trim();
             case 'commit':
                 if (this.settings.getUseShortHash()) {
-                    return (await git(repository.root, 'rev-parse', '--short', 'HEAD')).trim();
+                    return (
+                        await this.git.exec(
+                            repositoryInfo.repository,
+                            'rev-parse',
+                            '--short',
+                            'HEAD'
+                        )
+                    ).trim();
                 } else {
-                    return (await git(repository.root, 'rev-parse', 'HEAD')).trim();
+                    return (
+                        await this.git.exec(repositoryInfo.repository, 'rev-parse', 'HEAD')
+                    ).trim();
                 }
 
             default:
@@ -310,7 +326,7 @@ export class LinkHandler {
                 // name of the default branch by getting the name of the "remote_name/HEAD" ref.
                 return (
                     this.settings.getDefaultBranch() ||
-                    (await this.getDefaultRemoteBranch(repository))
+                    (await this.getDefaultRemoteBranch(repositoryInfo))
                 );
         }
     }
@@ -318,19 +334,21 @@ export class LinkHandler {
     /**
      * Gets the name of the default branch in the remote.
      *
-     * @param repository The repository.
+     * @param repositoryInfo The repository info.
      * @returns The name of the default branch.
      */
-    private async getDefaultRemoteBranch(repository: RepositoryWithRemote): Promise<string> {
+    private async getDefaultRemoteBranch(
+        repositoryInfo: RepositoryInfoWithRemote
+    ): Promise<string> {
         let branch: string;
 
         try {
             branch = (
-                await git(
-                    repository.root,
+                await this.git.exec(
+                    repositoryInfo.repository,
                     'rev-parse',
                     this.getRevParseOutputArgument(),
-                    `${repository.remote.name}/HEAD`
+                    `${repositoryInfo.remote.name}/HEAD`
                 )
             ).trim();
         } catch (ex) {
@@ -341,13 +359,15 @@ export class LinkHandler {
             case 'abbreviated':
                 // The branch name will be "remote_name/branch_name",
                 // but we only want the "branch_name" part.
-                return branch.slice(repository.remote.name.length + 1);
+                return branch.slice(repositoryInfo.remote.name.length + 1);
 
             case 'symbolic':
                 // The branch name will be "refs/remotes/remote_name/branch_name",
                 // but we want it to be "refs/heads/branch_name".
                 return branch.replace(
-                    new RegExp(`^refs\\/remotes\\/${this.escapeRegExp(repository.remote.name)}\\/`),
+                    new RegExp(
+                        `^refs\\/remotes\\/${this.escapeRegExp(repositoryInfo.remote.name)}\\/`
+                    ),
                     'refs/heads/'
                 );
 

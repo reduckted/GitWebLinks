@@ -1,3 +1,6 @@
+import { Uri } from 'vscode';
+
+import { Remote, Repository } from './git';
 import { StaticServer } from './schema';
 
 /**
@@ -13,14 +16,14 @@ export type LinkFormat = 'raw' | 'markdown' | 'markdownWithPreview';
 /**
  * Information about a Git repository.
  */
-export interface Repository {
+export interface RepositoryInfo {
     /**
-     * The root directory of the repository.
+     * The repository.
      */
-    readonly root: string;
+    readonly repository: Repository;
 
     /**
-     * The URL to the default remote, or `undefined` if the repository has no remotes.
+     * The remote to use for creating links, or `undefined` if the repository has no remotes.
      */
     readonly remote: Remote | undefined;
 }
@@ -28,27 +31,12 @@ export interface Repository {
 /**
  * Information about a Git repository that has a remote.
  */
-export type RepositoryWithRemote = Omit<Repository, 'remote'> & {
+export type RepositoryInfoWithRemote = Omit<RepositoryInfo, 'remote'> & {
     /**
      * The URL of the default remote.
      */
     readonly remote: Remote;
 };
-
-/**
- * A Git remote.
- */
-export interface Remote {
-    /**
-     * The name of the remote.
-     */
-    readonly name: string;
-
-    /**
-     * The URL of the remote.
-     */
-    readonly url: string;
-}
 
 /**
  * Defines a selected range in a file.
@@ -118,9 +106,9 @@ export interface LinkTargetPreset {
  */
 export interface FileInfo {
     /**
-     * The path of the file from the root of the repository.
+     * The URI of the file.
      */
-    filePath: string;
+    uri: Uri;
 
     /**
      * The selected range in the file.

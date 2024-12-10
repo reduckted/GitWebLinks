@@ -86,6 +86,9 @@
     "activationEvents": [
         "*"
     ],
+    "extensionDependencies": [
+        "vscode.git"
+    ],
     "contributes": {
         "commands": [
             {

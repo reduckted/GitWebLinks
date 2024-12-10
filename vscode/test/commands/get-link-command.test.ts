@@ -17,7 +17,7 @@ import {
 } from 'vscode';
 
 import { GetLinkCommand, GetLinkCommandOptions } from '../../src/commands/get-link-command';
-import { git } from '../../src/git';
+import { Git } from '../../src/git';
 import { CreateUrlResult, LinkHandler } from '../../src/link-handler';
 import { LinkHandlerProvider } from '../../src/link-handler-provider';
 import { RepositoryFinder } from '../../src/repository-finder';
@@ -28,10 +28,17 @@ import {
     LinkFormat,
     LinkOptions,
     LinkType,
-    Repository,
-    RepositoryWithRemote
+    RepositoryInfo,
+    RepositoryInfoWithRemote
 } from '../../src/types';
-import { Directory, markAsSlow, setupRepository } from '../helpers';
+import {
+    Directory,
+    getGitService,
+    markAsSlow,
+    remote,
+    repository,
+    setupRepository
+} from '../helpers';
 
 const expect = chai.use(sinonChai).expect;
 
@@ -39,44 +46,49 @@ describe('GetLinkCommand', () => {
     let showErrorMessage: sinon.SinonStub;
     let showInformationMessage: sinon.SinonStub;
     let createUrl: sinon.SinonStub<
-        [repository: RepositoryWithRemote, file: FileInfo, options: LinkOptions],
+        [repository: RepositoryInfoWithRemote, file: FileInfo, options: LinkOptions],
         Promise<CreateUrlResult>
     >;
+    let git: Git;
     let finder: RepositoryFinder;
     let provider: LinkHandlerProvider;
     let handler: LinkHandler | undefined;
     let command: GetLinkCommand;
     let folder: Uri;
     let file: Uri;
-    let repository: Repository | undefined;
+    let repositoryInfo: RepositoryInfo | undefined;
     let link: string | undefined;
 
     beforeEach(() => {
-        finder = new RepositoryFinder();
-        sinon.stub(finder, 'findRepository').callsFake(async () => Promise.resolve(repository));
+        git = getGitService();
+        finder = new RepositoryFinder(git);
+        sinon.stub(finder, 'findRepositoryInfo').callsFake(() => repositoryInfo);
 
-        provider = new LinkHandlerProvider();
+        provider = new LinkHandlerProvider(git);
         sinon.stub(provider, 'select').callsFake(() => handler);
 
-        handler = new LinkHandler({
-            name: 'Test',
-            server: { http: 'http://example.com', ssh: 'ssh://example.com' },
-            branchRef: 'abbreviated',
-            url: '',
-            selection: '',
-            reverse: {
-                pattern: '',
-                file: '',
-                server: { http: '', ssh: '' },
-                selection: { startLine: '', endLine: '' }
-            }
-        });
+        handler = new LinkHandler(
+            {
+                name: 'Test',
+                server: { http: 'http://example.com', ssh: 'ssh://example.com' },
+                branchRef: 'abbreviated',
+                url: '',
+                selection: '',
+                reverse: {
+                    pattern: '',
+                    file: '',
+                    server: { http: '', ssh: '' },
+                    selection: { startLine: '', endLine: '' }
+                }
+            },
+            git
+        );
 
         file = Uri.file('/foo/bar');
         folder = Uri.file('/foo');
-        repository = {
-            root: folder.toString(),
-            remote: { url: 'http://example.com', name: 'origin' }
+        repositoryInfo = {
+            repository: repository({ rootUri: folder }),
+            remote: remote('http://example.com', 'origin')
         };
 
         showErrorMessage = sinon
@@ -87,8 +99,9 @@ describe('GetLinkCommand', () => {
             .stub(window, 'showInformationMessage')
             .returns(Promise.resolve(undefined));
 
-        createUrl = sinon.stub(handler, 'createUrl');
-        createUrl.resolves({ url: 'test', relativePath: 'path', selection: '' });
+        createUrl = sinon
+            .stub(handler, 'createUrl')
+            .resolves({ url: 'test', relativePath: 'path', selection: '' });
 
         link = undefined;
         sinon.stub(env, 'clipboard').value({
@@ -120,7 +133,7 @@ describe('GetLinkCommand', () => {
     });
 
     it('should show an error if the file is not in a repository.', async () => {
-        repository = undefined;
+        repositoryInfo = undefined;
         command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
@@ -128,12 +141,15 @@ describe('GetLinkCommand', () => {
     });
 
     it('should show an error if the repository does not have a remote.', async () => {
-        repository = { root: folder.toString(), remote: undefined };
+        repositoryInfo = {
+            repository: repository({ rootUri: folder }),
+            remote: undefined
+        };
 
         command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
-        expectError(STRINGS.getLinkCommand.noRemote(folder.toString()));
+        expectError(STRINGS.getLinkCommand.noRemote(folder));
     });
 
     it('should show an error if the repository does not have a link handler.', async () => {
@@ -142,7 +158,7 @@ describe('GetLinkCommand', () => {
         command = createCommand({ linkType: 'commit', includeSelection: true, action: 'copy' });
         await command.execute(file);
 
-        expectError(STRINGS.getLinkCommand.noHandler(repository?.remote?.url ?? ''));
+        expectError(STRINGS.getLinkCommand.noHandler('http://example.com'));
     });
 
     it('should use the active text editor to get the file when no resource was specified.', async () => {
@@ -152,9 +168,9 @@ describe('GetLinkCommand', () => {
         await command.execute(undefined);
 
         expect(createUrl).to.have.been.calledWithExactly(
-            repository,
+            repositoryInfo,
             {
-                filePath: file.fsPath,
+                uri: file,
                 selection: { startLine: 1, startColumn: 1, endLine: 1, endColumn: 1 }
             },
             { target: { preset: 'commit' } }
@@ -166,8 +182,8 @@ describe('GetLinkCommand', () => {
         await command.execute(file);
 
         expect(createUrl).to.have.been.calledWithExactly(
-            repository,
-            { filePath: file.fsPath, selection: undefined },
+            repositoryInfo,
+            { uri: file, selection: undefined },
             { target: { preset: 'commit' } }
         );
     });
@@ -182,9 +198,9 @@ describe('GetLinkCommand', () => {
         await command.execute(file);
 
         expect(createUrl).to.have.been.calledWithExactly(
-            repository,
+            repositoryInfo,
             {
-                filePath: file.fsPath,
+                uri: file,
                 selection: { startLine: 2, startColumn: 3, endLine: 4, endColumn: 5 }
             },
             { target: { preset: 'commit' } }
@@ -198,8 +214,8 @@ describe('GetLinkCommand', () => {
         await command.execute(file);
 
         expect(createUrl).to.have.been.calledWithExactly(
-            repository,
-            { filePath: file.fsPath, selection: undefined },
+            repositoryInfo,
+            { uri: file, selection: undefined },
             { target: { preset: 'commit' } }
         );
     });
@@ -212,8 +228,8 @@ describe('GetLinkCommand', () => {
             await command.execute(file);
 
             expect(createUrl).to.have.been.calledWithExactly(
-                repository,
-                { filePath: file.fsPath, selection: undefined },
+                repositoryInfo,
+                { uri: file, selection: undefined },
                 { target: { preset: linkType } }
             );
         });
@@ -571,20 +587,20 @@ describe('GetLinkCommand', () => {
             await setupRepository(root.path);
 
             await fs.writeFile(path.join(root.path, '0'), '');
-            await git(root.path, 'add', '*');
-            await git(root.path, 'commit', '-m', '0');
+            await git.exec(root.path, 'add', '*');
+            await git.exec(root.path, 'commit', '-m', '0');
             commits.push(await getRef());
 
-            await git(root.path, 'checkout', '-b', 'first');
+            await git.exec(root.path, 'checkout', '-b', 'first');
             await fs.writeFile(path.join(root.path, '1'), '');
-            await git(root.path, 'add', '*');
-            await git(root.path, 'commit', '-m', '1');
+            await git.exec(root.path, 'add', '*');
+            await git.exec(root.path, 'commit', '-m', '1');
             commits.push(await getRef());
 
-            await git(root.path, 'checkout', '-b', 'second');
+            await git.exec(root.path, 'checkout', '-b', 'second');
             await fs.writeFile(path.join(root.path, '2'), '');
-            await git(root.path, 'add', '*');
-            await git(root.path, 'commit', '-m', '2');
+            await git.exec(root.path, 'add', '*');
+            await git.exec(root.path, 'commit', '-m', '2');
             commits.push(await getRef());
 
             commits.sort((x, y) => x.abbreviated.localeCompare(y.abbreviated));
@@ -597,9 +613,9 @@ describe('GetLinkCommand', () => {
                 action: 'copy'
             });
 
-            repository = {
-                root: root.path,
-                remote: { url: 'http://example.com', name: 'origin' }
+            repositoryInfo = {
+                repository: repository({ rootUri: root.uri }),
+                remote: remote('http://example.com', 'origin')
             };
 
             showQuickPick = sinon.stub(window, 'showQuickPick');
@@ -628,8 +644,8 @@ describe('GetLinkCommand', () => {
                     await command.execute(file);
 
                     expect(createUrl).to.have.been.calledWithExactly(
-                        repository,
-                        { filePath: file.fsPath, selection: undefined },
+                        repositoryInfo,
+                        { uri: file, selection: undefined },
                         { target: { preset: type } }
                     );
                 });
@@ -640,8 +656,8 @@ describe('GetLinkCommand', () => {
             await command.execute(file);
 
             expect(createUrl, 'branch #1').to.have.been.calledWithExactly(
-                repository,
-                { filePath: file.fsPath, selection: undefined },
+                repositoryInfo,
+                { uri: file, selection: undefined },
                 {
                     target: {
                         ref: { abbreviated: 'first', symbolic: 'refs/heads/first' },
@@ -654,8 +670,8 @@ describe('GetLinkCommand', () => {
             await command.execute(file);
 
             expect(createUrl, 'branch #2').to.have.been.calledWithExactly(
-                repository,
-                { filePath: file.fsPath, selection: undefined },
+                repositoryInfo,
+                { uri: file, selection: undefined },
                 {
                     target: {
                         ref: { abbreviated: 'master', symbolic: 'refs/heads/master' },
@@ -668,8 +684,8 @@ describe('GetLinkCommand', () => {
             await command.execute(file);
 
             expect(createUrl, 'branch #3').to.have.been.calledWithExactly(
-                repository,
-                { filePath: file.fsPath, selection: undefined },
+                repositoryInfo,
+                { uri: file, selection: undefined },
                 {
                     target: {
                         ref: { abbreviated: 'second', symbolic: 'refs/heads/second' },
@@ -684,8 +700,8 @@ describe('GetLinkCommand', () => {
             await command.execute(file);
 
             expect(createUrl, 'commit #1').to.have.been.calledWithExactly(
-                repository,
-                { filePath: file.fsPath, selection: undefined },
+                repositoryInfo,
+                { uri: file, selection: undefined },
                 { target: { ref: commits[0], type: 'commit' } }
             );
 
@@ -693,8 +709,8 @@ describe('GetLinkCommand', () => {
             await command.execute(file);
 
             expect(createUrl, 'commit #2').to.have.been.calledWithExactly(
-                repository,
-                { filePath: file.fsPath, selection: undefined },
+                repositoryInfo,
+                { uri: file, selection: undefined },
                 { target: { ref: commits[1], type: 'commit' } }
             );
 
@@ -702,16 +718,16 @@ describe('GetLinkCommand', () => {
             await command.execute(file);
 
             expect(createUrl, 'commit #3').to.have.been.calledWithExactly(
-                repository,
-                { filePath: file.fsPath, selection: undefined },
+                repositoryInfo,
+                { uri: file, selection: undefined },
                 { target: { ref: commits[2], type: 'commit' } }
             );
         });
 
         async function getRef(): Promise<Ref> {
             return {
-                abbreviated: (await git(root.path, 'rev-parse', '--short', 'HEAD')).trim(),
-                symbolic: (await git(root.path, 'rev-parse', 'HEAD')).trim()
+                abbreviated: (await git.exec(root.path, 'rev-parse', '--short', 'HEAD')).trim(),
+                symbolic: (await git.exec(root.path, 'rev-parse', 'HEAD')).trim()
             };
         }
 
@@ -722,7 +738,7 @@ describe('GetLinkCommand', () => {
     });
 
     function createCommand(options: GetLinkCommandOptions): GetLinkCommand {
-        return new GetLinkCommand(finder, provider, options);
+        return new GetLinkCommand(finder, provider, git, options);
     }
 
     function useTextEditor(

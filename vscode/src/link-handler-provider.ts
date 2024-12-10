@@ -1,7 +1,9 @@
+import { Git } from './git';
 import { LinkHandler } from './link-handler';
 import { log } from './log';
 import { load } from './schema';
-import { RepositoryWithRemote, UrlInfo } from './types';
+import { RepositoryInfoWithRemote, UrlInfo } from './types';
+import { getRemoteUrl } from './utilities';
 
 /**
  * Provides access to the link handlers.
@@ -11,11 +13,12 @@ export class LinkHandlerProvider {
 
     /**
      * @constructor
+     * @param git The Git service.
      */
-    public constructor() {
+    public constructor(git: Git) {
         this.handlers = load()
             .sort((x, y) => x.name.localeCompare(y.name))
-            .map((definition) => new LinkHandler(definition));
+            .map((definition) => new LinkHandler(definition, git));
     }
 
     /**
@@ -24,13 +27,13 @@ export class LinkHandlerProvider {
      * @param repository The repository to select the handler for.
      * @returns The handler to use, or `undefined` if the repository is not supported.
      */
-    public select(repository: RepositoryWithRemote): LinkHandler | undefined {
+    public select(repository: RepositoryInfoWithRemote): LinkHandler | undefined {
         log('Finding a handler for repository %O.', repository.remote);
 
         for (let handler of this.handlers) {
             log("Testing '%s'.", handler.name);
 
-            if (handler.handlesRemoteUrl(repository.remote.url)) {
+            if (handler.handlesRemoteUrl(getRemoteUrl(repository.remote))) {
                 log("Handler '%s' is a match.", handler.name);
                 return handler;
             }

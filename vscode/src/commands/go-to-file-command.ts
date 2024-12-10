@@ -1,4 +1,3 @@
-import { join } from 'path';
 import {
     commands,
     env,
@@ -20,8 +19,8 @@ import { RemoteServer } from '../remote-server';
 import { RepositoryFinder } from '../repository-finder';
 import { StaticServer } from '../schema';
 import { STRINGS } from '../strings';
-import { Repository, SelectedRange, UrlInfo } from '../types';
-import { toSelection } from '../utilities';
+import { RepositoryInfo, RepositoryInfoWithRemote, SelectedRange, UrlInfo } from '../types';
+import { getRemoteUrl, hasRemote, toSelection } from '../utilities';
 
 /**
  * The command to go to the file represented by a URL.
@@ -109,7 +108,7 @@ export class GoToFileCommand {
                 } else {
                     // The file can't be opened as a text document (it could be an
                     // image, or something similar), so just ask VS Code open it.
-                    await commands.executeCommand('vscode.open', Uri.file(file.fileName));
+                    await commands.executeCommand('vscode.open', file.fileName);
                 }
             }
         }
@@ -161,12 +160,7 @@ export class GoToFileCommand {
      */
     private async findFiles(urls: UrlInfo[]): Promise<MatchedFile[]> {
         let files: MatchedFile[];
-        let uniqueFileNames: Set<string>;
         let matches: MatchedUrlInfo[];
-
-        if (!workspace.workspaceFolders) {
-            return [];
-        }
 
         matches = urls.map((info) => ({
             info,
@@ -174,39 +168,21 @@ export class GoToFileCommand {
             repositories: []
         }));
 
-        for (let folder of workspace.workspaceFolders.filter((x) => !!x.uri.fsPath)) {
-            await this.findFilesInWorkspace(folder.uri.fsPath, matches);
-
-            // If all URLs have an exact match, then we
-            // can stop looking through the workspaces.
-            if (matches.every((x) => x.exactMatch)) {
-                break;
-            }
-        }
+        await this.findFilesInRepositories(matches);
 
         files = [];
-        uniqueFileNames = new Set<string>();
 
         // Now use the matching repositories to build the full paths to the files.
         // Note that we don't care about exact matches at this point. The exact
         // matches are just a way to early-exit from finding the repositories.
         for (let match of matches) {
-            for (let root of match.repositories) {
-                let fileName: string;
+            for (let repository of match.repositories) {
+                let fileName: Uri;
                 let stat: FileStat | undefined;
 
-                fileName = join(root, match.info.filePath);
+                fileName = Uri.joinPath(repository.repository.rootUri, match.info.filePath);
 
-                // If there are multiple workspace folders, and two or more of those
-                // folders are both within the same repository, then we can end up
-                // with duplicate matches because each workspace would map to the same
-                // repository. If we've already seen this URI, then we can skip over it.
-                if (uniqueFileNames.has(fileName)) {
-                    continue;
-                }
-
-                uniqueFileNames.add(fileName);
-                stat = await this.tryStat(Uri.file(fileName));
+                stat = await this.tryStat(fileName);
 
                 // If the URI exists and is a file, then we can include this match. If the
                 // URI doesn't exist, or is some other file system entry (like a directory),
@@ -221,21 +197,24 @@ export class GoToFileCommand {
     }
 
     /**
-     * Finds the files that correspond to the given URLs in the given workspace.
+     * Finds the files that correspond to the given URLs in the open repositories.
      *
-     * @param folder The workspace folder to search in.
      * @param matches The URL matches to find a repository for.
      */
-    private async findFilesInWorkspace(folder: string, matches: MatchedUrlInfo[]): Promise<void> {
-        for await (let repository of this.repositoryFinder.findRepositories(folder)) {
+    private async findFilesInRepositories(matches: MatchedUrlInfo[]): Promise<void> {
+        for (let repositoryInfo of this.repositoryFinder.getAllRepositories()) {
+            if (!hasRemote(repositoryInfo)) {
+                continue;
+            }
+
             // Look at each URL that we haven't found an exact match for.
             for (let item of matches.filter((x) => !x.exactMatch)) {
-                if (this.isMatchingRepository(repository, item.info.server)) {
+                if (this.isMatchingRepository(repositoryInfo, item.info.server)) {
                     // The URL is an exact match for this repository, so mark it as an
                     // exact match and replace any possible repository matches that were
                     // found previously with this repository that is an exact match.
                     item.exactMatch = true;
-                    item.repositories = [repository.root];
+                    item.repositories = [repositoryInfo];
                 } else {
                     // The URL is not an exact match for this repository, but that could
                     // be because the remote URLs that we determined aren't quite correct,
@@ -249,10 +228,14 @@ export class GoToFileCommand {
                     // guarantee that this is the correct repository, because a file could
                     // be found in many repositories. For example, if the file is "readme.md",
                     // then it's probably in all repositories.
-                    if (await this.tryStat(Uri.file(join(repository.root, item.info.filePath)))) {
+                    if (
+                        await this.tryStat(
+                            Uri.joinPath(repositoryInfo.repository.rootUri, item.info.filePath)
+                        )
+                    ) {
                         // The URI is in this repository, so record
                         // this repository as a possible match.
-                        item.repositories.push(repository.root);
+                        item.repositories.push(repositoryInfo);
                     }
                 }
             }
@@ -272,14 +255,13 @@ export class GoToFileCommand {
      * @param server The server URLs to test.
      * @returns True if the repository's remote URL matches the given server URLs.
      */
-    private isMatchingRepository(repository: Repository, server: StaticServer): boolean {
-        if (repository.remote) {
-            if (new RemoteServer(server).matchRemoteUrl(repository.remote.url)) {
-                return true;
-            }
-        }
-
-        return false;
+    private isMatchingRepository(
+        repository: RepositoryInfoWithRemote,
+        server: StaticServer
+    ): boolean {
+        return (
+            new RemoteServer(server).matchRemoteUrl(getRemoteUrl(repository.remote)) !== undefined
+        );
     }
 
     /**
@@ -306,7 +288,7 @@ export class GoToFileCommand {
         let items: QuickPickMatchedFile[];
 
         items = matches
-            .map((file) => ({ label: file.fileName, file }))
+            .map((file) => ({ label: file.fileName.fsPath, file }))
             .sort((x, y) => x.label.localeCompare(y.label));
 
         return (await window.showQuickPick(items))?.file;
@@ -404,7 +386,7 @@ interface MatchedUrlInfo {
     /**
      * The repositories that the URL was matched to.
      */
-    repositories: string[];
+    repositories: RepositoryInfo[];
 }
 
 /**
@@ -414,7 +396,7 @@ interface MatchedFile {
     /**
      * The file name of the file.
      */
-    fileName: string;
+    fileName: Uri;
 
     /**
      * The range to select in the file.

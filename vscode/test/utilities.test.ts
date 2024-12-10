@@ -2,16 +2,45 @@ import { expect } from 'chai';
 import * as assert from 'node:assert';
 import { commands, Position, Selection, TextEditor, window } from 'vscode';
 
-import { getSelectedRange, hasRemote, normalizeUrl, toSelection } from '../src/utilities';
+import {
+    getRemoteUrl,
+    getSelectedRange,
+    hasRemote,
+    normalizeUrl,
+    toSelection
+} from '../src/utilities';
+
+import { remote, repository } from './helpers';
 
 describe('utilities', () => {
+    describe('getRemoteUrl', () => {
+        it('returns fetch URL when remote has one.', () => {
+            expect(
+                getRemoteUrl({ fetchUrl: 'a', pushUrl: 'b', name: 'c', isReadOnly: false })
+            ).to.equal('a');
+        });
+
+        it('returns push URL when remote has one and does not have a fetch URL.', () => {
+            expect(getRemoteUrl({ pushUrl: 'b', name: 'c', isReadOnly: false })).to.equal('b');
+        });
+
+        it('returns empty string when remote does not have fetch URL or push URL.', () => {
+            expect(getRemoteUrl({ name: 'c', isReadOnly: false })).to.equal('');
+        });
+    });
+
     describe('hasRemote', () => {
         it('returns true when repository has a remote.', () => {
-            expect(hasRemote({ remote: { url: 'a', name: 'origin' }, root: 'b' })).to.be.true;
+            expect(
+                hasRemote({
+                    remote: remote('a', 'origin'),
+                    repository: repository({})
+                })
+            ).to.be.true;
         });
 
         it('returns false when repository does not have a remote.', () => {
-            expect(hasRemote({ remote: undefined, root: 'b' })).to.be.false;
+            expect(hasRemote({ remote: undefined, repository: repository({}) })).to.be.false;
         });
     });
 

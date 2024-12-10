@@ -1,6 +1,17 @@
 import { Position, Selection, TextEditor } from 'vscode';
 
-import { Repository, RepositoryWithRemote, SelectedRange } from './types';
+import { Remote } from './git';
+import { RepositoryInfo, RepositoryInfoWithRemote, SelectedRange } from './types';
+
+/**
+ * Gets the URL of the given remote.
+ *
+ * @param remote The remote.
+ * @returns The fetch URL if the remote has one, otherwise the push URL, or an empty string if the remote has no URLs.
+ */
+export function getRemoteUrl(remote: Remote): string {
+    return remote.fetchUrl ?? remote.pushUrl ?? '';
+}
 
 /**
  * Determines whether the given repository has a remote.
@@ -8,7 +19,7 @@ import { Repository, RepositoryWithRemote, SelectedRange } from './types';
  * @param repository The repository to check.
  * @returns True if the repository has a remote; otherwise, false.
  */
-export function hasRemote(repository: Repository): repository is RepositoryWithRemote {
+export function hasRemote(repository: RepositoryInfo): repository is RepositoryInfoWithRemote {
     return repository.remote !== undefined;
 }
 
