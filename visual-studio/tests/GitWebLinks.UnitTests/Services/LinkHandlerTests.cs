@@ -26,7 +26,7 @@ public static class LinkHandlerTests {
 
             _repository = new Repository(
                 RootDirectory,
-                new Remote("origin", "http://example.com")
+                new Remote("origin", new[] { "http://example.com" })
             );
         }
 
@@ -627,14 +627,17 @@ public static class LinkHandlerTests {
 
 
         private void SetRemoteUrl(string url) {
-            _repository = new Repository(_repository.Root, new Remote("origin", url));
+            _repository = new Repository(_repository.Root, new Remote("origin", new[] { url }));
         }
 
 
         private async Task<string> CreateUrlAsync(PartialHandlerDefinition definition, ILinkTarget target, string filePath = "file.txt") {
+            Assert.NotNull(_repository.Remote);
+
             return (
                 await CreateHandler(definition).CreateUrlAsync(
                     _repository,
+                    _repository.Remote.Urls[0],
                     new FileInfo(filePath, null),
                     new LinkOptions(target)
                 )

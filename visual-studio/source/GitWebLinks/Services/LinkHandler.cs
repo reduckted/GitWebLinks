@@ -43,12 +43,16 @@ public class LinkHandler : ILinkHandler {
     }
 
 
-    public async Task<CreateUrlResult> CreateUrlAsync(Repository repository, FileInfo file, LinkOptions options) {
+    public async Task<CreateUrlResult> CreateUrlAsync(
+        Repository repository,
+        string remoteUrl,
+        FileInfo file,
+        LinkOptions options
+    ) {
         if (repository.Remote is null) {
             throw new InvalidOperationException("The repository must have a remote.");
         }
 
-        string remoteUrl;
         StaticServer address;
         string refValue;
         RefType refType;
@@ -86,7 +90,7 @@ public class LinkHandler : ILinkHandler {
 
         // Adjust the remote URL so that it's in a
         // standard format that we can manipulate.
-        remoteUrl = UrlHelpers.Normalize(repository.Remote.Url);
+        remoteUrl = UrlHelpers.Normalize(remoteUrl);
 
         address = await GetAddressAsync(remoteUrl);
         relativePath = GetRelativePath(repository.Root, file.FilePath);

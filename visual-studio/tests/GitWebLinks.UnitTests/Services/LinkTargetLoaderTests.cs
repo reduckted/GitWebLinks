@@ -265,7 +265,7 @@ public static class LinkTargetLoaderTests {
     public abstract class TestBase : RepositoryTestBase {
 
         public TestBase() {
-            Repository = new Repository(RootDirectory, new Remote("origin", "http://example.com"));
+            Repository = new Repository(RootDirectory, new Remote("origin", new[] { "http://example.com" }));
             Settings = Substitute.For<ISettings>();
         }
 

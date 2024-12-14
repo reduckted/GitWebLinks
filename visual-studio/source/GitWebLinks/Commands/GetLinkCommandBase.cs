@@ -150,6 +150,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
 
                 result = await info.Handler.CreateUrlAsync(
                     info.Repository,
+                    info.RemoteUrl,
                     new FileInfo(info.FilePath, selection),
                     new LinkOptions(target)
                 );
@@ -192,7 +193,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
         RepositoryFinder repositoryFinder;
         LinkHandlerProvider handlerProvider;
         Repository? repository;
-        ILinkHandler? handler;
+        SelectedLinkHandler? match;
 
 
         repositoryFinder = await Package.GetServiceAsync<RepositoryFinder, RepositoryFinder>();
@@ -212,15 +213,15 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
         }
 
         handlerProvider = await Package.GetServiceAsync<LinkHandlerProvider, LinkHandlerProvider>();
-        handler = await handlerProvider.SelectAsync(repository);
+        match = await handlerProvider.SelectAsync(repository);
 
-        if (handler is null) {
-            await logger.LogAsync($"No handler for remote '{repository.Remote}'.");
-            await VS.MessageBox.ShowErrorAsync(Resources.Strings.GetLinkCommand_NoHandler.Format(repository.Remote.Url));
+        if (match is null) {
+            await logger.LogAsync($"No handler for remote '{repository.Remote.Name}'.");
+            await VS.MessageBox.ShowErrorAsync(Resources.Strings.GetLinkCommand_NoHandler.Format(repository.Remote.Name));
             return null;
         }
 
-        return new ResourceInfo(path, repository, handler);
+        return new ResourceInfo(path, repository, match.Handler, match.RemoteUrl);
     }
 
 

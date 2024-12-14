@@ -1,18 +1,21 @@
 #nullable enable
 
+using System.Collections.Generic;
+using System.Linq;
+
 namespace GitWebLinks;
 
 public class Remote {
 
-    public Remote(string name, string url) {
+    public Remote(string name, IEnumerable<string> urls) {
         Name = name;
-        Url = url;
+        Urls = urls.ToList();
     }
 
 
     public string Name { get; }
 
 
-    public string Url { get; }
+    public IReadOnlyList<string> Urls { get; }
 
 }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
@@ -182,6 +182,7 @@
     <Compile Include="Types\ReverseSelectionSettings.cs" />
     <Compile Include="Types\ReverseServerSettings.cs" />
     <Compile Include="Types\ReverseSettings.cs" />
+    <Compile Include="Types\SelectedLinkHandler.cs" />
     <Compile Include="Types\SelectedRange.cs" />
     <Compile Include="Types\StaticServer.cs" />
     <Compile Include="Types\UrlInfo.cs" />
@@ -219,12 +220,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Community.VisualStudio.Toolkit.17"/>
+    <PackageReference Include="Community.VisualStudio.Toolkit.17" />
     <PackageReference Include="Community.VisualStudio.VSCT">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Fluid.Core"/>
+    <PackageReference Include="Fluid.Core" />
     <PackageReference Include="Microsoft.VisualStudio.SDK" ExcludeAssets="runtime">
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

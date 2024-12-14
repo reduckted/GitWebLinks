@@ -9,7 +9,7 @@ public interface ILinkHandler {
     string Name { get; }
 
 
-    Task<CreateUrlResult> CreateUrlAsync(Repository repository, FileInfo file, LinkOptions options);
+    Task<CreateUrlResult> CreateUrlAsync(Repository repository, string remoteUrl, FileInfo file, LinkOptions options);
 
 
     Task<string> GetRefAsync(LinkType type, string repositoryRoot, Remote remote);

@@ -120,7 +120,7 @@ public static class RepositoryFinderTests {
             await Git.ExecuteAsync(RootDirectory, "remote", "add", "origin", "https://github.com/example/repo");
 
             Assert.Equal(
-                new Repository(RootDirectory, new Remote("origin", "https://github.com/example/repo")),
+                new Repository(RootDirectory, new Remote("origin", new[] { "https://github.com/example/repo" })),
                 await _finder.FindRepositoryAsync(RootDirectory),
                 RepositoryComparer.Instance
             );
@@ -138,7 +138,7 @@ public static class RepositoryFinderTests {
             child = CreateDirectory("child");
 
             Assert.Equal(
-                new Repository(RootDirectory, new Remote("origin", "https://github.com/example/repo")),
+                new Repository(RootDirectory, new Remote("origin", new[] { "https://github.com/example/repo" })),
                 await _finder.FindRepositoryAsync(child),
                 RepositoryComparer.Instance
             );
@@ -156,7 +156,7 @@ public static class RepositoryFinderTests {
             file = CreateFile("file.txt");
 
             Assert.Equal(
-                new Repository(RootDirectory, new Remote("origin", "https://github.com/example/repo")),
+                new Repository(RootDirectory, new Remote("origin", new[] { "https://github.com/example/repo" })),
                 await _finder.FindRepositoryAsync(file),
                 RepositoryComparer.Instance
             );
@@ -177,7 +177,7 @@ public static class RepositoryFinderTests {
             await Git.ExecuteAsync(repo, "worktree", "add", worktree);
 
             Assert.Equal(
-                new Repository(worktree, new Remote("origin", "https://github.com/example/repo")),
+                new Repository(worktree, new Remote("origin", new[] { "https://github.com/example/repo" })),
                 await _finder.FindRepositoryAsync(worktree),
                 RepositoryComparer.Instance
             );
@@ -194,7 +194,7 @@ public static class RepositoryFinderTests {
             await Git.ExecuteAsync(RootDirectory, "remote", "add", "testing", "https://github.com/example/repo");
 
             Assert.Equal(
-                new Repository(RootDirectory, new Remote("testing", "https://github.com/example/repo")),
+                new Repository(RootDirectory, new Remote("testing", new[] { "https://github.com/example/repo" })),
                 await _finder.FindRepositoryAsync(RootDirectory),
                 RepositoryComparer.Instance
             );
@@ -211,7 +211,7 @@ public static class RepositoryFinderTests {
             await Git.ExecuteAsync(RootDirectory, "remote", "add", "gamma", "https://github.com/example/gamma");
 
             Assert.Equal(
-                new Repository(RootDirectory, new Remote("alpha", "https://github.com/example/alpha")),
+                new Repository(RootDirectory, new Remote("alpha", new[] { "https://github.com/example/alpha" })),
                 await _finder.FindRepositoryAsync(RootDirectory),
                 RepositoryComparer.Instance
             );
@@ -368,9 +368,9 @@ public static class RepositoryFinderTests {
 
             Assert.Equal(
                 new[] {
-                    new Repository(alpha, new Remote("origin","https://github.com/example/alpha")),
+                    new Repository(alpha, new Remote("origin", new[] { "https://github.com/example/alpha" })),
                     new Repository(beta, null),
-                    new Repository(gamma,new Remote("origin", "https://github.com/example/gamma"))
+                    new Repository(gamma,new Remote("origin", new[] { "https://github.com/example/gamma" }))
                 },
                 repositories,
                 RepositoryComparer.Instance
@@ -421,7 +421,7 @@ public static class RepositoryFinderTests {
             }
 
             return string.Equals(x.Remote.Name, y.Remote.Name, StringComparison.Ordinal) &&
-                   string.Equals(x.Remote.Url, y.Remote.Url, StringComparison.Ordinal);
+                   x.Remote.Urls.SequenceEqual(y.Remote.Urls, StringComparer.Ordinal);
         }
 
 

@@ -163,7 +163,7 @@ public static class HandlerTests {
 
         private async Task RunTestAsync(string remote, Dictionary<string, JToken> settings, string result, TestOptions? options = null) {
             Repository repository;
-            ILinkHandler? handler;
+            SelectedLinkHandler? match;
             string? link;
 
 
@@ -173,19 +173,21 @@ public static class HandlerTests {
 
             result = await PrepareTestAsync(settings, result, options);
 
-            repository = new Repository(RepositoryRoot, new Remote("origin", remote));
+            repository = new Repository(RepositoryRoot, new Remote("origin", new[] { remote }));
 
-            handler = await Provider.SelectAsync(repository);
+            match = await Provider.SelectAsync(repository);
 
-            if (handler is null) {
+            if (match is null) {
                 throw new Xunit.Sdk.XunitException("A handler was not found.");
             }
 
-            Assert.Equal(Definition.Name, handler.Name);
+            Assert.Equal(Definition.Name, match.Handler.Name);
+            Assert.Equal(remote, match.RemoteUrl);
 
             link = (
-                await handler.CreateUrlAsync(
+                await match.Handler.CreateUrlAsync(
                     repository,
+                    match.RemoteUrl,
                     new FileInfo(Path.Combine(RepositoryRoot, options.FileName ?? TestFileName), options.Selection),
                     new LinkOptions(new LinkTargetPreset(options.Type ?? LinkType.CurrentBranch))
                 )

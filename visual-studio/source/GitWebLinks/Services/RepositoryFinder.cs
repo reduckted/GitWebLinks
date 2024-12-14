@@ -190,6 +190,8 @@ public class RepositoryFinder {
         remotes = data
             .Where((x) => !string.IsNullOrEmpty(x))
             .Select((x) => ParseRemote(x))
+            .GroupBy((x) => x.Name, (x) => x.Url)
+            .Select((x) => new Remote(x.Key, x.ToHashSet()))
             .ToList();
 
         await _logger.LogAsync($"Remotes found: {remotes}");
@@ -207,7 +209,7 @@ public class RepositoryFinder {
     }
 
 
-    private static Remote ParseRemote(string line) {
+    private static (string Name, string Url) ParseRemote(string line) {
         string[] parts;
         string name;
         string urlAndType;
@@ -218,7 +220,7 @@ public class RepositoryFinder {
         urlAndType = parts[1];
         url = urlAndType.Split(' ')[0];
 
-        return new Remote(name, url);
+        return (name, url);
     }
 
 }

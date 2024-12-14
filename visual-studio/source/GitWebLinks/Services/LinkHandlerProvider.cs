@@ -23,7 +23,7 @@ public class LinkHandlerProvider {
     }
 
 
-    public async Task<ILinkHandler?> SelectAsync(Repository repository) {
+    public async Task<SelectedLinkHandler?> SelectAsync(Repository repository) {
         if (repository.Remote is null) {
             return null;
         }
@@ -33,9 +33,11 @@ public class LinkHandlerProvider {
         foreach (ILinkHandler handler in _handlers) {
             await _logger.LogAsync($"Testing '{handler.Name}");
 
-            if (await handler.HandlesRemoteUrlAsync(repository.Remote.Url)) {
-                await _logger.LogAsync($"Handler '{handler.Name}' is a match.");
-                return handler;
+            foreach (string url in repository.Remote.Urls) {
+                if (await handler.HandlesRemoteUrlAsync(url)) {
+                    await _logger.LogAsync($"Handler '{handler.Name}' is a match.");
+                    return new SelectedLinkHandler(handler, url);
+                }
             }
         }
 
