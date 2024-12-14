@@ -40,8 +40,7 @@
         "debug-test": "npm run pretest"
     },
     "dependencies": {
-        "liquidjs": "10.19.0",
-        "spawn-rx": "5.1.0"
+        "liquidjs": "10.19.0"
     },
     "devDependencies": {
         "@eslint/js": "9.16.0",
