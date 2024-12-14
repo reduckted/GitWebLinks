@@ -1,7 +1,9 @@
+import type { DynamicServer, StaticServer } from './schema';
+import type { ParsedTemplate } from './templates';
+import type { Mutable } from './types';
+
 import { log } from './log';
-import { DynamicServer, StaticServer } from './schema';
-import { ParsedTemplate, parseTemplate } from './templates';
-import { Mutable } from './types';
+import { parseTemplate } from './templates';
 import { normalizeUrl } from './utilities';
 
 /**
@@ -16,9 +18,9 @@ export class RemoteServer {
      */
     public constructor(
         servers:
-            | StaticServer
+            | (DynamicServer | StaticServer)[]
             | DynamicServer
-            | (StaticServer | DynamicServer)[]
+            | StaticServer
             | StaticServerFactory
     ) {
         if (typeof servers === 'function') {
@@ -83,7 +85,7 @@ export class RemoteServer {
  * @param server The server definition.
  * @returns The matcher function.
  */
-function createMatcher(server: StaticServer | DynamicServer): Matcher {
+function createMatcher(server: DynamicServer | StaticServer): Matcher {
     if ('remotePattern' in server) {
         return createDynamicServerMatcher(server);
     } else {
@@ -235,7 +237,7 @@ function createLazyStaticServerMatcher(factory: StaticServerFactory): Matcher {
      * @param test The function to test a match.
      * @returns The matcher function.
      */
-    function create(test: typeof isWebMatch | typeof isRemoteMatch): Matcher['remote'] {
+    function create(test: typeof isRemoteMatch | typeof isWebMatch): Matcher['remote'] {
         return (url) => {
             for (let server of factory()) {
                 if (test(url, server)) {

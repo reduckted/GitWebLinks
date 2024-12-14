@@ -1,16 +1,16 @@
-import { Uri } from 'vscode';
+import type { Uri } from 'vscode';
 
-import { StaticServer } from './schema';
+import type { StaticServer } from './schema';
 
 /**
  * The type of link to generate.
  */
-export type LinkType = 'commit' | 'branch' | 'defaultBranch';
+export type LinkType = 'branch' | 'commit' | 'defaultBranch';
 
 /**
  * The format to use when copying a link.
  */
-export type LinkFormat = 'raw' | 'markdown' | 'markdownWithPreview';
+export type LinkFormat = 'markdown' | 'markdownWithPreview' | 'raw';
 
 /**
  * Information about a Git repository.
@@ -92,7 +92,7 @@ export interface LinkOptions {
 /**
  * A link target.
  */
-export type LinkTarget = LinkTargetRef | LinkTargetPreset;
+export type LinkTarget = LinkTargetPreset | LinkTargetRef;
 
 export interface LinkTargetRef {
     /**
@@ -103,7 +103,7 @@ export interface LinkTargetRef {
     /**
      * What the ref refers to.
      */
-    readonly type: 'commit' | 'branch';
+    readonly type: 'branch' | 'commit';
 }
 
 export interface LinkTargetPreset {

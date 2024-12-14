@@ -1,7 +1,9 @@
-import { Liquid, Template as LiquidTemplate } from 'liquidjs';
-import { posix } from 'path';
+import type { Template as LiquidTemplate } from 'liquidjs';
 
-import { Template } from './schema';
+import type { Template } from './schema';
+
+import { Liquid } from 'liquidjs';
+import { posix } from 'path';
 
 const engine: Liquid = new Liquid({
     strictFilters: true

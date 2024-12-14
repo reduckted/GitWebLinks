@@ -1,5 +1,6 @@
+import type { Uri } from 'vscode';
+
 import { format } from 'util';
-import { Uri } from 'vscode';
 
 export const STRINGS = {
     extension: {

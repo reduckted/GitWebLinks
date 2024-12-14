@@ -1,5 +1,7 @@
+import type { OutputChannel } from 'vscode';
+
 import { format } from 'util';
-import { OutputChannel, window } from 'vscode';
+import { window } from 'vscode';
 
 let channel: OutputChannel | undefined;
 

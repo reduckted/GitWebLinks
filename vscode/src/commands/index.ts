@@ -1,11 +1,16 @@
-import { commands, Disposable, Uri } from 'vscode';
+import type { Disposable, Uri } from 'vscode';
+
+import type { Git } from '../git';
+import type { LinkHandlerProvider } from '../link-handler-provider';
+import type { RepositoryFinder } from '../repository-finder';
+
+import type { GetLinkCommandOptions } from './get-link-command';
+
+import { commands } from 'vscode';
 
 import { COMMANDS } from '../constants';
-import { Git } from '../git';
-import { LinkHandlerProvider } from '../link-handler-provider';
-import { RepositoryFinder } from '../repository-finder';
 
-import { GetLinkCommand, GetLinkCommandOptions } from './get-link-command';
+import { GetLinkCommand } from './get-link-command';
 import { GoToFileCommand } from './go-to-file-command';
 
 /**

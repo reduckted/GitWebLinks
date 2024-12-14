@@ -1,19 +1,14 @@
-import { promises as fs, Stats } from 'fs';
-import * as path from 'path';
-import { URL } from 'url';
+import type { Stats } from 'fs';
 
-import { Git } from './git';
-import { NoRemoteHeadError } from './no-remote-head-error';
-import { RemoteServer } from './remote-server';
-import {
+import type { Git } from './git';
+import type {
     HandlerDefinition,
     ReverseSelectionSettings,
     ReverseServerSettings,
     StaticServer
 } from './schema';
-import { Settings } from './settings';
-import { ParsedTemplate, parseTemplate } from './templates';
-import {
+import type { ParsedTemplate } from './templates';
+import type {
     FileInfo,
     LinkOptions,
     LinkType,
@@ -22,6 +17,15 @@ import {
     SelectedRange,
     UrlInfo
 } from './types';
+
+import { promises as fs } from 'fs';
+import * as path from 'path';
+import { URL } from 'url';
+
+import { NoRemoteHeadError } from './no-remote-head-error';
+import { RemoteServer } from './remote-server';
+import { Settings } from './settings';
+import { parseTemplate } from './templates';
 import { getErrorMessage, normalizeUrl } from './utilities';
 
 /**

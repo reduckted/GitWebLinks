@@ -1,20 +1,12 @@
-import Ajv, { AnySchema } from 'ajv';
-import { expect } from 'chai';
-import { promises as fs } from 'fs';
-import * as path from 'path';
-import * as sinon from 'sinon';
-import { Uri, workspace } from 'vscode';
+import type { AnySchema } from 'ajv';
 
-import { Git } from '../src/git';
-import { CreateUrlResult } from '../src/link-handler';
-import { LinkHandlerProvider, SelectedLinkHandler } from '../src/link-handler-provider';
-import { findHandlersDirectory, load, Template } from '../src/schema';
-import { parseTemplate } from '../src/templates';
-import { LinkOptions, RepositoryWithRemote, SelectedRange, UrlInfo } from '../src/types';
-import { normalizeUrl } from '../src/utilities';
+import type { Git } from '../src/git';
+import type { CreateUrlResult } from '../src/link-handler';
+import type { SelectedLinkHandler } from '../src/link-handler-provider';
+import type { Template } from '../src/schema';
+import type { LinkOptions, RepositoryWithRemote, SelectedRange, UrlInfo } from '../src/types';
 
-import { Directory, getGitService, markAsSlow, setupRemote, setupRepository } from './helpers';
-import {
+import type {
     HandlerWithTests,
     RemoteUrlTests,
     SelectionTests,
@@ -22,6 +14,20 @@ import {
     UrlTest,
     UrlTests
 } from './test-schema';
+
+import Ajv from 'ajv';
+import { expect } from 'chai';
+import { promises as fs } from 'fs';
+import * as path from 'path';
+import * as sinon from 'sinon';
+import { Uri, workspace } from 'vscode';
+
+import { LinkHandlerProvider } from '../src/link-handler-provider';
+import { findHandlersDirectory, load } from '../src/schema';
+import { parseTemplate } from '../src/templates';
+import { normalizeUrl } from '../src/utilities';
+
+import { Directory, getGitService, markAsSlow, setupRemote, setupRepository } from './helpers';
 
 const TEST_FILE_NAME: string = 'src/file.txt';
 const TEST_FILE_NAME_WITH_SPACES: string = 'src/path spaces/file spaces.txt';
@@ -456,7 +462,7 @@ describe('Link handlers', function () {
             }
 
             type RemoteTestName = keyof Omit<RemoteUrlTests, 'result' | 'settings'>;
-            type UrlTestName = keyof Omit<UrlTests, 'misc' | 'selection' | 'remotes'>;
+            type UrlTestName = keyof Omit<UrlTests, 'misc' | 'remotes' | 'selection'>;
             type SelectionTestName = keyof Omit<SelectionTests, 'remote' | 'settings'>;
         });
     });

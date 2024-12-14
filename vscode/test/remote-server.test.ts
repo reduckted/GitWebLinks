@@ -1,7 +1,8 @@
+import type { StaticServer } from '../src/schema';
+
 import { expect } from 'chai';
 
 import { RemoteServer } from '../src/remote-server';
-import { StaticServer } from '../src/schema';
 
 describe('RemoteServer', () => {
     let server: RemoteServer;
@@ -407,7 +408,7 @@ describe('RemoteServer', () => {
 
     function match(
         expectedRemoteMatch: StaticServer | undefined,
-        expectedWebMatch: StaticServer | 'same' | undefined
+        expectedWebMatch: 'same' | StaticServer | undefined
     ): void {
         expect(server.matchRemoteUrl(url), 'remote').to.deep.equal(expectedRemoteMatch);
         expect(server.matchWebUrl(url), 'web').to.deep.equal(

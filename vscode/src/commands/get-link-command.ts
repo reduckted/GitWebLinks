@@ -1,24 +1,10 @@
-import {
-    commands,
-    env,
-    MessageItem,
-    QuickPickItem,
-    QuickPickItemKind,
-    Range,
-    TextEditor,
-    Uri,
-    window
-} from 'vscode';
+import type { MessageItem, QuickPickItem, TextEditor } from 'vscode';
 
-import { Git } from '../git';
-import { CreateUrlResult, LinkHandler } from '../link-handler';
-import { LinkHandlerProvider, SelectedLinkHandler } from '../link-handler-provider';
-import { log } from '../log';
-import { NoRemoteHeadError } from '../no-remote-head-error';
-import { RepositoryFinder } from '../repository-finder';
-import { Settings } from '../settings';
-import { STRINGS } from '../strings';
-import {
+import type { Git } from '../git';
+import type { CreateUrlResult, LinkHandler } from '../link-handler';
+import type { LinkHandlerProvider, SelectedLinkHandler } from '../link-handler-provider';
+import type { RepositoryFinder } from '../repository-finder';
+import type {
     LinkFormat,
     LinkTarget,
     LinkType,
@@ -26,6 +12,13 @@ import {
     RepositoryWithRemote,
     SelectedRange
 } from '../types';
+
+import { commands, env, QuickPickItemKind, Range, Uri, window } from 'vscode';
+
+import { log } from '../log';
+import { NoRemoteHeadError } from '../no-remote-head-error';
+import { Settings } from '../settings';
+import { STRINGS } from '../strings';
 import { getErrorMessage, getSelectedRange, hasRemote } from '../utilities';
 
 /**
@@ -265,8 +258,8 @@ export class GetLinkCommand {
      * @returns The target, or undefined to cancel the operation.
      */
     private async promptForLinkTarget(info: ResourceInfo): Promise<LinkTarget | undefined> {
-        let items: (QuickPickLinkTargetItem | QuickPickItem)[];
-        let selection: QuickPickLinkTargetItem | QuickPickItem | undefined;
+        let items: (QuickPickItem | QuickPickLinkTargetItem)[];
+        let selection: QuickPickItem | QuickPickLinkTargetItem | undefined;
 
         items = [
             ...(await this.getPresetTargetItems(info)),
@@ -365,9 +358,9 @@ export class GetLinkCommand {
      */
     private async getRefTargetItems(
         info: ResourceInfo
-    ): Promise<(QuickPickLinkTargetItem | QuickPickItem)[]> {
-        let branches: (QuickPickLinkTargetItem | QuickPickItem)[];
-        let commits: (QuickPickLinkTargetItem | QuickPickItem)[];
+    ): Promise<(QuickPickItem | QuickPickLinkTargetItem)[]> {
+        let branches: (QuickPickItem | QuickPickLinkTargetItem)[];
+        let commits: (QuickPickItem | QuickPickLinkTargetItem)[];
         let lines: string[];
         let useShortHashes: boolean;
 
@@ -514,7 +507,7 @@ export interface GetLinkCommandOptions {
      * The type of link the command will produce, or 'prompt' to ask the user which ref to use a function to get the
      * link type, or `undefined` to use the settings to determine the link type).
      */
-    linkType: LinkType | 'prompt' | undefined;
+    linkType: 'prompt' | LinkType | undefined;
 
     /**
      * Whether to include the selection region
@@ -570,5 +563,5 @@ interface ActionMessageItem extends MessageItem {
     /**
      * The action to perform.
      */
-    action: 'settings' | 'open' | 'copy-raw' | 'copy-markdown' | 'copy-markdown-with-preview';
+    action: 'copy-markdown-with-preview' | 'copy-markdown' | 'copy-raw' | 'open' | 'settings';
 }

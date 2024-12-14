@@ -1,15 +1,16 @@
+import type { Git } from '../src/git';
+import type { HandlerDefinition, ReverseSettings, StaticServer } from '../src/schema';
+import type { LinkOptions, LinkType, RepositoryWithRemote, UrlInfo } from '../src/types';
+
 import { expect } from 'chai';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import { Uri } from 'vscode';
 
-import { Git } from '../src/git';
 import { LinkHandler } from '../src/link-handler';
 import { NoRemoteHeadError } from '../src/no-remote-head-error';
-import { HandlerDefinition, ReverseSettings, StaticServer } from '../src/schema';
 import { Settings } from '../src/settings';
-import { LinkOptions, LinkType, RepositoryWithRemote, UrlInfo } from '../src/types';
 import { isErrorCode } from '../src/utilities';
 
 import { Directory, getGitService, markAsSlow, setupRemote, setupRepository } from './helpers';

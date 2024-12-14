@@ -1,6 +1,8 @@
+import type { ParsedTemplate } from '../src/templates';
+
 import { expect } from 'chai';
 
-import { ParsedTemplate, parseTemplate } from '../src/templates';
+import { parseTemplate } from '../src/templates';
 
 describe('templates', () => {
     describe('parseTemplate', () => {

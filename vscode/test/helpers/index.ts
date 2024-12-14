@@ -1,9 +1,10 @@
+import type { Uri } from 'vscode';
+
+import type { Git } from '../../src/git';
+
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import { Uri } from 'vscode';
-
-import { Git } from '../../src/git';
 
 import { Directory } from './directory';
 import { getGitService } from './git-extension';

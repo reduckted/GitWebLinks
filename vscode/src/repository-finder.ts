@@ -1,9 +1,10 @@
-import { Uri } from 'vscode';
+import type { Uri } from 'vscode';
 
-import { Git, GitRemote, GitRepository } from './git';
+import type { Git, GitRemote, GitRepository } from './git';
+import type { Remote, Repository } from './types';
+
 import { log } from './log';
 import { Settings } from './settings';
-import { Repository, Remote } from './types';
 
 /**
  * Finds the repository that a workspace belongs to.

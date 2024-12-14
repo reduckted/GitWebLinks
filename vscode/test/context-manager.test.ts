@@ -1,10 +1,13 @@
+import type { ConfigurationChangeEvent } from 'vscode';
+
+import type { Git, GitRepository } from '../src/git';
+
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { commands, ConfigurationChangeEvent, EventEmitter, workspace } from 'vscode';
+import { commands, EventEmitter, workspace } from 'vscode';
 
 import { CONTEXT } from '../src/constants';
 import { ContextManager } from '../src/context-manager';
-import { Git, GitRepository } from '../src/git';
 import { Settings } from '../src/settings';
 
 import { getGitService } from './helpers';

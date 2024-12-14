@@ -1,8 +1,11 @@
-import { workspace, WorkspaceConfiguration } from 'vscode';
+import type { WorkspaceConfiguration } from 'vscode';
+
+import type { StaticServer } from './schema';
+import type { LinkFormat, LinkType } from './types';
+
+import { workspace } from 'vscode';
 
 import { CONFIGURATION } from './constants';
-import { StaticServer } from './schema';
-import { LinkFormat, LinkType } from './types';
 
 /**
  * Provides access to the extension's settings.

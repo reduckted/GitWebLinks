@@ -1,7 +1,11 @@
-import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
-import { Disposable, EventEmitter, Event, Uri } from 'vscode';
+import type { ChildProcessWithoutNullStreams } from 'child_process';
+import type { Event, Uri } from 'vscode';
 
-import { API, Remote, Repository } from './api/git';
+import type { API, Remote, Repository } from './api/git';
+
+import { spawn } from 'child_process';
+import { Disposable, EventEmitter } from 'vscode';
+
 import { log } from './log';
 
 /**
@@ -65,7 +69,7 @@ export class Git extends Disposable {
      * @param args The arguments to pass to Git.
      * @returns The output of the command.
      */
-    public async exec(root: Uri | string, ...args: string[]): Promise<string> {
+    public async exec(root: string | Uri, ...args: string[]): Promise<string> {
         let child: ChildProcessWithoutNullStreams;
         // Handle non-ASCII characters in filenames.
         // See https://stackoverflow.com/questions/4144417/

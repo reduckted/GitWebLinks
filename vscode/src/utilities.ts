@@ -1,6 +1,8 @@
-import { Position, Selection, TextEditor } from 'vscode';
+import type { TextEditor } from 'vscode';
 
-import { Repository, RepositoryWithRemote, SelectedRange } from './types';
+import type { Repository, RepositoryWithRemote, SelectedRange } from './types';
+
+import { Position, Selection } from 'vscode';
 
 /**
  * Determines whether the given repository has a remote.

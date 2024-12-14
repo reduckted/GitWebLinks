@@ -1,25 +1,22 @@
-import {
-    commands,
-    env,
+import type {
     FileStat,
-    FileType,
     QuickPickItem,
     Selection,
     TextDocument,
     TextEditor,
-    TextLine,
-    Uri,
-    window,
-    workspace
+    TextLine
 } from 'vscode';
 
-import { LinkHandlerProvider } from '../link-handler-provider';
+import type { LinkHandlerProvider } from '../link-handler-provider';
+import type { RepositoryFinder } from '../repository-finder';
+import type { StaticServer } from '../schema';
+import type { Repository, RepositoryWithRemote, SelectedRange, UrlInfo } from '../types';
+
+import { commands, env, FileType, Uri, window, workspace } from 'vscode';
+
 import { log } from '../log';
 import { RemoteServer } from '../remote-server';
-import { RepositoryFinder } from '../repository-finder';
-import { StaticServer } from '../schema';
 import { STRINGS } from '../strings';
-import { Repository, RepositoryWithRemote, SelectedRange, UrlInfo } from '../types';
 import { hasRemote, toSelection } from '../utilities';
 
 /**

@@ -1,9 +1,10 @@
+import type { RepositoryState } from '../src/api/git';
+import type { Git, GitRemote, GitRepository } from '../src/git';
+
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { Uri } from 'vscode';
 
-import { RepositoryState } from '../src/api/git';
-import { Git, GitRemote, GitRepository } from '../src/git';
 import { RepositoryFinder } from '../src/repository-finder';
 import { Settings } from '../src/settings';
 

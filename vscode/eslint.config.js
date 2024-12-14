@@ -51,6 +51,7 @@ module.exports = tseslint.config(
                 'warn',
                 { assertionStyle: 'as', objectLiteralTypeAssertions: 'allow' }
             ],
+            '@typescript-eslint/consistent-type-imports': 'warn',
             '@typescript-eslint/explicit-function-return-type': [
                 'warn',
                 {
@@ -69,6 +70,8 @@ module.exports = tseslint.config(
             '@typescript-eslint/prefer-readonly': 'warn',
             '@typescript-eslint/promise-function-async': 'warn',
             '@typescript-eslint/restrict-template-expressions': 'off',
+            'perfectionist/sort-heritage-clauses': 'warn',
+            'perfectionist/sort-named-imports': 'warn',
             'perfectionist/sort-imports': [
                 'warn',
                 {
@@ -80,6 +83,27 @@ module.exports = tseslint.config(
                         'parent',
                         ['sibling', 'index', 'object'],
                         'unknown'
+                    ]
+                }
+            ],
+            'perfectionist/sort-union-types': [
+                'warn',
+                {
+                    groups: [
+                        [
+                            'conditional',
+                            'function',
+                            'import',
+                            'intersection',
+                            'keyword',
+                            'literal',
+                            'named',
+                            'object',
+                            'operator',
+                            'tuple',
+                            'union'
+                        ],
+                        'nullish'
                     ]
                 }
             ],

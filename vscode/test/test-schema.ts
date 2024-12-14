@@ -1,5 +1,5 @@
-import { HandlerDefinition, Template } from '../src/schema';
-import { SelectedRange } from '../src/types';
+import type { HandlerDefinition, Template } from '../src/schema';
+import type { SelectedRange } from '../src/types';
 
 /**
  * Settings to make available during a test.

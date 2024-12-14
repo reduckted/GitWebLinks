@@ -1,8 +1,9 @@
-import { Git } from './git';
+import type { Git } from './git';
+import type { RepositoryWithRemote, UrlInfo } from './types';
+
 import { LinkHandler } from './link-handler';
 import { log } from './log';
 import { load } from './schema';
-import { RepositoryWithRemote, UrlInfo } from './types';
 
 /**
  * Provides access to the link handlers.

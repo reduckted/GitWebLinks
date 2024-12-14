@@ -1,7 +1,8 @@
+import type { Git, GitRepository } from './git';
+
 import { commands, Disposable, workspace } from 'vscode';
 
 import { CONFIGURATION, CONTEXT } from './constants';
-import { Git, GitRepository } from './git';
 import { log } from './log';
 import { Settings } from './settings';
 

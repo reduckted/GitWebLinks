@@ -1,6 +1,9 @@
-import { ExtensionContext, window, extensions, Disposable } from 'vscode';
+import type { Disposable, ExtensionContext } from 'vscode';
 
-import { GitExtension } from './api/git';
+import type { GitExtension } from './api/git';
+
+import { extensions, window } from 'vscode';
+
 import { registerCommands } from './commands';
 import { ContextManager } from './context-manager';
 import { Git } from './git';

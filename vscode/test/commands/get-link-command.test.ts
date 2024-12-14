@@ -1,29 +1,17 @@
-import * as chai from 'chai';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
-import {
+import type {
     CancellationToken,
-    env,
     MessageItem,
-    Position,
     QuickPickItem,
     QuickPickOptions,
     Selection,
-    TextDocument,
-    Uri,
-    window
+    TextDocument
 } from 'vscode';
 
-import { GetLinkCommand, GetLinkCommandOptions } from '../../src/commands/get-link-command';
-import { Git } from '../../src/git';
-import { CreateUrlResult, LinkHandler } from '../../src/link-handler';
-import { LinkHandlerProvider, SelectedLinkHandler } from '../../src/link-handler-provider';
-import { RepositoryFinder } from '../../src/repository-finder';
-import { Settings } from '../../src/settings';
-import { STRINGS } from '../../src/strings';
-import {
+import type { GetLinkCommandOptions } from '../../src/commands/get-link-command';
+import type { Git } from '../../src/git';
+import type { CreateUrlResult } from '../../src/link-handler';
+import type { SelectedLinkHandler } from '../../src/link-handler-provider';
+import type {
     FileInfo,
     LinkFormat,
     LinkOptions,
@@ -31,6 +19,20 @@ import {
     Repository,
     RepositoryWithRemote
 } from '../../src/types';
+
+import * as chai from 'chai';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
+import { env, Position, Uri, window } from 'vscode';
+
+import { GetLinkCommand } from '../../src/commands/get-link-command';
+import { LinkHandler } from '../../src/link-handler';
+import { LinkHandlerProvider } from '../../src/link-handler-provider';
+import { RepositoryFinder } from '../../src/repository-finder';
+import { Settings } from '../../src/settings';
+import { STRINGS } from '../../src/strings';
 import { Directory, getGitService, markAsSlow, setupRepository } from '../helpers';
 
 const expect = chai.use(sinonChai).expect;
@@ -748,7 +750,7 @@ describe('GetLinkCommand', () => {
 
     function useTextEditor(
         uri: Uri | undefined,
-        selection?: Pick<Selection, 'start' | 'end'>,
+        selection?: Pick<Selection, 'end' | 'start'>,
         lines?: string[],
         languageId?: string
     ): void {

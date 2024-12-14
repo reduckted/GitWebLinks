@@ -6,7 +6,7 @@ import * as path from 'path';
 /**
  * Defines a handler
  */
-export type HandlerDefinition = PublicHandlerDefinition | PrivateHandlerDefinition;
+export type HandlerDefinition = PrivateHandlerDefinition | PublicHandlerDefinition;
 
 /**
  * Defines a handler for a public remote host.
@@ -174,7 +174,7 @@ export type Template = string | string[];
 /**
  * Defines the server that the handler matches to.
  */
-export type Server = StaticServer | DynamicServer[];
+export type Server = DynamicServer[] | StaticServer;
 
 /**
  * Defines a server with a fixed address.

@@ -1,6 +1,7 @@
+import type { GitExtension } from '../../src/api/git';
+
 import { extensions } from 'vscode';
 
-import { GitExtension } from '../../src/api/git';
 import { Git } from '../../src/git';
 
 let git: Git | undefined;

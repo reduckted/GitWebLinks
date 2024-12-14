@@ -1,29 +1,19 @@
+import type { InputBoxOptions, TextDocument, TextEditor, TextLine } from 'vscode';
+
+import type { Git } from '../../src/git';
+import type { Repository, SelectedRange, UrlInfo } from '../../src/types';
+
 import * as chai from 'chai';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import {
-    commands,
-    env,
-    InputBoxOptions,
-    Position,
-    Range,
-    Selection,
-    TextDocument,
-    TextEditor,
-    TextLine,
-    Uri,
-    window,
-    workspace
-} from 'vscode';
+import { commands, env, Position, Range, Selection, Uri, window, workspace } from 'vscode';
 
 import { GoToFileCommand } from '../../src/commands/go-to-file-command';
-import { Git } from '../../src/git';
 import { LinkHandlerProvider } from '../../src/link-handler-provider';
 import { RepositoryFinder } from '../../src/repository-finder';
 import { STRINGS } from '../../src/strings';
-import { Repository, SelectedRange, UrlInfo } from '../../src/types';
 import { toSelection } from '../../src/utilities';
 import { Directory, getGitService, matchUri } from '../helpers';
 
@@ -540,7 +530,7 @@ describe('GoToFileLinkCommand', () => {
         }
 
         for (let name in folder.children) {
-            let childFolder: Folder | 'file';
+            let childFolder: 'file' | Folder;
             let childPath: string;
 
             childFolder = folder.children[name];
@@ -611,6 +601,6 @@ describe('GoToFileLinkCommand', () => {
     interface Folder {
         repository?: string;
 
-        children: Record<string, Folder | 'file'>;
+        children: Record<string, 'file' | Folder>;
     }
 });
