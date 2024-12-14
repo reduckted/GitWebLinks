@@ -33,7 +33,7 @@ public class GitWebLinksPackage : ToolkitPackage {
     public const string DescriptionID = "101";
 
 
-    protected async override Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress) {
+    protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress) {
         TemplateEngine.Initialize();
         await AddServicesAsync();
         await this.RegisterCommandsAsync();

@@ -13,6 +13,8 @@ public class GiteaOptionsPage : ServerOptionsPageBase {
     public const short ResourceID = 208;
 
 
-    protected override FrameworkElement CreateView() => new GiteaOptionsControl();
+    protected override FrameworkElement CreateView() {
+        return new GiteaOptionsControl();
+    }
 
 }

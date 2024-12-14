@@ -15,7 +15,7 @@ public abstract class OptionsPageBase : UIElementDialogPage, INotifyPropertyChan
     private FrameworkElement? _view;
 
 
-    protected override sealed UIElement Child {
+    protected sealed override UIElement Child {
         get {
             if (_view is null) {
                 _view = CreateView();

@@ -13,6 +13,8 @@ public class AzureDevOpsServerOptionsPage : ServerOptionsPageBase {
     public const short ResourceID = 203;
 
 
-    protected override FrameworkElement CreateView() => new AzureDevOpsServerOptionsControl();
+    protected override FrameworkElement CreateView() {
+        return new AzureDevOpsServerOptionsControl();
+    }
 
 }

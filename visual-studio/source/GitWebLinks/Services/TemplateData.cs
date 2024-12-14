@@ -37,7 +37,7 @@ public class TemplateData {
             matchData = new Dictionary<string, object?>();
             groupsData = new Dictionary<string, object?>();
 
-            foreach (var group in match.Groups.OfType<Group>()) {
+            foreach (Group group in match.Groups.OfType<Group>()) {
                 groupsData[group.Name] = group.Success ? group.Value : null;
             }
 

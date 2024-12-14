@@ -60,7 +60,7 @@ public abstract class DirectoryTestBase : IDisposable {
 
 
     private void RemoveReadOnlyAttributes() {
-        foreach (var file in _rootDirectory.EnumerateFiles("*", SearchOption.AllDirectories)) {
+        foreach (System.IO.FileInfo file in _rootDirectory.EnumerateFiles("*", SearchOption.AllDirectories)) {
             if ((file.Attributes & FileAttributes.ReadOnly) != 0) {
                 file.Attributes &= ~FileAttributes.ReadOnly;
             }

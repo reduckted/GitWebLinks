@@ -4,7 +4,7 @@ namespace GitWebLinks;
 
 public class UrlTest {
 
-    public Dictionary<string, JToken> Settings { get; } = new();
+    public Dictionary<string, JToken> Settings { get; } = [];
 
 
     public string Remote { get; set; } = "";

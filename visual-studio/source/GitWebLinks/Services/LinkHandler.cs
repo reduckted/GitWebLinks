@@ -27,11 +27,9 @@ public class LinkHandler : ILinkHandler {
         _settings = settings;
         _git = git;
 
-        if (definition is PrivateHandlerDefinition privateHandlerDefinition) {
-            _server = new RemoteServer(async () => await _settings.GetServersAsync(privateHandlerDefinition.ServerSettingsKey));
-        } else {
-            _server = new RemoteServer(((PublicHandlerDefinition)definition).Servers);
-        }
+        _server = definition is PrivateHandlerDefinition privateHandlerDefinition
+            ? new RemoteServer(async () => await _settings.GetServersAsync(privateHandlerDefinition.ServerSettingsKey))
+            : new RemoteServer(((PublicHandlerDefinition)definition).Servers);
     }
 
 
@@ -143,7 +141,7 @@ public class LinkHandler : ILinkHandler {
             builder = new UriBuilder(url);
             query = HttpUtility.ParseQueryString(builder.Query);
 
-            foreach (var modification in modifications) {
+            foreach (QueryModification modification in modifications) {
                 query.Add(modification.Key, modification.Value);
             }
 
@@ -189,17 +187,15 @@ public class LinkHandler : ILinkHandler {
         // Remove the server's address from the start of the URL.
         // Note that the remote URL and both URLs in the server
         // address have been normalized by this point.
-        if (remoteUrl.StartsWith(address.Http, StringComparison.Ordinal)) {
-            repositoryPath = remoteUrl.Substring(address.Http.Length);
-        } else {
-            repositoryPath = address.Ssh is not null ? remoteUrl.Substring(address.Ssh.Length) : "";
-        }
+        repositoryPath = remoteUrl.StartsWith(address.Http, StringComparison.Ordinal)
+            ? remoteUrl.Substring(address.Http.Length)
+            : address.Ssh is not null ? remoteUrl.Substring(address.Ssh.Length) : "";
 
         // The server address we matched against may not have ended
         // with a slash (for HTTPS paths) or a colon (for SSH paths),
         // which means the path might start with that. Trim that off now.
         if (repositoryPath.Length > 0) {
-            if (repositoryPath[0] == '/' || repositoryPath[0] == ':') {
+            if (repositoryPath[0] is '/' or ':') {
                 repositoryPath = repositoryPath.Substring(1);
             }
         }
@@ -326,11 +322,9 @@ public class LinkHandler : ILinkHandler {
 
         // The "from" path is always a directory because it's the root of the
         // repository, but the "to" path could be a directory or a file.
-        if (new DirectoryInfo(to).Exists) {
-            toType = NativeMethods.FILE_ATTRIBUTE_DIRECTORY;
-        } else {
-            toType = NativeMethods.FILE_ATTRIBUTE_NORMAL;
-        }
+        toType = new DirectoryInfo(to).Exists
+            ? NativeMethods.FILE_ATTRIBUTE_DIRECTORY
+            : NativeMethods.FILE_ATTRIBUTE_NORMAL;
 
         unsafe {
             char* buffer = stackalloc char[260];

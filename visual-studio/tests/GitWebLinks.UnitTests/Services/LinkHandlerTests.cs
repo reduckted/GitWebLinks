@@ -26,7 +26,7 @@ public static class LinkHandlerTests {
 
             _repository = new Repository(
                 RootDirectory,
-                new Remote("origin", new[] { "http://example.com" })
+                new Remote("origin", ["http://example.com"])
             );
         }
 
@@ -558,7 +558,7 @@ public static class LinkHandlerTests {
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
                         Url = "http://example.com/file",
-                        Query = new[] { new QueryModification(new Regex("\\.js$"), "a", "1") }
+                        Query = [new QueryModification(new Regex("\\.js$"), "a", "1")]
                     },
                     new LinkTargetPreset(null),
                     filePath: "foo/bar.txt"
@@ -576,7 +576,7 @@ public static class LinkHandlerTests {
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
                         Url = "http://example.com/file",
-                        Query = new[] { new QueryModification(new Regex("\\.txt$"), "first", "yes") }
+                        Query = [new QueryModification(new Regex("\\.txt$"), "first", "yes")]
                     },
                     new LinkTargetPreset(null),
                     filePath: "foo/bar.txt"
@@ -594,7 +594,7 @@ public static class LinkHandlerTests {
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
                         Url = "http://example.com/file?first=yes",
-                        Query = new[] { new QueryModification(new Regex("\\.txt$"), "second", "no") }
+                        Query = [new QueryModification(new Regex("\\.txt$"), "second", "no")]
                     },
                     new LinkTargetPreset(null),
                     filePath: "foo/bar.txt"
@@ -612,7 +612,7 @@ public static class LinkHandlerTests {
                 await CreateUrlAsync(
                     new PartialHandlerDefinition {
                         Url = "http://example.com/file#L1-10",
-                        Query = new[] { new QueryModification(new Regex("\\.txt$"), "first", "yes") }
+                        Query = [new QueryModification(new Regex("\\.txt$"), "first", "yes")]
                     },
                     new LinkTargetPreset(null),
                     filePath: "foo/bar.txt"
@@ -627,7 +627,7 @@ public static class LinkHandlerTests {
 
 
         private void SetRemoteUrl(string url) {
-            _repository = new Repository(_repository.Root, new Remote("origin", new[] { url }));
+            _repository = new Repository(_repository.Root, new Remote("origin", [url]));
         }
 
 
@@ -650,9 +650,9 @@ public static class LinkHandlerTests {
                 new PublicHandlerDefinition(
                     "Test",
                     definition.BranchRef ?? BranchRefType.Abbreviated,
-                    Array.Empty<string>(),
+                    [],
                     Parser.Parse(definition.Url ?? ""),
-                    definition.Query ?? Array.Empty<QueryModification>(),
+                    definition.Query ?? [],
                     EmptyTemplate,
                     new ReverseSettings(
                         new Regex(""),
@@ -661,7 +661,7 @@ public static class LinkHandlerTests {
                         new ReverseServerSettings(EmptyTemplate, EmptyTemplate, null),
                         new ReverseSelectionSettings(EmptyTemplate, null, null, null)
                     ),
-                    new[] { definition.Server ?? new StaticServer("http://example.com", "ssh://example.com", null) }
+                    [definition.Server ?? new StaticServer("http://example.com", "ssh://example.com", null)]
                 ),
                 _settings,
                 Git
@@ -862,9 +862,9 @@ public static class LinkHandlerTests {
                 new PublicHandlerDefinition(
                     "Test",
                     BranchRefType.Abbreviated,
-                    Array.Empty<string>(),
+                    [],
                     EmptyTemplate,
-                    Array.Empty<QueryModification>(),
+                    [],
                     EmptyTemplate,
                     new ReverseSettings(
                         new Regex(reverse.Pattern ?? ""),
@@ -873,7 +873,7 @@ public static class LinkHandlerTests {
                         reverse.Server ?? new ReverseServerSettings(EmptyTemplate, EmptyTemplate, null),
                         reverse.Selection ?? new ReverseSelectionSettings(EmptyTemplate, null, null, null)
                     ),
-                    new[] { _server }
+                    [_server]
                 ),
                 Substitute.For<ISettings>(),
                 Git

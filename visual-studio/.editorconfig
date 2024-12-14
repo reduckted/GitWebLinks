@@ -101,6 +101,13 @@ csharp_style_unused_value_expression_statement_preference = discard_variable:sil
 # 'using' directive preferences
 csharp_using_directive_placement = outside_namespace:silent
 
+# Code-style rules
+dotnet_analyzer_diagnostic.category-Style.severity = warning
+dotnet_diagnostic.IDE0010.severity = none
+dotnet_diagnostic.IDE0046.severity = none
+dotnet_diagnostic.IDE0058.severity = none
+dotnet_diagnostic.IDE0290.severity = none
+
 #### C# Formatting Rules ####
 
 # New line preferences

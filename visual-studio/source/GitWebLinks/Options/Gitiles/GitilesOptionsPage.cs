@@ -14,6 +14,8 @@ public class GitilesOptionsPage : ServerOptionsPageBase {
     public const short ResourceID = 207;
 
 
-    protected override FrameworkElement CreateView() => new GitilesOptionsControl();
+    protected override FrameworkElement CreateView() {
+        return new GitilesOptionsControl();
+    }
 
 }

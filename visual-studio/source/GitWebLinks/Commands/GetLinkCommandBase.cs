@@ -84,7 +84,9 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
     protected abstract CommandAction Action { get; }
 
 
-    protected virtual bool IsVisible(GeneralOptionsPage options) => true;
+    protected virtual bool IsVisible(GeneralOptionsPage options) {
+        return true;
+    }
 
 
     protected override Task InitializeCompletedAsync() {
@@ -98,7 +100,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
     }
 
 
-    protected async override Task ExecuteAsync(OleMenuCmdEventArgs e) {
+    protected override async Task ExecuteAsync(OleMenuCmdEventArgs e) {
         SolutionItem? resource;
         ResourceInfo? info;
         ILogger logger;
@@ -257,7 +259,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
     }
 
 
-    private async Task<ILinkTarget?> PromptForTargetAsync(GetLinkCommandBase<T>.ResourceInfo info) {
+    private async Task<ILinkTarget?> PromptForTargetAsync(ResourceInfo info) {
         LinkTargetSelector selector;
 
 

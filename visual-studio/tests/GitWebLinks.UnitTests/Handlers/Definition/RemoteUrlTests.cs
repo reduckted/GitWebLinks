@@ -4,7 +4,7 @@ namespace GitWebLinks;
 
 public class RemoteUrlTests {
 
-    public Dictionary<string, JToken> Settings { get; } = new();
+    public Dictionary<string, JToken> Settings { get; } = [];
 
 
     public string Http { get; set; } = "";

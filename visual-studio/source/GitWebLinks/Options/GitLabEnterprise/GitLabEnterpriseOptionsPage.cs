@@ -13,6 +13,8 @@ public class GitLabEnterpriseOptionsPage : ServerOptionsPageBase {
     public const short ResourceID = 206;
 
 
-    protected override FrameworkElement CreateView() => new GitLabEnterpriseOptionsControl();
+    protected override FrameworkElement CreateView() {
+        return new GitLabEnterpriseOptionsControl();
+    }
 
 }

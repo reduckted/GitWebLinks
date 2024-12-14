@@ -120,7 +120,7 @@ public static class RepositoryFinderTests {
             await Git.ExecuteAsync(RootDirectory, "remote", "add", "origin", "https://github.com/example/repo");
 
             Assert.Equal(
-                new Repository(RootDirectory, new Remote("origin", new[] { "https://github.com/example/repo" })),
+                new Repository(RootDirectory, new Remote("origin", ["https://github.com/example/repo"])),
                 await _finder.FindRepositoryAsync(RootDirectory),
                 RepositoryComparer.Instance
             );
@@ -138,7 +138,7 @@ public static class RepositoryFinderTests {
             child = CreateDirectory("child");
 
             Assert.Equal(
-                new Repository(RootDirectory, new Remote("origin", new[] { "https://github.com/example/repo" })),
+                new Repository(RootDirectory, new Remote("origin", ["https://github.com/example/repo"])),
                 await _finder.FindRepositoryAsync(child),
                 RepositoryComparer.Instance
             );
@@ -156,7 +156,7 @@ public static class RepositoryFinderTests {
             file = CreateFile("file.txt");
 
             Assert.Equal(
-                new Repository(RootDirectory, new Remote("origin", new[] { "https://github.com/example/repo" })),
+                new Repository(RootDirectory, new Remote("origin", ["https://github.com/example/repo"])),
                 await _finder.FindRepositoryAsync(file),
                 RepositoryComparer.Instance
             );
@@ -177,7 +177,7 @@ public static class RepositoryFinderTests {
             await Git.ExecuteAsync(repo, "worktree", "add", worktree);
 
             Assert.Equal(
-                new Repository(worktree, new Remote("origin", new[] { "https://github.com/example/repo" })),
+                new Repository(worktree, new Remote("origin", ["https://github.com/example/repo"])),
                 await _finder.FindRepositoryAsync(worktree),
                 RepositoryComparer.Instance
             );
@@ -194,7 +194,7 @@ public static class RepositoryFinderTests {
             await Git.ExecuteAsync(RootDirectory, "remote", "add", "testing", "https://github.com/example/repo");
 
             Assert.Equal(
-                new Repository(RootDirectory, new Remote("testing", new[] { "https://github.com/example/repo" })),
+                new Repository(RootDirectory, new Remote("testing", ["https://github.com/example/repo"])),
                 await _finder.FindRepositoryAsync(RootDirectory),
                 RepositoryComparer.Instance
             );
@@ -211,7 +211,7 @@ public static class RepositoryFinderTests {
             await Git.ExecuteAsync(RootDirectory, "remote", "add", "gamma", "https://github.com/example/gamma");
 
             Assert.Equal(
-                new Repository(RootDirectory, new Remote("alpha", new[] { "https://github.com/example/alpha" })),
+                new Repository(RootDirectory, new Remote("alpha", ["https://github.com/example/alpha"])),
                 await _finder.FindRepositoryAsync(RootDirectory),
                 RepositoryComparer.Instance
             );
@@ -256,7 +256,7 @@ public static class RepositoryFinderTests {
             await SetupRepositoryAsync(RootDirectory);
 
             Assert.Equal(
-                new[] { RootDirectory },
+                [RootDirectory],
                 await FindRoots(RootDirectory)
             );
         }
@@ -272,7 +272,7 @@ public static class RepositoryFinderTests {
             child = CreateDirectory("child");
 
             Assert.Equal(
-                new[] { RootDirectory },
+                [RootDirectory],
                 await FindRoots(child)
             );
         }
@@ -290,7 +290,7 @@ public static class RepositoryFinderTests {
             await SetupRepositoryAsync(child);
 
             Assert.Equal(
-                new[] { child },
+                [child],
                 await FindRoots(RootDirectory)
             );
         }
@@ -333,7 +333,7 @@ public static class RepositoryFinderTests {
             await SetupRepositoryAsync(delta);
 
             Assert.Equal(
-                new[] { alpha, beta, gamma, delta },
+                [alpha, beta, gamma, delta],
                 (await FindRoots(RootDirectory)).OrderBy((x) => x)
             );
         }
@@ -358,7 +358,7 @@ public static class RepositoryFinderTests {
             await Git.ExecuteAsync(alpha, "remote", "add", "origin", "https://github.com/example/alpha");
             await Git.ExecuteAsync(gamma, "remote", "add", "origin", "https://github.com/example/gamma");
 
-            repositories = new List<Repository>();
+            repositories = [];
 
             await foreach (Repository repository in _finder.FindRepositoriesAsync(RootDirectory)) {
                 repositories.Add(repository);
@@ -367,11 +367,11 @@ public static class RepositoryFinderTests {
             repositories.Sort((x, y) => string.Compare(x.Root, y.Root, StringComparison.Ordinal));
 
             Assert.Equal(
-                new[] {
-                    new Repository(alpha, new Remote("origin", new[] { "https://github.com/example/alpha" })),
+                [
+                    new Repository(alpha, new Remote("origin", ["https://github.com/example/alpha"])),
                     new Repository(beta, null),
-                    new Repository(gamma,new Remote("origin", new[] { "https://github.com/example/gamma" }))
-                },
+                    new Repository(gamma,new Remote("origin", ["https://github.com/example/gamma"]))
+                ],
                 repositories,
                 RepositoryComparer.Instance
             );
@@ -382,7 +382,7 @@ public static class RepositoryFinderTests {
             List<string> repositories;
 
 
-            repositories = new List<string>();
+            repositories = [];
 
             await foreach (Repository repository in _finder.FindRepositoriesAsync(directory)) {
                 repositories.Add(repository.Root);

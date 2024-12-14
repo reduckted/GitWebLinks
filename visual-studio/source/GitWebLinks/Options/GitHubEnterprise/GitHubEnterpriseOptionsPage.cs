@@ -13,6 +13,8 @@ public class GitHubEnterpriseOptionsPage : ServerOptionsPageBase {
     public const short ResourceID = 205;
 
 
-    protected override FrameworkElement CreateView() => new GitHubEnterpriseOptionsControl();
+    protected override FrameworkElement CreateView() {
+        return new GitHubEnterpriseOptionsControl();
+    }
 
 }

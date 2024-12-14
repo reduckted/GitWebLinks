@@ -83,17 +83,14 @@ public static class HandlerTests {
 
             test = Definition.Tests.CreateUrl.Misc.First((x) => x.Name == customTestName);
 
-            if (test.Selection is not null) {
-                selection = new SelectedRange(
+            selection = test.Selection is not null
+                ? new SelectedRange(
                     test.Selection.StartLine,
                     test.Selection.StartColumn,
                     test.Selection.EndLine,
                     test.Selection.EndColumn
-                );
-
-            } else {
-                selection = null;
-            }
+                )
+                : null;
 
             await RunTestAsync(
                 test.Remote,
@@ -167,13 +164,11 @@ public static class HandlerTests {
             string? link;
 
 
-            if (options is null) {
-                options = new TestOptions();
-            }
+            options ??= new TestOptions();
 
             result = await PrepareTestAsync(settings, result, options);
 
-            repository = new Repository(RepositoryRoot, new Remote("origin", new[] { remote }));
+            repository = new Repository(RepositoryRoot, new Remote("origin", [remote]));
 
             match = await Provider.SelectAsync(repository);
 
@@ -283,17 +278,14 @@ public static class HandlerTests {
 
             test = Definition.Tests.CreateUrl.Misc.First((x) => x.Name == customTestName);
 
-            if (test.Selection is not null) {
-                selection = new PartialSelectedRange(
+            selection = test.Selection is not null
+                ? new PartialSelectedRange(
                     test.Selection.StartLine,
                     test.Selection.StartColumn,
                     test.Selection.EndLine,
                     test.Selection.EndColumn
-                );
-
-            } else {
-                selection = null;
-            }
+                )
+                : null;
 
             await RunTestAsync(
                 test.Remote,
@@ -362,17 +354,9 @@ public static class HandlerTests {
             IReadOnlyCollection<UrlInfo> infos;
             UrlInfo info;
 
-            if (options is null) {
-                options = new ReverseTestOptions();
-            }
-
-            if (options.FileName is null) {
-                options.FileName = TestFileName;
-            }
-
-            if (options.Selection is null) {
-                options.Selection = new PartialSelectedRange(null, null, null, null);
-            }
+            options ??= new ReverseTestOptions();
+            options.FileName ??= TestFileName;
+            options.Selection ??= new PartialSelectedRange(null, null, null, null);
 
             url = await PrepareTestAsync(settings, url, options);
 
@@ -448,9 +432,6 @@ public static class HandlerTests {
         private readonly ISettings _settings;
         private readonly Dictionary<string, IReadOnlyList<StaticServer>> _servers;
         private readonly Dictionary<string, object> _handlerSettings;
-        private HandlerTestDefinition _definition;
-        private string _repositoryRoot;
-
 
         static TestBase() {
             TemplateEngine.Initialize();
@@ -458,8 +439,8 @@ public static class HandlerTests {
 
 
         protected TestBase() {
-            _handlerSettings = new Dictionary<string, object>();
-            _servers = new Dictionary<string, IReadOnlyList<StaticServer>>();
+            _handlerSettings = [];
+            _servers = [];
 
             _settings = Substitute.For<ISettings>();
             _settings.GetDefaultBranchAsync().Returns("");
@@ -475,39 +456,39 @@ public static class HandlerTests {
             _settings.GetServersAsync(Arg.Any<string>()).Returns(
                 (args) => {
                     _servers.TryGetValue(args.ArgAt<string>(0), out IReadOnlyList<StaticServer>? value);
-                    return Task.FromResult(value ?? Array.Empty<StaticServer>());
+                    return Task.FromResult(value ?? []);
                 }
             );
 
             Provider = new(_settings, Git, NullLogger.Instance);
 
-            _repositoryRoot = "";
-            _definition = default!;
+            RepositoryRoot = "";
+            Definition = default!;
         }
 
 
         protected LinkHandlerProvider Provider { get; }
 
 
-        protected HandlerTestDefinition Definition => _definition;
+        protected HandlerTestDefinition Definition { get; private set; }
 
 
-        protected string RepositoryRoot => _repositoryRoot;
+        protected string RepositoryRoot { get; private set; }
 
 
         public void SetDefinition(HandlerTestDefinition definition) {
-            _definition = definition;
+            Definition = definition;
         }
 
 
         protected async Task<string> PrepareTestAsync(Dictionary<string, JToken>? settings, string url, TestBaseOptions options) {
             SetupSettings(settings);
 
-            _repositoryRoot = CreateDirectory("repo");
-            await SetupRepositoryAsync(_repositoryRoot);
+            RepositoryRoot = CreateDirectory("repo");
+            await SetupRepositoryAsync(RepositoryRoot);
 
             if (options.Branch is not null) {
-                await Git.ExecuteAsync(_repositoryRoot, "checkout", "-b", options.Branch);
+                await Git.ExecuteAsync(RepositoryRoot, "checkout", "-b", options.Branch);
             }
 
             if (options.RemoteName is not null) {
@@ -516,8 +497,8 @@ public static class HandlerTests {
 
                 origin = CreateDirectory("origin");
 
-                await SetupRemoteAsync(_repositoryRoot, origin, options.RemoteName);
-                await Git.ExecuteAsync(_repositoryRoot, "remote", "set-head", options.RemoteName, "master");
+                await SetupRemoteAsync(RepositoryRoot, origin, options.RemoteName);
+                await Git.ExecuteAsync(RepositoryRoot, "remote", "set-head", options.RemoteName, "master");
             }
 
             // Treat the test URL as a template and allow
@@ -525,14 +506,14 @@ public static class HandlerTests {
             return new FluidParser().Parse(url).Render(
                 TemplateData
                     .Create()
-                    .Add("commit", string.Concat(await Git.ExecuteAsync(_repositoryRoot, "rev-parse", "HEAD")).Trim())
+                    .Add("commit", string.Concat(await Git.ExecuteAsync(RepositoryRoot, "rev-parse", "HEAD")).Trim())
                     .AsTemplateContext()
             );
         }
 
 
         private void SetupSettings(Dictionary<string, JToken>? settings) {
-            ApplySettings(_definition.Tests.Settings);
+            ApplySettings(Definition.Tests.Settings);
 
             if (settings is not null) {
                 ApplySettings(settings);
@@ -556,6 +537,8 @@ public static class HandlerTests {
                         _handlerSettings["useGitHubDev"] = item.Value.ToObject<bool>();
                         break;
 
+                    default:
+                        throw new InvalidOperationException("Unknown setting key");
                 }
             }
         }
@@ -566,7 +549,9 @@ public static class HandlerTests {
                 .Select((x) => new StaticServer(x.Http, x.Ssh, x.Web))
                 .ToList();
 
-            static T Convert<T>(JToken value, T witness) => value.ToObject<T>()!;
+            static T Convert<T>(JToken value, T witness) {
+                return value.ToObject<T>()!;
+            }
         }
 
     }

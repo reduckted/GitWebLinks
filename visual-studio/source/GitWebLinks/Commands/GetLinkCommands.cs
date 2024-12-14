@@ -9,7 +9,9 @@ public class CopyLinkToFileCommand : GetLinkCommandBase<CopyLinkToFileCommand> {
     protected override bool IncludeSelection => false;
     protected override CommandLinkType LinkType => CommandLinkType.UseDefault;
     protected override CommandAction Action => CommandAction.Copy;
-    protected override bool IsVisible(GeneralOptionsPage options) => options.ShowCopyLinkMenuItem;
+    protected override bool IsVisible(GeneralOptionsPage options) {
+        return options.ShowCopyLinkMenuItem;
+    }
 }
 
 
@@ -18,7 +20,9 @@ public class CopyLinkToSelectionCommand : GetLinkCommandBase<CopyLinkToSelection
     protected override bool IncludeSelection => true;
     protected override CommandLinkType LinkType => CommandLinkType.UseDefault;
     protected override CommandAction Action => CommandAction.Copy;
-    protected override bool IsVisible(GeneralOptionsPage options) => options.ShowCopyLinkMenuItem;
+    protected override bool IsVisible(GeneralOptionsPage options) {
+        return options.ShowCopyLinkMenuItem;
+    }
 }
 
 
@@ -59,7 +63,9 @@ public class OpenLinkToFileCommand : GetLinkCommandBase<OpenLinkToFileCommand> {
     protected override bool IncludeSelection => false;
     protected override CommandLinkType LinkType => CommandLinkType.UseDefault;
     protected override CommandAction Action => CommandAction.Open;
-    protected override bool IsVisible(GeneralOptionsPage options) => options.ShowOpenLinkMenuItem;
+    protected override bool IsVisible(GeneralOptionsPage options) {
+        return options.ShowOpenLinkMenuItem;
+    }
 }
 
 
@@ -68,7 +74,9 @@ public class OpenLinkToSelectionCommand : GetLinkCommandBase<OpenLinkToSelection
     protected override bool IncludeSelection => true;
     protected override CommandLinkType LinkType => CommandLinkType.UseDefault;
     protected override CommandAction Action => CommandAction.Open;
-    protected override bool IsVisible(GeneralOptionsPage options) => options.ShowOpenLinkMenuItem;
+    protected override bool IsVisible(GeneralOptionsPage options) {
+        return options.ShowOpenLinkMenuItem;
+    }
 }
 
 

@@ -91,7 +91,7 @@ public class RemoteServer {
         );
 
         UrlMatcher Create(Func<string, StaticServer, bool> test) {
-            return async (url) => (await factory()).Where((x) => test(url, x)).FirstOrDefault();
+            return async (url) => (await factory()).FirstOrDefault((x) => test(url, x));
         }
     }
 

@@ -81,10 +81,10 @@ public static class RemoteServerTests {
 
         public MultipleStaticServers() : base(
             new(
-                new IServer[] {
+                [
                     new StaticServer("http://example.com:8000","ssh://git@example.com:9000", null),
                     new StaticServer("http://test.com:6000","ssh://git@test.com:7000", null)
-                }
+                ]
             )
         ) { }
 
@@ -128,13 +128,13 @@ public static class RemoteServerTests {
 
         [Fact]
         public async Task ShouldReturnTheMatchingServerWhenMatchingToTheSshAddressWithoutTheSshProtocol() {
-            Url = ("git@example.com:9000/foo/bar");
+            Url = "git@example.com:9000/foo/bar";
             await MatchAsync(
                 new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null),
                 null
             );
 
-            Url = ("git@test.com:7000/foo/bar");
+            Url = "git@test.com:7000/foo/bar";
             await MatchAsync(
                 new StaticServer("http://test.com:6000", "ssh://git@test.com:7000", null),
                 null
@@ -145,7 +145,7 @@ public static class RemoteServerTests {
         [Fact]
         public async Task ShouldMatchTheWebAddressWhenThereIsAWebAddress() {
             Server = new RemoteServer(
-                new IServer[] {
+                [
                     new StaticServer(
                         "http://example.com:8000",
                         "ssh://git@example.com:9000",
@@ -156,7 +156,7 @@ public static class RemoteServerTests {
                         "ssh://git@test.com:7000",
                         "http://web.test.com"
                     )
-                }
+                ]
             );
 
             Url = "http://web.example.com/foo/bar";
@@ -242,7 +242,7 @@ public static class RemoteServerTests {
 
         public MultipleDynamicServers() : base(
             new RemoteServer(
-                new IServer[] {
+                [
                     new DynamicServer(
                         new Regex("http://(.+)\\.example\\.com:8000"),
                         Parser.Parse("http://example.com:8000/repos/{{ match[1] }}"),
@@ -257,7 +257,7 @@ public static class RemoteServerTests {
                         new Regex("^$"), // This server should only match SSH remote URLs.
                         null
                     )
-                }
+                ]
             )
         ) { }
 
@@ -287,7 +287,7 @@ public static class RemoteServerTests {
         [Fact]
         public async Task ShouldMatchTheWebAddressWhenThereIsAWebAddress() {
             Server = new RemoteServer(
-                new IServer[] {
+                [
                     new DynamicServer(
                         new Regex("http://(.+)\\.example\\.com:8000"),
                         Parser.Parse("http://example.com:8000/repos/{{ match[1] }}"),
@@ -302,7 +302,7 @@ public static class RemoteServerTests {
                         new Regex("http://(.+)\\.other\\.com:8000"),
                         Parser.Parse("http://other.com:8000/repos/{{ match[1] }}")
                     )
-                }
+                ]
             );
 
             Url = "http://foo.test.com:8000/bar/meep";
@@ -333,7 +333,7 @@ public static class RemoteServerTests {
 
         public MixedStaticAndDynamicServers() : base(
             new RemoteServer(
-                new IServer[] {
+                [
                     new DynamicServer(
                         new Regex("http://(.+)\\.example\\.com:8000"),
                         Parser.Parse("http://example.com:8000/repos/{{ match[1] }}"),
@@ -346,7 +346,7 @@ public static class RemoteServerTests {
                         "ssh://git@example.com:11000",
                         null
                     )
-                }
+                ]
             )
         ) { }
 
@@ -385,10 +385,10 @@ public static class RemoteServerTests {
 
 
         public StaticServerFactory() : base(new RemoteServer(new StaticServer("", null, null))) {
-            _source = new[] {
+            _source = [
                 new StaticServer("http://example.com:8000","ssh://git@example.com:9000", null),
                 new StaticServer("http://test.com:6000","ssh://git@test.com:7000", "http://web.test.com")
-            };
+            ];
             Server = new RemoteServer(() => Task.FromResult(_source));
         }
 
@@ -443,7 +443,7 @@ public static class RemoteServerTests {
 
         [Fact]
         public async Task ShouldReturnTheMatchingServerWhenTheRemoteUrlIsAnHttpAddresAndTheServerHasNoSshUrl() {
-            _source = new[] { new StaticServer("http://example.com:8000", null, null) };
+            _source = [new StaticServer("http://example.com:8000", null, null)];
 
             Url = "http://example.com:8000/foo/bar";
             await MatchAsync(
@@ -454,7 +454,7 @@ public static class RemoteServerTests {
 
         [Fact]
         public async Task ShouldNotReturnMatchWhenTheRemoteUrlIsAnSshAddressAndTheServerHNoSshURL() {
-            _source = new[] { new StaticServer("http://example.com:8000", null, null) };
+            _source = [new StaticServer("http://example.com:8000", null, null)];
 
             Url = "ssh://git@test.com:7000/foo/bar";
             await MatchAsync(null);
@@ -468,11 +468,11 @@ public static class RemoteServerTests {
                 new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null)
             );
 
-            _source = new[] { new StaticServer("http://test.com:6000", "ssh://git@test.com:7000", null) };
+            _source = [new StaticServer("http://test.com:6000", "ssh://git@test.com:7000", null)];
 
             await MatchAsync(null);
 
-            _source = new[] { new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null) };
+            _source = [new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null)];
 
             await MatchAsync(
                 new StaticServer("http://example.com:8000", "ssh://git@example.com:9000", null)

@@ -6,8 +6,6 @@ namespace GitWebLinks;
 
 public class HandlerTestCase : XunitTestCase {
 
-    private string _handlerName;
-
     public HandlerTestCase(
         IMessageSink diagnosticMessageSink,
         TestMethodDisplay defaultMethodDisplay,
@@ -16,18 +14,18 @@ public class HandlerTestCase : XunitTestCase {
         string handlerName,
         object[]? testMethodArguments = null
     ) : base(diagnosticMessageSink, defaultMethodDisplay, defaultMethodDisplayOptions, testMethod, testMethodArguments) {
-        _handlerName = handlerName;
+        HandlerName = handlerName;
     }
 
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("Used for deserialization only.")]
     public HandlerTestCase() {
-        _handlerName = "";
+        HandlerName = "";
     }
 
 
-    protected string HandlerName => _handlerName;
+    protected string HandlerName { get; private set; }
 
 
     protected override string GetDisplayName(IAttributeInfo factAttribute, string displayName) {
@@ -50,7 +48,7 @@ public class HandlerTestCase : XunitTestCase {
 
 
     public override void Deserialize(IXunitSerializationInfo data) {
-        _handlerName = data.GetValue<string>("HandlerName");
+        HandlerName = data.GetValue<string>("HandlerName");
         base.Deserialize(data);
     }
 

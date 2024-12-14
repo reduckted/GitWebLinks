@@ -8,7 +8,7 @@ public class UrlTests {
     public UrlTest Spaces { get; } = new();
 
 
-    public IList<CustomTest> Misc { get; } = new List<CustomTest>();
+    public IList<CustomTest> Misc { get; } = [];
 
 
     public UrlTest Branch { get; } = new();

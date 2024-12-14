@@ -9,8 +9,8 @@ public class LinkFormatListItem {
 
         Name = value switch {
             LinkFormat.Raw => "Raw URL",
-            LinkFormat.Markdown=> "Markdown Link",
-            LinkFormat.MarkdownWithPreview=> "Markdown Link with Code Block",
+            LinkFormat.Markdown => "Markdown Link",
+            LinkFormat.MarkdownWithPreview => "Markdown Link with Code Block",
             _ => "?"
         };
     }

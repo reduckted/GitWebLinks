@@ -19,13 +19,13 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
 
 
         loader = CreateLoader(
-            new[] {
+            [
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>()),
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>())
-            },
-            Array.Empty<string>(),
-            Array.Empty<LinkTargetListItem>()
+            ],
+            [],
+            []
         );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
@@ -34,7 +34,7 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
             new JoinableTaskFactory(_joinableTaskContext)
         );
 
-        Assert.Equal(new[] { "one", "two", "three" }, viewModel.Targets.Select((x) => x.Name));
+        Assert.Equal(["one", "two", "three"], viewModel.Targets.Select((x) => x.Name));
 
         await loader.Received(1).LoadPresetsAsync();
         Assert.Single(loader.ReceivedCalls());
@@ -48,15 +48,15 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
 
 
         loader = CreateLoader(
-            new[] {
+            [
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>())
-            },
-            new[] { "1", "2" },
-            new[] {
+            ],
+            ["1", "2"],
+            [
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>()) { Description = "3" },
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Substitute.For <ILinkTarget>()) { Description = "4" }
-            }
+            ]
         );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
@@ -74,12 +74,12 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         Assert.Equal(Visibility.Collapsed, viewModel.LoadingVisibility);
 
         Assert.Equal(
-            new[] {
+            [
                 ("one", "1"),
                 ("two", "2"),
                 ("three", "3"),
                 ("four", "4")
-            },
+            ],
             viewModel.Targets.Select((x) => (x.Name, x.Description))
         );
 
@@ -97,15 +97,15 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
 
 
         loader = CreateLoader(
-        new[] {
+        [
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>())
-            },
-            new[] { "1", "2" },
-            new[] {
+            ],
+            ["1", "2"],
+            [
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>()) { Description = "3" },
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Substitute.For<ILinkTarget>()) { Description = "4" }
-            }
+            ]
         );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
@@ -117,12 +117,12 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         await viewModel.OnLoadedAsync();
 
         Assert.Equal(Visibility.Collapsed, viewModel.NoTargetsVisibility);
-        Assert.Equal(new[] { "one", "two", "three", "four" }, viewModel.Targets.Select((x) => x.Name));
+        Assert.Equal(["one", "two", "three", "four"], viewModel.Targets.Select((x) => x.Name));
 
         viewModel.FilterText = "t";
 
         Assert.Equal(Visibility.Collapsed, viewModel.NoTargetsVisibility);
-        Assert.Equal(new[] { "two", "three" }, viewModel.Targets.Select((x) => x.Name));
+        Assert.Equal(["two", "three"], viewModel.Targets.Select((x) => x.Name));
 
         viewModel.FilterText = "x";
 
@@ -132,7 +132,7 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         viewModel.FilterText = "";
 
         Assert.Equal(Visibility.Collapsed, viewModel.NoTargetsVisibility);
-        Assert.Equal(new[] { "one", "two", "three", "four" }, viewModel.Targets.Select((x) => x.Name));
+        Assert.Equal(["one", "two", "three", "four"], viewModel.Targets.Select((x) => x.Name));
     }
 
 
@@ -143,15 +143,15 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
 
 
         loader = CreateLoader(
-            new[] {
+            [
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "1", Substitute.For<ILinkTarget>()),
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "2", Substitute.For<ILinkTarget>())
-            },
-            new[] { "first", "second" },
-            new[] {
+            ],
+            ["first", "second"],
+            [
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "3", Substitute.For<ILinkTarget>()) { Description = "third" },
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "4", Substitute.For<ILinkTarget>()) { Description = "fourth" }
-            }
+            ]
         );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
@@ -163,12 +163,12 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         await viewModel.OnLoadedAsync();
 
         Assert.Equal(Visibility.Collapsed, viewModel.NoTargetsVisibility);
-        Assert.Equal(new[] { "first", "second", "third", "fourth" }, viewModel.Targets.Select((x) => x.Description));
+        Assert.Equal(["first", "second", "third", "fourth"], viewModel.Targets.Select((x) => x.Description));
 
         viewModel.FilterText = "t";
 
         Assert.Equal(Visibility.Collapsed, viewModel.NoTargetsVisibility);
-        Assert.Equal(new[] { "first", "third", "fourth" }, viewModel.Targets.Select((x) => x.Description));
+        Assert.Equal(["first", "third", "fourth"], viewModel.Targets.Select((x) => x.Description));
 
         viewModel.FilterText = "x";
 
@@ -178,7 +178,7 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         viewModel.FilterText = "";
 
         Assert.Equal(Visibility.Collapsed, viewModel.NoTargetsVisibility);
-        Assert.Equal(new[] { "first", "second", "third", "fourth" }, viewModel.Targets.Select((x) => x.Description));
+        Assert.Equal(["first", "second", "third", "fourth"], viewModel.Targets.Select((x) => x.Description));
     }
 
 
@@ -189,15 +189,15 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
 
 
         loader = CreateLoader(
-            new[] {
+            [
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>())
-            },
-            new[] { "1", "2" },
-            new[] {
+            ],
+            ["1", "2"],
+            [
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>()) { Description = "3" },
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Substitute.For<ILinkTarget>()) { Description = "4" }
-            }
+            ]
         );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
@@ -207,13 +207,13 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         );
 
         viewModel.FilterText = "t";
-        Assert.Equal(new[] { "two" }, viewModel.Targets.Select((x) => x.Name));
+        Assert.Equal(["two"], viewModel.Targets.Select((x) => x.Name));
 
         await viewModel.OnLoadedAsync();
-        Assert.Equal(new[] { "two", "three" }, viewModel.Targets.Select((x) => x.Name));
+        Assert.Equal(["two", "three"], viewModel.Targets.Select((x) => x.Name));
 
         viewModel.FilterText = "";
-        Assert.Equal(new[] { "one", "two", "three", "four" }, viewModel.Targets.Select((x) => x.Name));
+        Assert.Equal(["one", "two", "three", "four"], viewModel.Targets.Select((x) => x.Name));
     }
 
 

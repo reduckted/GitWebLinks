@@ -17,7 +17,7 @@ public class HandlerCustomTestCase : HandlerTestCase {
         ITestMethod testMethod,
         string handlerName,
         string customTestName
-    ) : base(diagnosticMessageSink, defaultMethodDisplay, defaultMethodDisplayOptions, testMethod, handlerName, new object[] { customTestName }) {
+    ) : base(diagnosticMessageSink, defaultMethodDisplay, defaultMethodDisplayOptions, testMethod, handlerName, [customTestName]) {
         _customTestName = customTestName;
     }
 

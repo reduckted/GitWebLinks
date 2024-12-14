@@ -7,7 +7,7 @@ public class CustomTest {
     public string Name { get; set; } = "";
 
 
-    public Dictionary<string, JToken> Settings { get; } = new();
+    public Dictionary<string, JToken> Settings { get; } = [];
 
 
     public string Remote { get; set; } = "";

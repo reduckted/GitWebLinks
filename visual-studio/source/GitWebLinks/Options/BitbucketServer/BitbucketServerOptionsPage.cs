@@ -13,6 +13,8 @@ public class BitbucketServerOptionsPage : ServerOptionsPageBase {
     public const short ResourceID = 204;
 
 
-    protected override FrameworkElement CreateView() => new BitbucketServerOptionsControl();
+    protected override FrameworkElement CreateView() {
+        return new BitbucketServerOptionsControl();
+    }
 
 }

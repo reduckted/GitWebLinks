@@ -63,32 +63,30 @@ public class ServerDataGrid : ItemsControl {
 
 
     public string HttpExample {
-        get { return (string)GetValue(HttpExampleProperty); }
-        set { SetValue(HttpExampleProperty, value); }
+        get => (string)GetValue(HttpExampleProperty);
+        set => SetValue(HttpExampleProperty, value);
     }
 
 
     public string SshExample {
-        get { return (string)GetValue(SshExampleProperty); }
-        set { SetValue(SshExampleProperty, value); }
+        get => (string)GetValue(SshExampleProperty);
+        set => SetValue(SshExampleProperty, value);
     }
 
 
     public string WebExample {
-        get { return (string)GetValue(WebExampleProperty); }
-        set { SetValue(WebExampleProperty, value); }
+        get => (string)GetValue(WebExampleProperty);
+        set => SetValue(WebExampleProperty, value);
     }
 
 
     public bool HasWebAddress {
-        get { return (bool)GetValue(HasWebAddressProperty); }
-        set { SetValue(HasWebAddressProperty, value); }
+        get => (bool)GetValue(HasWebAddressProperty);
+        set => SetValue(HasWebAddressProperty, value);
     }
 
 
-    public bool WebExampleVisibility {
-        get { return (bool)GetValue(WebExampleVisibilityProperty); }
-    }
+    public bool WebExampleVisibility => (bool)GetValue(WebExampleVisibilityProperty);
 
 
     private static void OnHasWebAddressChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {

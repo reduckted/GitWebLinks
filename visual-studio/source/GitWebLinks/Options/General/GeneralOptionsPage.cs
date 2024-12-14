@@ -34,15 +34,15 @@ public class GeneralOptionsPage : OptionsPageBase {
         _useShortHashes = false;
 
         LinkTypes = new List<LinkTypeListItem> {
-            new LinkTypeListItem(LinkType.Commit),
-            new LinkTypeListItem(LinkType.CurrentBranch),
-            new LinkTypeListItem(LinkType.DefaultBranch)
+            new (LinkType.Commit),
+            new (LinkType.CurrentBranch),
+            new (LinkType.DefaultBranch)
         };
 
         LinkFormats = new List<LinkFormatListItem> {
-            new LinkFormatListItem(LinkFormat.Raw),
-            new LinkFormatListItem(LinkFormat.Markdown),
-            new LinkFormatListItem(LinkFormat.MarkdownWithPreview)
+            new (LinkFormat.Raw),
+            new (LinkFormat.Markdown),
+            new (LinkFormat.MarkdownWithPreview)
         };
     }
 
@@ -103,7 +103,9 @@ public class GeneralOptionsPage : OptionsPageBase {
     }
 
 
-    protected override FrameworkElement CreateView() => new GeneralOptionsControl();
+    protected override FrameworkElement CreateView() {
+        return new GeneralOptionsControl();
+    }
 
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]

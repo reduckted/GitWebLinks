@@ -6,9 +6,9 @@ namespace GitWebLinks;
 public static class TestDefinitionProvider {
 
     private static readonly JsonSerializerSettings SerializerSettings = new() {
-        Converters = new List<JsonConverter> {
+        Converters = [
             new StringArrayJsonConverter()
-        }
+        ]
     };
 
 
@@ -21,7 +21,7 @@ public static class TestDefinitionProvider {
             List<HandlerTestDefinition> definitions;
 
 
-            definitions = new List<HandlerTestDefinition>();
+            definitions = [];
             container = typeof(LinkHandlerProvider).Assembly;
 
             foreach (string name in container.GetManifestResourceNames()) {

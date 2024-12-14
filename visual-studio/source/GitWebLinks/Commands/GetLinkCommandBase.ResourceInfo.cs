@@ -2,7 +2,7 @@
 
 namespace GitWebLinks;
 
-partial class GetLinkCommandBase<T> {
+public abstract partial class GetLinkCommandBase<T> {
 
     private class ResourceInfo {
 

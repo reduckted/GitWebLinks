@@ -24,6 +24,8 @@ public class GitHubOptionsPage : OptionsPageBase {
     }
 
 
-    protected override FrameworkElement CreateView() => new GitHubOptionsControl();
+    protected override FrameworkElement CreateView() {
+        return new GitHubOptionsControl();
+    }
 
 }

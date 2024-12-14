@@ -94,20 +94,20 @@ public static class LinkTargetLoaderTests {
 
             loader = CreateLoader(handler);
 
-            presets = new List<LinkTargetListItem> {
+            presets = [
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "Commit", new LinkTargetPreset(LinkType.Commit)),
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "DefaultBranch", new LinkTargetPreset(LinkType.DefaultBranch)),
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "CurrentBranch", new LinkTargetPreset(LinkType.CurrentBranch))
-            };
+            ];
 
             await loader.PopulatePresetDescriptionsAsync(presets);
 
             Assert.Equal(
-                new[] {
+                [
                     "the commit",
                     "the default",
                     "the branch"
-                },
+                ],
                 presets.Select((x) => x.Description).ToArray()
             );
         }
@@ -130,20 +130,20 @@ public static class LinkTargetLoaderTests {
 
             loader = CreateLoader(handler);
 
-            presets = new List<LinkTargetListItem> {
+            presets = [
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "CurrentBranch", new LinkTargetPreset(LinkType.CurrentBranch)),
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "DefaultBranch", new LinkTargetPreset(LinkType.DefaultBranch)),
                 new LinkTargetListItem(LinkTargetListItemKind.Preset, "Commit", new LinkTargetPreset(LinkType.Commit))
-            };
+            ];
 
             await loader.PopulatePresetDescriptionsAsync(presets);
 
             Assert.Equal(
-                new[] {
+                [
                     "the branch",
                     "",
                     "the commit"
-                },
+                ],
                 presets.Select((x) => x.Description).ToArray()
             );
         }
@@ -153,8 +153,8 @@ public static class LinkTargetLoaderTests {
 
     public class LoadBranchesAndCommitsAsyncMethod : TestBase {
 
-        private readonly List<Ref> _commitsInBranchOrder = new();
-        private readonly List<Ref> _commitsInHashOrder = new();
+        private readonly List<Ref> _commitsInBranchOrder = [];
+        private readonly List<Ref> _commitsInHashOrder = [];
 
 
         [Fact]
@@ -265,7 +265,7 @@ public static class LinkTargetLoaderTests {
     public abstract class TestBase : RepositoryTestBase {
 
         public TestBase() {
-            Repository = new Repository(RootDirectory, new Remote("origin", new[] { "http://example.com" }));
+            Repository = new Repository(RootDirectory, new Remote("origin", ["http://example.com"]));
             Settings = Substitute.For<ISettings>();
         }
 

@@ -95,7 +95,7 @@ public static partial class DefinitionProvider {
 
         servers = new List<IServer>();
 
-        foreach (var server in json) {
+        foreach (JsonServer server in json) {
             if (server.RemotePattern is not null) {
                 servers.Add(
                     new DynamicServer(

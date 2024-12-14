@@ -3,6 +3,7 @@
 using Fluid;
 using Fluid.Values;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,6 +32,11 @@ public static class TemplateEngine {
     }
 
 
+    [SuppressMessage(
+        "Style",
+        "IDE0060:Remove unused parameter",
+        Justification = "Unused arguments are included so that the signature matches the FilterDelegate type."
+    )]
     private class Filters {
 
         public static ValueTask<FluidValue> FilenameAsync(

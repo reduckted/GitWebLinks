@@ -4,7 +4,7 @@
         <TargetFramework>net48</TargetFramework>
         <RuntimeIdentifiers>win</RuntimeIdentifiers>
         <Nullable>enable</Nullable>
-        <LangVersion>10.0</LangVersion>
+        <LangVersion>13.0</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <AnalysisMode>AllEnabledByDefault</AnalysisMode>
         <RootNamespace>GitWebLinks</RootNamespace>

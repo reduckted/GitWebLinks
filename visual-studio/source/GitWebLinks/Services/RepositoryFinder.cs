@@ -173,14 +173,13 @@ public class RepositoryFinder {
 
         // .git will usually be a directory,
         //  but for a worktree it will be a file.
-        return (Directory.Exists(gitFileName) || File.Exists(gitFileName));
+        return Directory.Exists(gitFileName) || File.Exists(gitFileName);
     }
 
 
     private async Task<Remote?> FindRemoteAsync(string root) {
         IReadOnlyList<string> data;
         List<Remote> remotes;
-        Remote? remote;
         string preferredRemoteName;
 
         await _logger.LogAsync("Finding remote repositories...");
@@ -199,13 +198,9 @@ public class RepositoryFinder {
         // Use the remote that's specified in the settings if
         // that remote exists; otherwise, just use the first remote.
         preferredRemoteName = await _settings.GetPreferredRemoteNameAsync();
-        remote = remotes.FirstOrDefault((x) => x.Name == preferredRemoteName);
 
-        if (remote is null) {
-            remote = remotes.OrderBy((x) => x.Name).FirstOrDefault();
-        }
-
-        return remote;
+        return remotes.FirstOrDefault((x) => x.Name == preferredRemoteName)
+            ?? remotes.OrderBy((x) => x.Name).FirstOrDefault();
     }
 
 

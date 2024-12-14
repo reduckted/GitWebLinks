@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace GitWebLinks;
 
-partial class DefinitionProvider {
+public static partial class DefinitionProvider {
 
     private class ServerArrayJsonConverter : JsonConverter<IReadOnlyList<JsonServer>> {
 

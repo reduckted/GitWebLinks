@@ -71,7 +71,7 @@ public class LinkTargetLoader : ILinkTargetLoader {
             TryGetRefAsync(LinkType.DefaultBranch)
         );
 
-        foreach (var preset in presets) {
+        foreach (LinkTargetListItem preset in presets) {
             switch (((LinkTargetPreset)preset.Target).Type) {
                 case LinkType.CurrentBranch:
                     preset.Description = descriptions[0];

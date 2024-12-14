@@ -25,8 +25,9 @@ internal class HandlerTestInvoker : XunitTestInvoker {
                 }
 
             } finally {
-                if (!MessageBus.QueueMessage(new TestClassConstructionFinished(Test)))
+                if (!MessageBus.QueueMessage(new TestClassConstructionFinished(Test))) {
                     CancellationTokenSource.Cancel();
+                }
             }
         }
 
