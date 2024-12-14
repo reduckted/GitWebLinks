@@ -1,5 +1,9 @@
 # UNRELEASED
 
+## New Features
+
+-   ⭐ VS Code: Repositories are found using VS Code's Git extension.
+
 ## Maintenance
 
 -   🔨 Dependency updates.
