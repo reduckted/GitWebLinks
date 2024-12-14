@@ -84,7 +84,7 @@
         "Other"
     ],
     "activationEvents": [
-        "*"
+        "onStartupFinished"
     ],
     "extensionDependencies": [
         "vscode.git"
