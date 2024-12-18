@@ -24,6 +24,7 @@ updates:
                   - "*"
       ignore:
           - dependency-name: "Microsoft.VisualStudio.SDK" # Pinned to support all versions of Visual Studio 2022.
+          - dependency-name: "Fluid.Core" # Pinned due to dependencies in newer versions that are not compatible with Visual Studio.
 
     - package-ecosystem: "github-actions"
       directory: "/"
