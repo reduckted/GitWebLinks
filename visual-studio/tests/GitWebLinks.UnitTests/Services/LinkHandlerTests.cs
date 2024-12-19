@@ -475,7 +475,7 @@ public static class LinkHandlerTests {
             link = Path.Combine(RootDirectory, "link");
 
             if (!NativeMethods.CreateSymbolicLink(link, real, NativeMethods.SYMBOLIC_LINK_FLAG_DIRECTORY)) {
-                throw new InvalidOperationException("Could not create symlink.");
+                Assert.Skip("Could not create symlink.");
             }
 
             CreateFile("real/foo.js");
@@ -505,7 +505,7 @@ public static class LinkHandlerTests {
             link = Path.Combine(RootDirectory, "link.js");
 
             if (!NativeMethods.CreateSymbolicLink(link, file, 0)) {
-                throw new InvalidOperationException("Could not create symlink.");
+                Assert.Skip("Could not create symlink.");
             }
 
             Assert.Equal(
@@ -531,7 +531,7 @@ public static class LinkHandlerTests {
             link = Path.Combine(RootDirectory, "link");
 
             if (!NativeMethods.CreateSymbolicLink(link, real, NativeMethods.SYMBOLIC_LINK_FLAG_DIRECTORY)) {
-                throw new InvalidOperationException("Could not create symlink.");
+                Assert.Skip("Could not create symlink.");
             }
 
             SetRepositoryRoot(link);

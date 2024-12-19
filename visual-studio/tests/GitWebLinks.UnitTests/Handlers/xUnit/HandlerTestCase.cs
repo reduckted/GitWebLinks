@@ -1,22 +1,10 @@
 using System.ComponentModel;
-using Xunit.Abstractions;
 using Xunit.Sdk;
+using Xunit.v3;
 
 namespace GitWebLinks;
 
-public class HandlerTestCase : XunitTestCase {
-
-    public HandlerTestCase(
-        IMessageSink diagnosticMessageSink,
-        TestMethodDisplay defaultMethodDisplay,
-        TestMethodDisplayOptions defaultMethodDisplayOptions,
-        ITestMethod testMethod,
-        string handlerName,
-        object[]? testMethodArguments = null
-    ) : base(diagnosticMessageSink, defaultMethodDisplay, defaultMethodDisplayOptions, testMethod, testMethodArguments) {
-        HandlerName = handlerName;
-    }
-
+public class HandlerTestCase : XunitTestCase, ISelfExecutingXunitTestCase {
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("Used for deserialization only.")]
@@ -25,52 +13,73 @@ public class HandlerTestCase : XunitTestCase {
     }
 
 
+    public HandlerTestCase(
+        string handlerName,
+        IXunitTestMethod testMethod,
+        string testCaseDisplayName,
+        string uniqueID,
+        bool @explicit,
+        string? skipReason = null,
+        Type? skipType = null,
+        string? skipUnless = null,
+        string? skipWhen = null,
+        Dictionary<string, HashSet<string>>? traits = null,
+        object?[]? testMethodArguments = null,
+        string? sourceFilePath = null,
+        int? sourceLineNumber = null,
+        int? timeout = null
+    ) : base(
+        testMethod,
+        testCaseDisplayName,
+        uniqueID,
+        @explicit,
+        skipReason,
+        skipType,
+        skipUnless,
+        skipWhen,
+        traits,
+        testMethodArguments,
+        sourceFilePath,
+        sourceLineNumber,
+        timeout
+    ) {
+        HandlerName = handlerName;
+    }
+
+
     protected string HandlerName { get; private set; }
 
 
-    protected override string GetDisplayName(IAttributeInfo factAttribute, string displayName) {
-        string[] nameParts;
-
-
-        // The base display name will be the full name of
-        // the method (namespace + class + method name).
-        // Add the handler name to the start of the method name.
-        nameParts = BaseDisplayName.Split('.');
-        nameParts[nameParts.Length - 1] = $"[{HandlerName}] {nameParts[nameParts.Length - 1]}";
-
-        return string.Join(".", nameParts);
-    }
-
-
-    protected override string GetUniqueID() {
-        return $"{base.GetUniqueID()}+{HandlerName.Replace(" ", "_")}";
-    }
-
-
-    public override void Deserialize(IXunitSerializationInfo data) {
-        HandlerName = data.GetValue<string>("HandlerName");
+    protected override void Deserialize(IXunitSerializationInfo data) {
         base.Deserialize(data);
+        HandlerName = data.GetValue<string>(nameof(HandlerName))!;
     }
 
 
-    public override void Serialize(IXunitSerializationInfo data) {
-        data.AddValue("HandlerName", HandlerName);
+    protected override void Serialize(IXunitSerializationInfo data) {
         base.Serialize(data);
+        data.AddValue(nameof(HandlerName), HandlerName);
     }
 
 
-    public override Task<RunSummary> RunAsync(IMessageSink diagnosticMessageSink, IMessageBus messageBus, object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource) {
-        return new HandlerTestCaseRunner(
+    public ValueTask<RunSummary> Run(
+        ExplicitOption explicitOption,
+        IMessageBus messageBus,
+        object?[] constructorArguments,
+        ExceptionAggregator aggregator,
+        CancellationTokenSource cancellationTokenSource
+    ) {
+        return HandlerTestCaseRunner.Instance.RunAsync(
+            HandlerName,
             this,
-            DisplayName,
-            SkipReason,
-            constructorArguments,
-            TestMethodArguments,
             messageBus,
-            aggregator,
+            aggregator.Clone(),
             cancellationTokenSource,
-            HandlerName
-        ).RunAsync();
+            TestCaseDisplayName,
+            SkipReason,
+            explicitOption,
+            constructorArguments
+        );
     }
 
 }
