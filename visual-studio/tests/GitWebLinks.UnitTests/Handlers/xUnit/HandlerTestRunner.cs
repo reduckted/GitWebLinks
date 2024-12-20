@@ -1,16 +1,50 @@
-using System.Reflection;
-using Xunit.Abstractions;
 using Xunit.Sdk;
+using Xunit.v3;
 
 namespace GitWebLinks;
 
-public class HandlerTestRunner : XunitTestRunner {
+internal class HandlerTestRunner : XunitTestRunnerBase<HandlerTestRunnerContext, IXunitTest> {
 
-    public HandlerTestRunner(ITest test, IMessageBus messageBus, Type testClass, object[] constructorArguments, MethodInfo testMethod, object[] testMethodArguments, string skipReason, IReadOnlyList<BeforeAfterTestAttribute> beforeAfterAttributes, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource) : base(test, messageBus, testClass, constructorArguments, testMethod, testMethodArguments, skipReason, beforeAfterAttributes, aggregator, cancellationTokenSource) { }
+    public static HandlerTestRunner Instance { get; } = new();
 
 
-    protected override Task<decimal> InvokeTestMethodAsync(ExceptionAggregator aggregator) {
-        return new HandlerTestInvoker(Test, MessageBus, TestClass, ConstructorArguments, TestMethod, TestMethodArguments, BeforeAfterAttributes, aggregator, CancellationTokenSource).RunAsync();
+    private HandlerTestRunner() { }
+
+
+    protected override ValueTask<TimeSpan> InvokeTest(HandlerTestRunnerContext context, object? testClassInstance) {
+        if (testClassInstance is IHandlerTestClass testClass) {
+            testClass.SetDefinition(
+                TestDefinitionProvider.GetDefinitions().First((x) => x.Name == context.HandlerName)
+            );
+        }
+
+        return base.InvokeTest(context, testClassInstance);
+    }
+
+
+    public async ValueTask<RunSummary> RunAsync(
+        string handlerName,
+        IXunitTest test,
+        IMessageBus messageBus,
+        object?[] constructorArguments,
+        ExplicitOption explicitOption,
+        ExceptionAggregator aggregator,
+        CancellationTokenSource cancellationTokenSource,
+        IReadOnlyCollection<IBeforeAfterTestAttribute> beforeAfterAttributes
+    ) {
+        await using (HandlerTestRunnerContext context = new(
+            handlerName,
+            test,
+            messageBus,
+            explicitOption,
+            aggregator,
+            cancellationTokenSource,
+            beforeAfterAttributes,
+            constructorArguments
+        )) {
+            await context.InitializeAsync();
+            return await Run(context);
+        }
     }
 
 }

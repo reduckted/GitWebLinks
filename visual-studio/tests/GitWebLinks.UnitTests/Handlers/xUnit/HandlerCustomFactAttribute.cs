@@ -1,7 +1,6 @@
-using Xunit.Sdk;
+using Xunit.v3;
 
 namespace GitWebLinks;
 
-[XunitTestCaseDiscoverer("GitWebLinks.HandlerCustomTestCaseDiscoverer", "GitWebLinks.UnitTests")]
-public sealed class HandlerCustomFactAttribute : FactAttribute {
-}
+[XunitTestCaseDiscoverer(typeof(HandlerCustomTestCaseDiscoverer))]
+public sealed class HandlerCustomFactAttribute : FactAttribute { }
