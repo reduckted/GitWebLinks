@@ -5,6 +5,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:GitWebLinks"
+    xmlns:resources="clr-namespace:GitWebLinks.Resources"
     xmlns:platform="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
     xmlns:catalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
     xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
@@ -63,7 +64,7 @@
                 Grid.Row="0"
                 Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
                 Margin="7,5"
-                Watermark="What would you like to create the link to?"
+                Watermark="{x:Static resources:Strings.SelectTargetDialog_Watermark}"
                 local:ClearOnEscape.Enabled="True"
                 local:ListNavigation.List="{Binding ElementName=TargetList}"
                 />

@@ -22,7 +22,7 @@ namespace GitWebLinks.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Strings {
+    public class Strings {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace GitWebLinks.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("GitWebLinks.Resources.Strings", typeof(Strings).Assembly);
@@ -51,7 +51,7 @@ namespace GitWebLinks.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace GitWebLinks.Resources {
         /// <summary>
         ///   Looks up a localized string similar to An error occurred while creating the link..
         /// </summary>
-        internal static string GetLinkCommand_Error {
+        public static string GetLinkCommand_Error {
             get {
                 return ResourceManager.GetString("GetLinkCommand_Error", resourceCulture);
             }
@@ -72,16 +72,25 @@ namespace GitWebLinks.Resources {
         /// <summary>
         ///   Looks up a localized string similar to There was a problem opening the link..
         /// </summary>
-        internal static string GetLinkCommand_FailedToOpenLink {
+        public static string GetLinkCommand_FailedToOpenLink {
             get {
                 return ResourceManager.GetString("GetLinkCommand_FailedToOpenLink", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Link copied to {0}.
+        /// </summary>
+        public static string GetLinkCommand_LinkCopied {
+            get {
+                return ResourceManager.GetString("GetLinkCommand_LinkCopied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The Git remote &apos;{0}&apos; is not supported. If this is a private Git server, you may need to add the server address to the settings..
         /// </summary>
-        internal static string GetLinkCommand_NoHandler {
+        public static string GetLinkCommand_NoHandler {
             get {
                 return ResourceManager.GetString("GetLinkCommand_NoHandler", resourceCulture);
             }
@@ -90,7 +99,7 @@ namespace GitWebLinks.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The repository &apos;{0}&apos; does not have a &apos;HEAD&apos; ref for the &apos;{1}&apos; remote. You can fix this by running the command: git remote set-head {1} --auto.
         /// </summary>
-        internal static string GetLinkCommand_NoRemoteHead {
+        public static string GetLinkCommand_NoRemoteHead {
             get {
                 return ResourceManager.GetString("GetLinkCommand_NoRemoteHead", resourceCulture);
             }
@@ -99,7 +108,7 @@ namespace GitWebLinks.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The repository &apos;{0}&apos; does not have any remotes..
         /// </summary>
-        internal static string GetLinkCommand_NoRemotes {
+        public static string GetLinkCommand_NoRemotes {
             get {
                 return ResourceManager.GetString("GetLinkCommand_NoRemotes", resourceCulture);
             }
@@ -108,9 +117,63 @@ namespace GitWebLinks.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The file &apos;{0}&apos; is not tracked by Git..
         /// </summary>
-        internal static string GetLinkCommand_NotTrackedByGit {
+        public static string GetLinkCommand_NotTrackedByGit {
             get {
                 return ResourceManager.GetString("GetLinkCommand_NotTrackedByGit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to What would you like to create the link to?.
+        /// </summary>
+        public static string SelectTargetDialog_Watermark {
+            get {
+                return ResourceManager.GetString("SelectTargetDialog_Watermark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Markdown.
+        /// </summary>
+        public static string Toast_CopyMarkdown {
+            get {
+                return ResourceManager.GetString("Toast_CopyMarkdown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy without Code Block.
+        /// </summary>
+        public static string Toast_CopyMarkdownWithoutPreview {
+            get {
+                return ResourceManager.GetString("Toast_CopyMarkdownWithoutPreview", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy with Code Block.
+        /// </summary>
+        public static string Toast_CopyMarkdownWithPreview {
+            get {
+                return ResourceManager.GetString("Toast_CopyMarkdownWithPreview", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy Raw URL.
+        /// </summary>
+        public static string Toast_CopyRaw {
+            get {
+                return ResourceManager.GetString("Toast_CopyRaw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open in Browser.
+        /// </summary>
+        public static string Toast_OpenInBrowser {
+            get {
+                return ResourceManager.GetString("Toast_OpenInBrowser", resourceCulture);
             }
         }
     }

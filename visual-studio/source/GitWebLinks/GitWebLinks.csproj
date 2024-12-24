@@ -57,7 +57,7 @@
       <Link>Definitions\%(Filename)%(Extension)</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Strings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="VSPackage.resx">
@@ -105,6 +105,7 @@
     <Compile Include="Services\ILinkTargetLoader.cs" />
     <Compile Include="Services\LinkTargetLoader.cs" />
     <Compile Include="Services\LinkTargetSelector.cs" />
+    <Compile Include="Services\ToastManager.cs" />
     <Compile Include="Types\CreateUrlResult.cs" />
     <Compile Include="Types\ILinkTarget.cs" />
     <Compile Include="Types\LinkTargetPreset.cs" />
@@ -121,6 +122,7 @@
     <Compile Include="UI\AttachedProperties\FocusOnLoad.cs" />
     <Compile Include="UI\Controls\InfoTip.cs" />
     <Compile Include="Options\OptionsPageBase.cs" />
+    <Compile Include="UI\Controls\Toast.cs" />
     <Compile Include="UI\Windows\LinkTargetListItemKind.cs" />
     <Compile Include="UI\Windows\LinkTargetListItem.cs" />
     <Compile Include="UI\Windows\SelectTargetDialog.xaml.cs">
@@ -197,6 +199,7 @@
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\..\..\LICENSE" Link="Resources\LICENSE" IncludeInVsix="true" />
+    <Resource Include="Resources\toast-icon.png" />
     <VSCTCompile Include="VSCommandTable.vsct">
       <Generator>VsctGenerator</Generator>
       <ResourceName>Menus.ctmenu</ResourceName>
@@ -268,6 +271,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Options\GitHubEnterprise\GitHubEnterpriseOptionsControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\Controls\Toast.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

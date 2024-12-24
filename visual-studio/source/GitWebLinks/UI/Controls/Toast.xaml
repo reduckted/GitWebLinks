@@ -1,0 +1,204 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:GitWebLinks"
+    xmlns:catalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
+    xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
+    xmlns:resources="clr-namespace:GitWebLinks.Resources"
+    xmlns:platform="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+    xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
+    >
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/GitWebLinks;component/UI/Common.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style TargetType="{x:Type local:Toast}">
+        <Setter Property="Background" Value="{DynamicResource {x:Static platform:EnvironmentColors.ToolWindowBackgroundBrushKey}}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static platform:EnvironmentColors.ToolWindowBorderBrushKey}}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static platform:EnvironmentColors.ToolWindowTextBrushKey}}" />
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:Toast}">
+                    <Border
+                        toolkit:Themes.UseVsTheme="True"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="4"
+                        >
+
+                        <Border.Effect>
+                            <DropShadowEffect
+                                ShadowDepth="0"
+                                Opacity="0.25"
+                                Direction="0"
+                                BlurRadius="12"
+                                Color="{DynamicResource {x:Static platform:EnvironmentColors.DropShadowBackgroundColorKey}}"
+                                />
+                        </Border.Effect>
+
+                        <Border
+                            BorderBrush="{DynamicResource {x:Static platform:EnvironmentColors.TitleBarActiveBorderBrushKey}}"
+                            BorderThickness="4,0,0,0"
+                            Padding="10"
+                            CornerRadius="3,0,0,3"
+                            >
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Image
+                                    Grid.Column="0"
+                                    Grid.Row="0"
+                                    Source="pack://application:,,,/GitWebLinks;component/Resources/toast-icon.png"
+                                    Width="16"
+                                    Height="16"
+                                    Margin="0,0,10,20"
+                                    VerticalAlignment="Center"
+                                    />
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Grid.Row="0"
+                                    Text="{TemplateBinding Message}"
+                                    FontWeight="SemiBold"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,0,20"
+                                    />
+
+                                <Button
+                                    Grid.Column="2"
+                                    Grid.Row="0"
+                                    x:Name="PART_Close"
+                                    Margin="0,-10,-10,0"
+                                    Padding="4"
+                                    MinHeight="0"
+                                    MinWidth="0"
+                                    VerticalAlignment="Top"
+                                    HorizontalAlignment="Right"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    >
+
+                                    <imaging:CrispImage
+                                        Moniker="{x:Static catalog:KnownMonikers.Close}"
+                                        Margin="1"
+                                        VerticalAlignment="Center"
+                                        Width="12"
+                                        Height="12"
+                                        platform:ImageThemingUtilities.ImageBackgroundColor="{DynamicResource {x:Static platform:EnvironmentColors.ToolWindowBackgroundColorKey}}"
+                                        />
+                                </Button>
+
+                                <StackPanel
+                                    Grid.Column="1"
+                                    Grid.Row="1"
+                                    Grid.ColumnSpan="2"
+                                    Orientation="Horizontal"
+                                    Margin="0,0,-10,0"
+                                    >
+
+                                    <Button
+                                        x:Name="PART_OpenInBrowser"
+                                        Content="{x:Static resources:Strings.Toast_OpenInBrowser}"
+                                        Margin="0,0,10,0"
+                                        />
+
+                                    <Button
+                                        x:Name="PART_CopyRaw"
+                                        Content="{x:Static resources:Strings.Toast_CopyRaw}"
+                                        Margin="0,0,10,0"
+                                        />
+
+                                    <Button
+                                        x:Name="PART_CopyMarkdown"
+                                        Content="{x:Static resources:Strings.Toast_CopyMarkdown}"
+                                        Margin="0,0,10,0"
+                                        />
+
+                                    <Button
+                                        x:Name="PART_CopyMarkdownWithPreview"
+                                        Content="{x:Static resources:Strings.Toast_CopyMarkdownWithPreview}"
+                                        Margin="0,0,10,0"
+                                        />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger SourceName="PART_Close" Property="IsMouseOver" Value="True">
+                            <Setter
+                                TargetName="PART_Close"
+                                Property="Background"
+                                Value="{DynamicResource {x:Static platform:CommonControlsColors.ButtonHoverBrushKey}}"
+                                />
+                            <Setter
+                                TargetName="PART_Close"
+                                Property="Foreground"
+                                Value="{DynamicResource {x:Static platform:CommonControlsColors.ButtonHoverTextBrushKey}}"
+                                />
+                        </Trigger>
+
+                        <Trigger SourceName="PART_Close" Property="IsPressed" Value="True">
+                            <Setter
+                                 TargetName="PART_Close"
+                                 Property="Background"
+                                 Value="{DynamicResource {x:Static platform:CommonControlsColors.ButtonPressedBrushKey}}"
+                                 />
+                            <Setter
+                                 TargetName="PART_Close"
+                                 Property="Foreground"
+                                 Value="{DynamicResource {x:Static platform:CommonControlsColors.ButtonPressedTextBrushKey}}"
+                                 />
+                        </Trigger>
+                        
+                        <Trigger Property="CanCopyRaw" Value="False">
+                            <Setter TargetName="PART_CopyRaw"  Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+
+                        <Trigger Property="CanCopyMarkdown" Value="False">
+                            <Setter TargetName="PART_CopyMarkdown"  Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+
+                        <Trigger Property="CanCopyMarkdownWithPreview" Value="False">
+                            <Setter TargetName="PART_CopyMarkdownWithPreview"  Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+
+                        <MultiTrigger>
+                            <!--
+                            When you can copy the raw URL and as markdown, but you cannot copy as markdown
+                            with a preview, then the link that was originally copied must have been the
+                            markdown with a preview. We will change the text on the "Copy as Markdown"
+                            button to indicate that it will copy the link without a preview.
+                            -->
+                            <MultiTrigger.Conditions>
+                                <Condition Property="CanCopyRaw" Value="True" />
+                                <Condition Property="CanCopyMarkdown" Value="True"/>
+                                <Condition Property="CanCopyMarkdownWithPreview" Value="False"/>
+                            </MultiTrigger.Conditions>
+
+                            <Setter
+                                TargetName="PART_CopyMarkdown"
+                                Property="Content"
+                                Value="{x:Static resources:Strings.Toast_CopyMarkdownWithoutPreview}"
+                                />
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

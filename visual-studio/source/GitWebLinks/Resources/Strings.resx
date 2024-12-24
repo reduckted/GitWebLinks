@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,6 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="GetLinkCommand_LinkCopied" xml:space="preserve">
+    <value>Link copied to {0}</value>
+    <comment>{0} = Host name</comment>
+  </data>
   <data name="GetLinkCommand_Error" xml:space="preserve">
     <value>An error occurred while creating the link.</value>
   </data>
@@ -138,5 +142,23 @@
   <data name="GetLinkCommand_NotTrackedByGit" xml:space="preserve">
     <value>The file '{0}' is not tracked by Git.</value>
     <comment>{0} = File path</comment>
+  </data>
+  <data name="SelectTargetDialog_Watermark" xml:space="preserve">
+    <value>What would you like to create the link to?</value>
+  </data>
+  <data name="Toast_OpenInBrowser" xml:space="preserve">
+    <value>Open in Browser</value>
+  </data>
+  <data name="Toast_CopyMarkdown" xml:space="preserve">
+    <value>Copy Markdown</value>
+  </data>
+  <data name="Toast_CopyMarkdownWithoutPreview" xml:space="preserve">
+    <value>Copy without Code Block</value>
+  </data>
+  <data name="Toast_CopyMarkdownWithPreview" xml:space="preserve">
+    <value>Copy with Code Block</value>
+  </data>
+  <data name="Toast_CopyRaw" xml:space="preserve">
+    <value>Copy Raw URL</value>
   </data>
 </root>

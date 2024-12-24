@@ -5,5 +5,6 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/GitWebLinks;component/UI/Controls/InfoTip.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/GitWebLinks;component/UI/Controls/ServerDataGrid.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/GitWebLinks;component/UI/Controls/Toast.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
