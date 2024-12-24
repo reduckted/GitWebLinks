@@ -59,6 +59,7 @@
     <EmbeddedResource Include="Resources\Strings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="VSPackage.resx">
       <MergeWithCTO>true</MergeWithCTO>
@@ -105,7 +106,6 @@
     <Compile Include="Services\ILinkTargetLoader.cs" />
     <Compile Include="Services\LinkTargetLoader.cs" />
     <Compile Include="Services\LinkTargetSelector.cs" />
-    <Compile Include="Services\ToastManager.cs" />
     <Compile Include="Types\CreateUrlResult.cs" />
     <Compile Include="Types\ILinkTarget.cs" />
     <Compile Include="Types\LinkTargetPreset.cs" />
@@ -115,6 +115,7 @@
     <Compile Include="Types\RefInfo.cs" />
     <Compile Include="Types\RefType.cs" />
     <Compile Include="UI\AttachedProperties\CancelOnEscape.cs" />
+    <Compile Include="UI\AttachedProperties\CloseSignal.cs" />
     <Compile Include="UI\AttachedProperties\DialogResult.cs" />
     <Compile Include="UI\AttachedProperties\ListNavigation.cs" />
     <Compile Include="UI\AttachedProperties\ClearOnEscape.cs" />
@@ -122,13 +123,12 @@
     <Compile Include="UI\AttachedProperties\FocusOnLoad.cs" />
     <Compile Include="UI\Controls\InfoTip.cs" />
     <Compile Include="Options\OptionsPageBase.cs" />
-    <Compile Include="UI\Controls\Toast.cs" />
-    <Compile Include="UI\Windows\LinkTargetListItemKind.cs" />
-    <Compile Include="UI\Windows\LinkTargetListItem.cs" />
-    <Compile Include="UI\Windows\SelectTargetDialog.xaml.cs">
+    <Compile Include="UI\Windows\SelectTargetDialog\LinkTargetListItemKind.cs" />
+    <Compile Include="UI\Windows\SelectTargetDialog\LinkTargetListItem.cs" />
+    <Compile Include="UI\Windows\SelectTargetDialog\SelectTargetDialog.xaml.cs">
       <DependentUpon>SelectTargetDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\Windows\SelectTargetDialogViewModel.cs" />
+    <Compile Include="UI\Windows\SelectTargetDialog\SelectTargetDialogViewModel.cs" />
     <Compile Include="UI\Controls\ServerDataGrid.cs" />
     <Compile Include="Options\ServerOptionsPageBase.cs" />
     <Compile Include="source.extension.cs">
@@ -136,6 +136,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>source.extension.vsixmanifest</DependentUpon>
     </Compile>
+    <Compile Include="UI\Windows\Toast\Toast.xaml.cs">
+      <DependentUpon>Toast.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Windows\Toast\ToastViewModel.cs" />
     <Compile Include="Utilities\AsyncPackageExtensions.cs" />
     <Compile Include="VSCommandTable.cs">
       <AutoGen>True</AutoGen>
@@ -274,15 +278,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UI\Controls\Toast.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="UI\Controls\InfoTip.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UI\Windows\SelectTargetDialog.xaml">
+    <Page Include="UI\Windows\SelectTargetDialog\SelectTargetDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -297,6 +297,10 @@
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\Windows\Toast\Toast.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup />

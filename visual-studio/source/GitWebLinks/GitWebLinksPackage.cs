@@ -19,7 +19,6 @@ namespace GitWebLinks;
 [ProvideService(typeof(LinkHandlerProvider), IsAsyncQueryable = true)]
 [ProvideService(typeof(LinkTargetSelector), IsAsyncQueryable = true)]
 [ProvideService(typeof(RepositoryFinder), IsAsyncQueryable = true)]
-[ProvideService(typeof(ToastManager), IsAsyncQueryable = true)]
 [ProvideOptionPage(typeof(AzureDevOpsServerOptionsPage), Vsix.Name, AzureDevOpsServerOptionsPage.Name, CategoryID, AzureDevOpsServerOptionsPage.ResourceID, true, SupportsProfiles = true, DescriptionResourceId = DescriptionID, CategoryDescriptionResourceId = DescriptionID)]
 [ProvideOptionPage(typeof(BitbucketServerOptionsPage), Vsix.Name, BitbucketServerOptionsPage.Name, CategoryID, BitbucketServerOptionsPage.ResourceID, true, SupportsProfiles = true, DescriptionResourceId = DescriptionID, CategoryDescriptionResourceId = DescriptionID)]
 [ProvideOptionPage(typeof(GeneralOptionsPage), Vsix.Name, GeneralOptionsPage.Name, CategoryID, GeneralOptionsPage.ResourceID, true, SupportsProfiles = true, DescriptionResourceId = DescriptionID, CategoryDescriptionResourceId = DescriptionID)]
@@ -48,7 +47,6 @@ public class GitWebLinksPackage : ToolkitPackage {
         LinkHandlerProvider linkHandlerProvider;
         LinkTargetSelector linkTargetSelector;
         RepositoryFinder repositoryFinder;
-        ToastManager toastManager;
 
 
         settings = new Settings(this);
@@ -57,13 +55,11 @@ public class GitWebLinksPackage : ToolkitPackage {
         linkHandlerProvider = new LinkHandlerProvider(settings, git, logger);
         linkTargetSelector = new LinkTargetSelector(settings, git, logger);
         repositoryFinder = new RepositoryFinder(git, settings, logger);
-        toastManager = new ToastManager(logger);
 
         AddService(typeof(LinkHandlerProvider), (_, _, _) => Task.FromResult<object>(linkHandlerProvider));
         AddService(typeof(LinkTargetSelector), (_, _, _) => Task.FromResult<object>(linkTargetSelector));
         AddService(typeof(ILogger), (_, _, _) => Task.FromResult<object>(logger));
         AddService(typeof(RepositoryFinder), (_, _, _) => Task.FromResult<object>(repositoryFinder));
-        AddService(typeof(ToastManager), (_, _, _) => Task.FromResult<object>(toastManager));
     }
 
 }

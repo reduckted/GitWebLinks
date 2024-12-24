@@ -1,0 +1,178 @@
+<Window
+    x:Class="GitWebLinks.Toast"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:catalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
+    xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
+    xmlns:local="clr-namespace:GitWebLinks"
+    xmlns:resources="clr-namespace:GitWebLinks.Resources"
+    xmlns:platform="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+    xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
+    mc:Ignorable="d" 
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    d:DataContext="{d:DesignInstance Type=local:ToastViewModel, IsDesignTimeCreatable=False}"
+    AllowsTransparency="True"
+    Background="Transparent"
+    Foreground="{DynamicResource {x:Static platform:EnvironmentColors.ToolWindowTextBrushKey}}"
+    ResizeMode="NoResize"
+    ShowInTaskbar="False"
+    SizeToContent="WidthAndHeight"
+    Title=""
+    Topmost="True"
+    WindowStyle="None"
+    WindowStartupLocation="Manual"
+    toolkit:Themes.UseVsTheme="True"
+    local:CloseSignal.Close="{Binding Close}"
+    >
+
+    <Border
+        Background="{DynamicResource {x:Static platform:EnvironmentColors.ToolWindowBackgroundBrushKey}}"
+        BorderBrush="{DynamicResource {x:Static platform:EnvironmentColors.TitleBarActiveBorderBrushKey}}"
+        BorderThickness="5,1,1,1"
+        CornerRadius="4"
+        Padding="10"
+        >
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Image
+                Grid.Column="0"
+                Grid.Row="0"
+                Source="pack://application:,,,/GitWebLinks;component/Resources/toast-icon.png"
+                Width="16"
+                Height="16"
+                Margin="0,0,10,20"
+                VerticalAlignment="Center"
+                />
+
+            <TextBlock
+                Grid.Column="1"
+                Grid.Row="0"
+                Text="{Binding Message}"
+                FontWeight="SemiBold"
+                VerticalAlignment="Center"
+                Margin="0,0,0,20"
+                />
+
+            <Button
+                Grid.Column="2"
+                Grid.Row="0"
+                Command="{Binding CloseCommand}"
+                Margin="0,-10,-10,0"
+                Padding="4"
+                MinHeight="0"
+                MinWidth="0"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Right"
+                BorderThickness="0"
+                >
+
+                <imaging:CrispImage
+                    Moniker="{x:Static catalog:KnownMonikers.Close}"
+                    Margin="1"
+                    VerticalAlignment="Center"
+                    Width="12"
+                    Height="12"
+                    platform:ImageThemingUtilities.ImageBackgroundColor="{DynamicResource {x:Static platform:EnvironmentColors.ToolWindowBackgroundColorKey}}"
+                    />
+
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="Transparent" />
+                        
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border
+                                        x:Name="Background"
+                                        Background="{TemplateBinding Background}"
+                                        Padding="{TemplateBinding Padding}"
+                                        CornerRadius="0,4,0,0"
+                                        >
+
+                                        <ContentPresenter />
+                                    </Border>
+                                    
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter
+                                                Property="Background"
+                                                Value="{DynamicResource {x:Static platform:CommonControlsColors.ButtonHoverBrushKey}}"
+                                                />
+                                            
+                                            <Setter
+                                                Property="Foreground"
+                                                Value="{DynamicResource {x:Static platform:CommonControlsColors.ButtonHoverTextBrushKey}}"
+                                                />
+                                        </Trigger>
+
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter
+                                                Property="Background"
+                                                Value="{DynamicResource {x:Static platform:CommonControlsColors.ButtonPressedBrushKey}}"
+                                                />
+
+                                            <Setter
+                                                Property="Foreground"
+                                                Value="{DynamicResource {x:Static platform:CommonControlsColors.ButtonPressedTextBrushKey}}"
+                                                />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <StackPanel
+                Grid.Column="1"
+                Grid.Row="1"
+                Grid.ColumnSpan="2"
+                Orientation="Horizontal"
+                Margin="0,0,-10,0"
+                >
+
+                <Button
+                    Command="{Binding OpenInBrowserCommand}"
+                    Content="{x:Static resources:Strings.Toast_OpenInBrowser}"
+                    Margin="0,0,10,0"
+                    />
+
+                <Button
+                    Command="{Binding CopyRawCommand}"
+                    Content="{x:Static resources:Strings.Toast_CopyRaw}"
+                    Visibility="{Binding CopyRawVisibility}"
+                    Margin="0,0,10,0"
+                    />
+
+                <Button
+                    Command="{Binding CopyMarkdownCommand}"
+                    Content="{Binding CopyMarkdownLabel}"
+                    Visibility="{Binding CopyMarkdownVisibility}"
+                    Margin="0,0,10,0"
+                    />
+
+                <Button
+                    Command="{Binding CopyMarkdownWithPreviewCommand}"
+                    Content="{x:Static resources:Strings.Toast_CopyMarkdownWithPreview}"
+                    Visibility="{Binding CopyMarkdownWithPreviewVisibility}"
+                    Margin="0,0,10,0"
+                    />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

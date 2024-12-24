@@ -290,6 +290,7 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         }
     }
 
+
     public void Dispose() {
         _joinableTaskContext.Dispose();
     }

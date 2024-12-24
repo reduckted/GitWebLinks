@@ -74,7 +74,6 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
 
 
     private GeneralOptionsPage _options = default!; // Initialized immediately after the command is created.
-    private ToastManager? _toastManager;
 
 
     protected abstract bool IncludeSelection { get; }
@@ -91,9 +90,9 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
     }
 
 
-    protected override async Task InitializeCompletedAsync() {
+    protected override Task InitializeCompletedAsync() {
         _options = (GeneralOptionsPage)Package.GetDialogPage(typeof(GeneralOptionsPage));
-        _toastManager = await Package.GetServiceAsync<ToastManager, ToastManager>();
+        return Task.CompletedTask;
     }
 
 
@@ -372,58 +371,20 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
         Dictionary<LinkFormat, string> links,
         ILogger logger
     ) {
-        if (_toastManager is not null) {
-            Toast toast;
-            string copiedText;
+        Toast toast;
 
 
-            copiedText = links[copiedLinkFormat];
+        toast = new Toast {
+            DataContext = new ToastViewModel(
+                message,
+                copiedLinkFormat,
+                links,
+                () => OpenUrlAsync(links[LinkFormat.Raw], logger).FireAndForget(false),
+                Package.JoinableTaskFactory
+            )
+        };
 
-            toast = new Toast {
-                Message = message,
-
-                // If we didn't copy the raw link, then we can
-                // allow it to be copied via the toast notification.
-                CanCopyRaw = copiedLinkFormat != LinkFormat.Raw,
-
-                // If we didn't copy the markdown link, add an action to copy it. Note that
-                // we check the actual copied text rather than the format that was used because
-                // the format can be "Markdown with Preview" but we might not include the preview,
-                // which causes what we copied to be the same as the basic markdown link.
-                CanCopyMarkdown = copiedText != links[LinkFormat.Markdown],
-
-                // If we didn't copy the markdown link with a preview,
-                // add an action to copy it, but only if the text
-                // will be different to the plain markdown link.
-                CanCopyMarkdownWithPreview =
-                    (copiedText != links[LinkFormat.MarkdownWithPreview]) &&
-                    (links[LinkFormat.MarkdownWithPreview] != links[LinkFormat.Markdown])
-            };
-
-            toast.Close += (_, _) => _toastManager.Close(toast);
-
-            toast.OpenInBrowser += (_, _) => {
-                OpenUrlAsync(links[LinkFormat.Raw], logger).FireAndForget(false);
-                _toastManager.Close(toast);
-            };
-
-            toast.CopyRaw += (_, _) => {
-                Clipboard.SetText(links[LinkFormat.Raw]);
-                _toastManager.Close(toast);
-            };
-
-            toast.CopyMarkdown += (_, _) => {
-                Clipboard.SetText(links[LinkFormat.Markdown]);
-                _toastManager.Close(toast);
-            };
-
-            toast.CopyMarkdownWithPreview += (_, _) => {
-                Clipboard.SetText(links[LinkFormat.MarkdownWithPreview]);
-                _toastManager.Close(toast);
-            };
-
-            _toastManager.Show(toast);
-        }
+        toast.Show();
     }
 
 }
