@@ -20,6 +20,10 @@
             "targetPath": "images/copy-file-tab.png"
         },
         {
+            "pathOnDisk": "images/go-to-file.png",
+            "targetPath": "images/go-to-file.png"
+        },
+        {
             "pathOnDisk": "images/select-target.png",
             "targetPath": "images/select-target.png"
         }
