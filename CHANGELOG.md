@@ -12,6 +12,30 @@
 
 -   🔨 Dependency updates.
 
+## 2.12.0 (2024-09-22)
+
+### New Features
+
+-   ⭐ Allow Gitiles URL for HTTP remote to be different to URL for the web interface.
+
+## 2.11.0 (2024-03-20)
+
+### New Features
+
+-   ⭐ Added support for Gitea.
+
+## 2.10.0 (2024-02-05)
+
+### New Features
+
+-   ⭐ Added an option to format the copied links as either a plain URL, a markdown link, or a markdown link with a code block that contains the selected lines.
+
+## 2.9.3 (2023-08-22)
+
+### New Features
+
+-   ⭐ Bitbucket Cloud branch URLs now use a shorter format when possible.
+
 ## 2.9.2 (2022-12-23)
 
 ### Maintenance
