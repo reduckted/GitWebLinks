@@ -124,6 +124,24 @@ namespace GitWebLinks.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No files were found for the URL.
+        /// </summary>
+        public static string GoToFileDialog_NoFilesFound {
+            get {
+                return ResourceManager.GetString("GoToFileDialog_NoFilesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the URL of the file to go to.
+        /// </summary>
+        public static string GoToFileDialog_Watermark {
+            get {
+                return ResourceManager.GetString("GoToFileDialog_Watermark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to What would you like to create the link to?.
         /// </summary>
         public static string SelectTargetDialog_Watermark {

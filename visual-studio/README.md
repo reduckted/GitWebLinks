@@ -1,4 +1,4 @@
-﻿# Git Web Links for Visual Studio 2022
+# Git Web Links for Visual Studio 2022
 
 Copy links to files in their online Git repositories from inside Visual Studio 2022.
 
@@ -39,6 +39,14 @@ If the current commit, current branch of default branch is not suitable, you can
 This command can be useful if you need to share a link to code that is not on the default branch, and your current branch has not been pushed to the server. For example, your current branch may have branched off an "epic" branch but has not been pushed to the server. You can use this command to create a link to the "epic" branch.
 
 The caveat with this command is that if the code you are linking to is different between your current branch and the branch or commit you are linking to, the link may be invalid.
+
+## Open the File from a Link
+
+You can also go in the opposite direction. Starting from a link, you can navigate to the file that the link refers to using the _Edit->Go To->Go To File From Link_ command (<kbd>Ctrl</kbd>+<kbd>1</kbd>,<kbd>Ctrl</kbd>+<kbd>L</kbd>).
+
+![Go To File](images/go-to-file.png)
+
+Run the command then paste the link into the prompt to navigate to the file.
 
 ## Default Link Format
 

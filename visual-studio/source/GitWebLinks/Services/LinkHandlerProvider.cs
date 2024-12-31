@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GitWebLinks;
 
-public class LinkHandlerProvider {
+public class LinkHandlerProvider : ILinkHandlerProvider {
 
     private readonly IReadOnlyCollection<ILinkHandler> _handlers;
     private readonly ILogger _logger;

@@ -14,6 +14,9 @@ namespace GitWebLinks
     {
         public const string GitWebLinksPackageString = "c79040c1-a271-4bae-b776-be5f65b29c4c";
         public static Guid GitWebLinksPackage = new Guid(GitWebLinksPackageString);
+
+        public const string guidSHLMainMenuExtraString = "d309f791-903f-11d0-9efc-00a0c911004f";
+        public static Guid guidSHLMainMenuExtra = new Guid(guidSHLMainMenuExtraString);
     }
     /// <summary>
     /// Helper class that encapsulates all CommandIDs uses across VS Package.
@@ -36,5 +39,7 @@ namespace GitWebLinks
         public const int Command_OpenLinkToSelectionAtCurrentCommit = 0x0107;
         public const int Command_OpenLinkToSelectionOnCurrentBranch = 0x0108;
         public const int Command_OpenLinkToSelectionOnDefaultBranch = 0x0109;
+        public const int Command_GoToFile = 0x0120;
+        public const int IDG_VS_GOTO = 0x0622;
     }
 }

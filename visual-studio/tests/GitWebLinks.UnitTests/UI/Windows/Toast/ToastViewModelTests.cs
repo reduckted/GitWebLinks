@@ -1,4 +1,5 @@
 using Microsoft.VisualStudio.Threading;
+using NSubstitute;
 using System.Windows;
 
 namespace GitWebLinks;
@@ -16,16 +17,13 @@ public class ToastViewModelTests : IDisposable {
         ToastViewModel viewModel;
 
 
-        viewModel = new ToastViewModel(
-            "Test",
+        viewModel = CreateViewModel(
             copiedFormat,
             new Dictionary<LinkFormat, string> {
                 [LinkFormat.Raw] = "x",
                 [LinkFormat.Markdown] = "x",
                 [LinkFormat.MarkdownWithPreview] = "x"
-            },
-            () => { },
-            _joinableTaskContext.Factory
+            }
         );
 
         Assert.Equal(canCopy, viewModel.CopyRawCommand.CanExecute(null));
@@ -44,16 +42,13 @@ public class ToastViewModelTests : IDisposable {
         ToastViewModel viewModel;
 
 
-        viewModel = new ToastViewModel(
-            "Test",
+        viewModel = CreateViewModel(
             copiedFormat,
             new Dictionary<LinkFormat, string> {
                 [LinkFormat.Raw] = "raw",
                 [LinkFormat.Markdown] = markdownLink,
                 [LinkFormat.MarkdownWithPreview] = previewLink
-            },
-            () => { },
-            _joinableTaskContext.Factory
+            }
         );
 
         Assert.Equal(canCopy, viewModel.CopyMarkdownCommand.CanExecute(null));
@@ -72,16 +67,13 @@ public class ToastViewModelTests : IDisposable {
         ToastViewModel viewModel;
 
 
-        viewModel = new ToastViewModel(
-            "Test",
+        viewModel = CreateViewModel(
             copiedFormat,
             new Dictionary<LinkFormat, string> {
                 [LinkFormat.Raw] = "raw",
                 [LinkFormat.Markdown] = markdownLink,
                 [LinkFormat.MarkdownWithPreview] = previewLink
-            },
-            () => { },
-            _joinableTaskContext.Factory
+            }
         );
 
         Assert.Equal(canCopy, viewModel.CopyMarkdownWithPreviewCommand.CanExecute(null));
@@ -107,13 +99,25 @@ public class ToastViewModelTests : IDisposable {
             [LinkFormat.MarkdownWithPreview] = previewLink
         };
 
-        viewModel = new ToastViewModel("Test", copiedFormat, links, () => { }, _joinableTaskContext.Factory);
+        viewModel = CreateViewModel(copiedFormat, links);
 
         Assert.Equal(
             usesWithoutPreview
                 ? Resources.Strings.Toast_CopyMarkdownWithoutPreview
                 : Resources.Strings.Toast_CopyMarkdown,
             viewModel.CopyMarkdownLabel
+        );
+    }
+
+
+    private ToastViewModel CreateViewModel(LinkFormat copiedLinkFormat, Dictionary<LinkFormat, string> links) {
+        return new ToastViewModel(
+            "Test",
+            copiedLinkFormat,
+            links,
+            () => { },
+            Substitute.For<IClipboard>(),
+            _joinableTaskContext.Factory
         );
     }
 

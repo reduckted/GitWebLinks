@@ -1,0 +1,158 @@
+<platform:DialogWindow
+    x:Class="GitWebLinks.GoToFileDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:local="clr-namespace:GitWebLinks"
+    xmlns:resources="clr-namespace:GitWebLinks.Resources"
+    xmlns:platform="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+    xmlns:catalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
+    xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
+    xmlns:internal="clr-namespace:Microsoft.Internal.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+    xmlns:theming="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Imaging"
+    xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
+    xmlns:utilities="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Utilities"
+    mc:Ignorable="d" 
+    d:DataContext="{d:DesignInstance Type=local:GoToFileDialogViewModel, IsDesignTimeCreatable=False}"
+    toolkit:Themes.UseVsTheme="True"
+    Width="450"
+    MinHeight="100"
+    MaxHeight="300" 
+    SizeToContent="Height"
+    ResizeMode="NoResize"
+    WindowStyle="None"
+    HasDialogFrame="False"
+    BorderBrush="{DynamicResource {x:Static platform:EnvironmentColors.ToolWindowBorderBrushKey}}"
+    BorderThickness="1"
+    WindowStartupLocation="CenterOwner"
+    local:FocusOnLoad.Target="{Binding ElementName=UrlTextBox}"
+    local:CancelOnLostKeyboardFocus.Enabled="True"
+    local:CancelOnEscape.Enabled="True"
+    local:DialogResult.Value="{Binding DialogResult}"
+    >
+
+    <platform:DialogWindow.InputBindings>
+        <KeyBinding Key="Return" Command="{Binding SelectTargetCommand}" CommandParameter="{Binding SelectedTarget}"/>
+    </platform:DialogWindow.InputBindings>
+
+    <Border
+        BorderBrush="{DynamicResource {x:Static platform:EnvironmentColors.TitleBarActiveBorderBrushKey}}"
+        BorderThickness="0,4,0,0"
+        Padding="0,2,0,0"
+        >
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <platform:WatermarkedTextBox
+                x:Name="UrlTextBox"
+                Grid.Row="0"
+                Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}"
+                Margin="7,5"
+                Watermark="{x:Static resources:Strings.GoToFileDialog_Watermark}"
+                local:ClearOnEscape.Enabled="True"
+                local:ListNavigation.List="{Binding ElementName=TargetList}"
+                local:SelectAllOnFocus.Enabled="True"
+                />
+
+            <ListBox
+                x:Name="TargetList"
+                Grid.Row="1"
+                BorderThickness="0"
+                Margin="2"
+                ItemsSource="{Binding Targets}"
+                SelectedItem="{Binding SelectedTarget, Mode=TwoWay}"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                VirtualizingPanel.IsVirtualizing="True"
+                VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                VirtualizingPanel.ScrollUnit="Pixel"
+                local:ListNavigation.Circular="True"
+                >
+
+                <ListBox.Template>
+                    <!-- Redefine the template to get rid of the fixed padding. -->
+                    <ControlTemplate TargetType="{x:Type ListBox}">
+                        <ScrollViewer Focusable="False">
+                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ListBox.Template>
+
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:FileTargetListItem}">
+                        <Border>
+                            <Border.InputBindings>
+                                <MouseBinding
+                                    MouseAction="LeftDoubleClick"
+                                    Command="{Binding DataContext.SelectTargetCommand, RelativeSource={RelativeSource AncestorType={x:Type local:SelectTargetDialog}}}"
+                                    CommandParameter="{Binding}"
+                                    />
+                            </Border.InputBindings>
+
+                            <Grid Margin="8,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <imaging:CrispImage
+                                    Grid.Column="0"
+                                    Grid.Row="0"
+                                    Moniker="{Binding Icon}"
+                                    VerticalAlignment="Center"
+                                    platform:ImageThemingUtilities.ImageBackgroundColor="{DynamicResource {x:Static platform:EnvironmentColors.ToolWindowBackgroundColorKey}}"
+                                    />
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Text="{Binding Name}"
+                                    TextTrimming="CharacterEllipsis"
+                                    Margin="6,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    />
+
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    Text="{Binding RelativePath}"
+                                    TextTrimming="CharacterEllipsis"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource {x:Static platform:EnvironmentColors.SystemGrayTextBrushKey}}"
+                                    />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <TextBlock
+                Grid.Row="1"
+                VerticalAlignment="Center"
+                TextAlignment="Center"
+                Text="{x:Static resources:Strings.GoToFileDialog_NoFilesFound}"
+                Visibility="{Binding NoTargetsVisibility}"
+                Margin="7"
+                Foreground="{DynamicResource {x:Static platform:EnvironmentColors.SystemGrayTextBrushKey}}"
+                />
+        </Grid>
+    </Border>
+</platform:DialogWindow>

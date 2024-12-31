@@ -161,4 +161,10 @@
   <data name="Toast_CopyRaw" xml:space="preserve">
     <value>Copy Raw URL</value>
   </data>
+  <data name="GoToFileDialog_NoFilesFound" xml:space="preserve">
+    <value>No files were found for the URL</value>
+  </data>
+  <data name="GoToFileDialog_Watermark" xml:space="preserve">
+    <value>Enter the URL of the file to go to</value>
+  </data>
 </root>

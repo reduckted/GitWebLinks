@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace GitWebLinks;
 
 
-public class RepositoryFinder {
+public class RepositoryFinder : IRepositoryFinder {
 
     private static readonly HashSet<string> IgnoredDirectories = new(
         new[] { "node_modules", "bin", "obj" },

@@ -12,6 +12,7 @@ public class ToastViewModel : ObservableObject {
 
     private readonly Dictionary<LinkFormat, string> _links;
     private readonly Action _openInBrowser;
+    private readonly IClipboard _clipboard;
     private readonly bool _canCopyRaw;
     private readonly bool _canCopyMarkdown;
     private readonly bool _canCopyMarkdownWithPreview;
@@ -23,10 +24,12 @@ public class ToastViewModel : ObservableObject {
         LinkFormat copiedLinkFormat,
         Dictionary<LinkFormat, string> links,
         Action openInBrowser,
+        IClipboard clipboard,
         JoinableTaskFactory joinableTaskFactory
     ) {
         _links = links;
         _openInBrowser = openInBrowser;
+        _clipboard = clipboard;
 
         Message = message;
 
@@ -137,19 +140,19 @@ public class ToastViewModel : ObservableObject {
 
 
     private void OnCopyRaw() {
-        Clipboard.SetText(_links[LinkFormat.Raw]);
+        _clipboard.SetText(_links[LinkFormat.Raw]);
         OnClose();
     }
 
 
     private void OnCopyMarkdown() {
-        Clipboard.SetText(_links[LinkFormat.Markdown]);
+        _clipboard.SetText(_links[LinkFormat.Markdown]);
         OnClose();
     }
 
 
     private void OnCopyMarkdownWithPreview() {
-        Clipboard.SetText(_links[LinkFormat.MarkdownWithPreview]);
+        _clipboard.SetText(_links[LinkFormat.MarkdownWithPreview]);
         OnClose();
     }
 

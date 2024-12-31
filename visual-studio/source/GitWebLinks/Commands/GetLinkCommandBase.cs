@@ -11,7 +11,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace GitWebLinks;
 
@@ -74,6 +73,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
 
 
     private GeneralOptionsPage _options = default!; // Initialized immediately after the command is created.
+    private IClipboard _clipboard = default!; // Initialized immediately after the command is created.
 
 
     protected abstract bool IncludeSelection { get; }
@@ -90,9 +90,9 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
     }
 
 
-    protected override Task InitializeCompletedAsync() {
+    protected override async Task InitializeCompletedAsync() {
         _options = (GeneralOptionsPage)Package.GetDialogPage(typeof(GeneralOptionsPage));
-        return Task.CompletedTask;
+        _clipboard = await Package.GetServiceAsync<IClipboard, IClipboard>();
     }
 
 
@@ -175,7 +175,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
                             [LinkFormat.MarkdownWithPreview] = GetFormattedLink(result, LinkFormat.MarkdownWithPreview, documentView, selection)
                         };
 
-                        Clipboard.SetText(links[_options.LinkFormat]);
+                        _clipboard.SetText(links[_options.LinkFormat]);
 
                         message = Resources.Strings.GetLinkCommand_LinkCopied.Format(info.Handler.Name);
 
@@ -210,13 +210,13 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
 
 
     private async Task<ResourceInfo?> GetResourceInfoAsync(string path, ILogger logger) {
-        RepositoryFinder repositoryFinder;
-        LinkHandlerProvider handlerProvider;
+        IRepositoryFinder repositoryFinder;
+        ILinkHandlerProvider handlerProvider;
         Repository? repository;
         SelectedLinkHandler? match;
 
 
-        repositoryFinder = await Package.GetServiceAsync<RepositoryFinder, RepositoryFinder>();
+        repositoryFinder = await Package.GetServiceAsync<IRepositoryFinder, IRepositoryFinder>();
 
         repository = await repositoryFinder.FindRepositoryAsync(path);
 
@@ -232,7 +232,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
             return null;
         }
 
-        handlerProvider = await Package.GetServiceAsync<LinkHandlerProvider, LinkHandlerProvider>();
+        handlerProvider = await Package.GetServiceAsync<ILinkHandlerProvider, ILinkHandlerProvider>();
         match = await handlerProvider.SelectAsync(repository);
 
         if (match is null) {
@@ -380,6 +380,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
                 copiedLinkFormat,
                 links,
                 () => OpenUrlAsync(links[LinkFormat.Raw], logger).FireAndForget(false),
+                _clipboard,
                 Package.JoinableTaskFactory
             )
         };

@@ -67,6 +67,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\GoToFileCommand.cs" />
     <Compile Include="Options\AzureDevOpsServer\AzureDevOpsServerOptionsControl.xaml.cs">
       <DependentUpon>AzureDevOpsServerOptionsControl.xaml</DependentUpon>
     </Compile>
@@ -102,8 +103,12 @@
     <Compile Include="Options\General\GeneralOptionsPage.cs" />
     <Compile Include="Options\GitHub\GitHubOptionsPage.cs" />
     <Compile Include="Options\ServerListItem.cs" />
+    <Compile Include="Services\Clipboard.cs" />
+    <Compile Include="Services\IClipboard.cs" />
     <Compile Include="Services\ILinkHandler.cs" />
+    <Compile Include="Services\ILinkHandlerProvider.cs" />
     <Compile Include="Services\ILinkTargetLoader.cs" />
+    <Compile Include="Services\IRepositoryFinder.cs" />
     <Compile Include="Services\LinkTargetLoader.cs" />
     <Compile Include="Services\LinkTargetSelector.cs" />
     <Compile Include="Types\CreateUrlResult.cs" />
@@ -114,6 +119,7 @@
     <Compile Include="Types\LinkFormat.cs" />
     <Compile Include="Types\RefInfo.cs" />
     <Compile Include="Types\RefType.cs" />
+    <Compile Include="UI\AttachedProperties\SelectAllOnFocus.cs" />
     <Compile Include="UI\AttachedProperties\CancelOnEscape.cs" />
     <Compile Include="UI\AttachedProperties\CloseSignal.cs" />
     <Compile Include="UI\AttachedProperties\DialogResult.cs" />
@@ -123,6 +129,12 @@
     <Compile Include="UI\AttachedProperties\FocusOnLoad.cs" />
     <Compile Include="UI\Controls\InfoTip.cs" />
     <Compile Include="Options\OptionsPageBase.cs" />
+    <Compile Include="UI\Windows\GoToFileDialog\FileTarget.cs" />
+    <Compile Include="UI\Windows\GoToFileDialog\FileTargetListItem.cs" />
+    <Compile Include="UI\Windows\GoToFileDialog\GoToFileDialog.xaml.cs">
+      <DependentUpon>GoToFileDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Windows\GoToFileDialog\GoToFileDialogViewModel.cs" />
     <Compile Include="UI\Windows\SelectTargetDialog\LinkTargetListItemKind.cs" />
     <Compile Include="UI\Windows\SelectTargetDialog\LinkTargetListItem.cs" />
     <Compile Include="UI\Windows\SelectTargetDialog\SelectTargetDialog.xaml.cs">
@@ -281,6 +293,10 @@
     <Page Include="UI\Controls\InfoTip.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\Windows\GoToFileDialog\GoToFileDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
     <Page Include="UI\Windows\SelectTargetDialog\SelectTargetDialog.xaml">
       <SubType>Designer</SubType>

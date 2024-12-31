@@ -25,6 +25,8 @@ public abstract class DirectoryTestBase : IDisposable {
 
 
         fullPath = Path.Combine(RootDirectory, relativeFileName);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
         using (File.Create(fullPath)) { }
 
         return fullPath;

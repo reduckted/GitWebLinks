@@ -15,10 +15,11 @@ namespace GitWebLinks;
 [ProvideMenuResource("Menus.ctmenu", 1)]
 [Guid(PackageGuids.GitWebLinksPackageString)]
 [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
+[ProvideService(typeof(IClipboard), IsAsyncQueryable = true)]
+[ProvideService(typeof(ILinkHandlerProvider), IsAsyncQueryable = true)]
 [ProvideService(typeof(ILogger), IsAsyncQueryable = true)]
-[ProvideService(typeof(LinkHandlerProvider), IsAsyncQueryable = true)]
+[ProvideService(typeof(IRepositoryFinder), IsAsyncQueryable = true)]
 [ProvideService(typeof(LinkTargetSelector), IsAsyncQueryable = true)]
-[ProvideService(typeof(RepositoryFinder), IsAsyncQueryable = true)]
 [ProvideOptionPage(typeof(AzureDevOpsServerOptionsPage), Vsix.Name, AzureDevOpsServerOptionsPage.Name, CategoryID, AzureDevOpsServerOptionsPage.ResourceID, true, SupportsProfiles = true, DescriptionResourceId = DescriptionID, CategoryDescriptionResourceId = DescriptionID)]
 [ProvideOptionPage(typeof(BitbucketServerOptionsPage), Vsix.Name, BitbucketServerOptionsPage.Name, CategoryID, BitbucketServerOptionsPage.ResourceID, true, SupportsProfiles = true, DescriptionResourceId = DescriptionID, CategoryDescriptionResourceId = DescriptionID)]
 [ProvideOptionPage(typeof(GeneralOptionsPage), Vsix.Name, GeneralOptionsPage.Name, CategoryID, GeneralOptionsPage.ResourceID, true, SupportsProfiles = true, DescriptionResourceId = DescriptionID, CategoryDescriptionResourceId = DescriptionID)]
@@ -44,22 +45,25 @@ public class GitWebLinksPackage : ToolkitPackage {
         ISettings settings;
         ILogger logger;
         Git git;
-        LinkHandlerProvider linkHandlerProvider;
+        IClipboard clipboard;
+        ILinkHandlerProvider linkHandlerProvider;
         LinkTargetSelector linkTargetSelector;
-        RepositoryFinder repositoryFinder;
+        IRepositoryFinder repositoryFinder;
 
 
         settings = new Settings(this);
         logger = await Logger.CreateAsync();
         git = new Git(logger);
+        clipboard = new Clipboard();
         linkHandlerProvider = new LinkHandlerProvider(settings, git, logger);
         linkTargetSelector = new LinkTargetSelector(settings, git, logger);
         repositoryFinder = new RepositoryFinder(git, settings, logger);
 
-        AddService(typeof(LinkHandlerProvider), (_, _, _) => Task.FromResult<object>(linkHandlerProvider));
+        AddService(typeof(IClipboard), (_, _, _) => Task.FromResult<object>(clipboard));
+        AddService(typeof(ILinkHandlerProvider), (_, _, _) => Task.FromResult<object>(linkHandlerProvider));
         AddService(typeof(LinkTargetSelector), (_, _, _) => Task.FromResult<object>(linkTargetSelector));
         AddService(typeof(ILogger), (_, _, _) => Task.FromResult<object>(logger));
-        AddService(typeof(RepositoryFinder), (_, _, _) => Task.FromResult<object>(repositoryFinder));
+        AddService(typeof(IRepositoryFinder), (_, _, _) => Task.FromResult<object>(repositoryFinder));
     }
 
 }
