@@ -1,6 +1,6 @@
 # Changelog
 
-## UNRELEASED
+## 2.13.0 (2025-01-15)
 
 ### New Features
 
