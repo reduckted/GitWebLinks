@@ -13,8 +13,8 @@
         <PackageVersion Include="Microsoft.VisualStudio.SDK.Analyzers" Version="17.7.47" />
         <PackageVersion Include="Microsoft.VSSDK.BuildTools" Version="17.12.2069" />
         <PackageVersion Include="NSubstitute" Version="5.3.0" />
-        <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />
-        <PackageVersion Include="xunit.v3" Version="1.0.0" />
-        <PackageVersion Include="xunit.v3.runner.msbuild" Version="1.0.0" />
+        <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.1" />
+        <PackageVersion Include="xunit.v3" Version="1.0.1" />
+        <PackageVersion Include="xunit.v3.runner.msbuild" Version="1.0.1" />
     </ItemGroup>
 </Project>
