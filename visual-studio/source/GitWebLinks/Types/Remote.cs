@@ -18,4 +18,9 @@ public class Remote {
 
     public IReadOnlyList<string> Urls { get; }
 
+
+    public override string ToString() {
+        return Name + $" ({string.Join(", ", Urls)})";
+    }
+
 }

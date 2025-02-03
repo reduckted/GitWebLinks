@@ -110,7 +110,7 @@ public class RepositoryFinder : IRepositoryFinder {
                 return await CreateRepositoryAsync(root);
             }
         } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
-            await _logger.LogAsync($"Error finding repository for path '{path}'. {ex.Message}");
+            await _logger.LogAsync($"Error finding repository for path '{path}'. {ex}");
         }
 
         return null;
@@ -120,11 +120,11 @@ public class RepositoryFinder : IRepositoryFinder {
     private async Task<Repository> CreateRepositoryAsync(string root) {
         Remote? remote;
 
-        await _logger.LogAsync($"Finding remote URL for '{root}'...");
+        await _logger.LogAsync($"Finding remote for '{root}'...");
 
         remote = await FindRemoteAsync(root);
 
-        await _logger.LogAsync($"Remote URL is '{remote}'.");
+        await _logger.LogAsync($"Remote is {remote}.");
 
         return new Repository(root, remote);
     }
@@ -171,12 +171,14 @@ public class RepositoryFinder : IRepositoryFinder {
 
         remotes = data
             .Where((x) => !string.IsNullOrEmpty(x))
-            .Select((x) => ParseRemote(x))
+            .Select(ParseRemote)
             .GroupBy((x) => x.Name, (x) => x.Url)
             .Select((x) => new Remote(x.Key, x.ToHashSet()))
             .ToList();
 
-        await _logger.LogAsync($"Remotes found: {remotes}");
+        await _logger.LogAsync(
+            $"Remotes found: {string.Concat(remotes.Select((x) => $"{Environment.NewLine}  - {x}"))}"
+        );
 
         // Use the remote that's specified in the settings if
         // that remote exists; otherwise, just use the first remote.

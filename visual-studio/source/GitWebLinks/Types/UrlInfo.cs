@@ -19,4 +19,9 @@ public class UrlInfo {
 
     public PartialSelectedRange Selection { get; }
 
+
+    public override string ToString() {
+        return $"{{FilePath = {FilePath}, Server = {Server}, Selection = {Selection}}}";
+    }
+
 }

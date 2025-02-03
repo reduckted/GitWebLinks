@@ -359,7 +359,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
             using (Process.Start(url)) { }
 
         } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
-            await logger.LogAsync($"Error opening URL: {ex.Message}");
+            await logger.LogAsync($"Error opening URL: {ex}");
             await VS.MessageBox.ShowErrorAsync(Resources.Strings.GetLinkCommand_FailedToOpenLink);
         }
     }

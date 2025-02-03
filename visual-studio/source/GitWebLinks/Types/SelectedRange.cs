@@ -23,5 +23,9 @@ public class SelectedRange {
 
     public int EndColumn { get; }
 
+
+    public override string ToString() {
+        return $"{StartLine}:{StartColumn}-{EndLine}:{EndColumn}";
+    }
 }
 

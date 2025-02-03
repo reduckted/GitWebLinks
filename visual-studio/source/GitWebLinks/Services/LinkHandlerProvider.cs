@@ -31,7 +31,7 @@ public class LinkHandlerProvider : ILinkHandlerProvider {
         await _logger.LogAsync($"Finding a handler for repository {repository.Remote}.");
 
         foreach (ILinkHandler handler in _handlers) {
-            await _logger.LogAsync($"Testing '{handler.Name}");
+            await _logger.LogAsync($"Testing '{handler.Name}'");
 
             foreach (string url in repository.Remote.Urls) {
                 if (await handler.HandlesRemoteUrlAsync(url)) {
