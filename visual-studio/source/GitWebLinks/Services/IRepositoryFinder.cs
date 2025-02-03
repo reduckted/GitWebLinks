@@ -12,7 +12,4 @@ public interface IRepositoryFinder {
 
     Task<Repository?> FindRepositoryAsync(string path);
 
-
-    Task<bool> HasRepositoriesAsync(string directory);
-
 }

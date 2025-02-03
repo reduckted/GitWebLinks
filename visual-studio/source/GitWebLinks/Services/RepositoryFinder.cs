@@ -29,23 +29,6 @@ public class RepositoryFinder : IRepositoryFinder {
     }
 
 
-    public async Task<bool> HasRepositoriesAsync(string directory) {
-        try {
-            await foreach (string root in InternalFindRepositoriesAsync(directory)) {
-                await _logger.LogAsync($"Found a repository at '{root}'.");
-                return true;
-            }
-
-            await _logger.LogAsync("No repositories found.");
-
-        } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
-            await _logger.LogAsync($"Error searching for Git repositories in directory '{directory}'. {ex.Message}");
-        }
-
-        return false;
-    }
-
-
     public async IAsyncEnumerable<Repository> FindRepositoriesAsync(string directory) {
         await foreach (string root in InternalFindRepositoriesAsync(directory)) {
             yield return await CreateRepositoryAsync(root);
