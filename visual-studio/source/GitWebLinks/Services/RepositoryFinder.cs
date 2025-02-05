@@ -1,6 +1,5 @@
 #nullable enable
 
-using Microsoft.VisualStudio;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -97,20 +96,16 @@ public class RepositoryFinder : IRepositoryFinder {
 
 
     public async Task<Repository?> FindRepositoryAsync(string path) {
-        try {
-            string? root;
+        string? root;
 
-            await _logger.LogAsync($"Finding root directory of Git repository starting from '{path}'...");
+        await _logger.LogAsync($"Finding root directory of Git repository starting from '{path}'...");
 
-            root = FindRepositoryRoot(path);
+        root = FindRepositoryRoot(path);
 
-            await _logger.LogAsync($"Root directory is '{root}'.");
+        await _logger.LogAsync($"Root directory is '{root}'.");
 
-            if (root is not null) {
-                return await CreateRepositoryAsync(root);
-            }
-        } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
-            await _logger.LogAsync($"Error finding repository for path '{path}'. {ex}");
+        if (root is not null) {
+            return await CreateRepositoryAsync(root);
         }
 
         return null;

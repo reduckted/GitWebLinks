@@ -112,6 +112,7 @@
     <Compile Include="Services\LinkTargetLoader.cs" />
     <Compile Include="Services\LinkTargetSelector.cs" />
     <Compile Include="Types\CreateUrlResult.cs" />
+    <Compile Include="Types\GitNotFoundException.cs" />
     <Compile Include="Types\ILinkTarget.cs" />
     <Compile Include="Types\LinkTargetPreset.cs" />
     <Compile Include="Types\LinkTargetRef.cs" />
@@ -184,7 +185,7 @@
     <Compile Include="Types\BranchRefType.cs" />
     <Compile Include="Types\DynamicServer.cs" />
     <Compile Include="Types\FileInfo.cs" />
-    <Compile Include="Types\GitException.cs" />
+    <Compile Include="Types\GitCommandException.cs" />
     <Compile Include="Types\HandlerDefinition.cs" />
     <Compile Include="Types\IServer.cs" />
     <Compile Include="Types\LinkOptions.cs" />

@@ -2,8 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -51,7 +53,16 @@ public class Git {
             errors = new List<string>();
 
             process.StartInfo = info;
-            process.Start();
+
+            try {
+                process.Start();
+            } catch (Win32Exception) {
+                if (Marshal.GetLastWin32Error() == 2 /* ERROR_FILE_NOT_FOUND */) {
+                    throw new GitNotFoundException(Resources.Strings.GitNotFound);
+                } else {
+                    throw;
+                }
+            }
 
             await Task.WhenAll(
                 ReadStreamAsync(process.StandardOutput, output),
@@ -61,7 +72,7 @@ public class Git {
             process.WaitForExit();
 
             if (process.ExitCode != 0) {
-                throw new GitException(string.Join(Environment.NewLine, errors));
+                throw new GitCommandException(string.Join(Environment.NewLine, errors));
             }
 
             return output;

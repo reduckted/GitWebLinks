@@ -1,6 +1,5 @@
 #nullable enable
 
-using Microsoft.VisualStudio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,7 +92,7 @@ public class LinkTargetLoader : ILinkTargetLoader {
         try {
             return await _handler.GetRefAsync(linkType, _repositoryRoot, _remote);
 
-        } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
+        } catch (Exception ex) when (ex is NoRemoteHeadException or GitCommandException) {
             await _logger.LogAsync($"Error when getting ref for link type '{linkType}': {ex}");
             return "";
         }
@@ -149,7 +148,7 @@ public class LinkTargetLoader : ILinkTargetLoader {
 
             return branches.Concat(commits).ToList();
 
-        } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
+        } catch (GitCommandException ex) {
             await _logger.LogAsync($"Error while finding branch and commit link targets: {ex}");
             return Array.Empty<LinkTargetListItem>();
         }

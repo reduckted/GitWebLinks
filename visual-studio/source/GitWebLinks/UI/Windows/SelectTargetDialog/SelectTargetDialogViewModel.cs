@@ -1,9 +1,12 @@
 #nullable enable
 
+using Community.VisualStudio.Toolkit;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.PatternMatching;
 using Microsoft.VisualStudio.Threading;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -56,12 +59,20 @@ public class SelectTargetDialogViewModel : ObservableObject {
 
 
     public async Task OnLoadedAsync() {
-        await Task.WhenAll(
-            PopulatePresetDescriptionsAsync(),
-            LoadBranchesAndCommitsAsync()
-        );
+        try {
+            await Task.WhenAll(
+                PopulatePresetDescriptionsAsync(),
+                LoadBranchesAndCommitsAsync()
+            );
 
-        ApplyFilter();
+            ApplyFilter();
+
+        } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
+            await VS.MessageBox.ShowErrorAsync(
+                Resources.Strings.SelectTargetDialog_CouldNotLoadTargets.Format(ex.Message)
+            );
+        }
+
         IsLoading = false;
     }
 

@@ -114,28 +114,30 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
         }
 
         logger = await Package.GetServiceAsync<ILogger, ILogger>();
-        info = await GetResourceInfoAsync(resource.FullPath, logger);
+        info = null;
 
-        if (info is not null) {
-            SelectedRange? selection = null;
-            DocumentView? documentView = null;
+        try {
+            info = await GetResourceInfoAsync(resource.FullPath, logger);
+
+            if (info is not null) {
+                SelectedRange? selection = null;
+                DocumentView? documentView = null;
 
 
-            if (IncludeSelection) {
-                // We are allowed to include the selection, but we can only get the
-                // selection from the active editor, so we'll only include the selection
-                // if the file we are generating the URL for is in the active editor.
-                documentView = await VS.Documents.GetActiveDocumentViewAsync();
+                if (IncludeSelection) {
+                    // We are allowed to include the selection, but we can only get the
+                    // selection from the active editor, so we'll only include the selection
+                    // if the file we are generating the URL for is in the active editor.
+                    documentView = await VS.Documents.GetActiveDocumentViewAsync();
 
-                if (documentView?.TextView is not null) {
-                    if (string.Equals(documentView.FilePath, resource.FullPath, StringComparison.OrdinalIgnoreCase)) {
-                        selection = GetLinkCommandBase<T>.GetSelectedRange(documentView.TextView);
-                        await logger.LogAsync($"Line selection: {selection}");
+                    if (documentView?.TextView is not null) {
+                        if (string.Equals(documentView.FilePath, resource.FullPath, StringComparison.OrdinalIgnoreCase)) {
+                            selection = GetLinkCommandBase<T>.GetSelectedRange(documentView.TextView);
+                            await logger.LogAsync($"Line selection: {selection}");
+                        }
                     }
                 }
-            }
 
-            try {
                 ILinkTarget? target;
                 CreateUrlResult result;
 
@@ -188,21 +190,21 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
                         break;
 
                 }
+            }
 
-            } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
-                await logger.LogAsync($"Error while generating a URL: {ex}");
+        } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
+            await logger.LogAsync($"Error while generating a URL: {ex}");
 
-                if (ex is NoRemoteHeadException) {
-                    await VS.MessageBox.ShowErrorAsync(
-                        Resources.Strings.GetLinkCommand_NoRemoteHead.Format(
-                            info.Repository.Root,
-                            info.Repository.Remote?.Name
-                        )
-                    );
+            if ((ex is NoRemoteHeadException) && (info is not null)) {
+                await VS.MessageBox.ShowErrorAsync(
+                    Resources.Strings.GetLinkCommand_NoRemoteHead.Format(
+                        info.Repository.Root,
+                        info.Repository.Remote?.Name
+                    )
+                );
 
-                } else {
-                    await VS.MessageBox.ShowErrorAsync(Resources.Strings.GetLinkCommand_Error);
-                }
+            } else {
+                await VS.MessageBox.ShowErrorAsync(Resources.Strings.GetLinkCommand_Error.Format(ex.Message));
             }
         }
 
@@ -360,7 +362,7 @@ public abstract partial class GetLinkCommandBase<T> : BaseCommand<T> where T : G
 
         } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
             await logger.LogAsync($"Error opening URL: {ex}");
-            await VS.MessageBox.ShowErrorAsync(Resources.Strings.GetLinkCommand_FailedToOpenLink);
+            await VS.MessageBox.ShowErrorAsync(Resources.Strings.GetLinkCommand_FailedToOpenLink.Format(ex.Message));
         }
     }
 

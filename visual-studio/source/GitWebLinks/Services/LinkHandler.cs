@@ -251,7 +251,7 @@ public class LinkHandler : ILinkHandler {
                 )
             ).Trim();
 
-        } catch (GitException ex) {
+        } catch (GitCommandException ex) {
             throw new NoRemoteHeadException(ex.Message);
         }
 

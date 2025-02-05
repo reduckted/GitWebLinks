@@ -61,7 +61,7 @@ namespace GitWebLinks.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An error occurred while creating the link..
+        ///   Looks up a localized string similar to An error occurred while creating the link: {0}.
         /// </summary>
         public static string GetLinkCommand_Error {
             get {
@@ -70,7 +70,7 @@ namespace GitWebLinks.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There was a problem opening the link..
+        ///   Looks up a localized string similar to There was a problem opening the link: {0}.
         /// </summary>
         public static string GetLinkCommand_FailedToOpenLink {
             get {
@@ -124,6 +124,15 @@ namespace GitWebLinks.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The Git executable cannot be found. Ensure that Git is installed and is in the PATH environment variable..
+        /// </summary>
+        public static string GitNotFound {
+            get {
+                return ResourceManager.GetString("GitNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No files were found for the URL.
         /// </summary>
         public static string GoToFileDialog_NoFilesFound {
@@ -138,6 +147,15 @@ namespace GitWebLinks.Resources {
         public static string GoToFileDialog_Watermark {
             get {
                 return ResourceManager.GetString("GoToFileDialog_Watermark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was a problem loading the target refs: {0}.
+        /// </summary>
+        public static string SelectTargetDialog_CouldNotLoadTargets {
+            get {
+                return ResourceManager.GetString("SelectTargetDialog_CouldNotLoadTargets", resourceCulture);
             }
         }
         

@@ -122,10 +122,12 @@
     <comment>{0} = Host name</comment>
   </data>
   <data name="GetLinkCommand_Error" xml:space="preserve">
-    <value>An error occurred while creating the link.</value>
+    <value>An error occurred while creating the link: {0}</value>
+    <comment>{0} = Error message</comment>
   </data>
   <data name="GetLinkCommand_FailedToOpenLink" xml:space="preserve">
-    <value>There was a problem opening the link.</value>
+    <value>There was a problem opening the link: {0}</value>
+    <comment>{0} = Error message</comment>
   </data>
   <data name="GetLinkCommand_NoHandler" xml:space="preserve">
     <value>The Git remote '{0}' is not supported. If this is a private Git server, you may need to add the server address to the settings.</value>
@@ -166,5 +168,12 @@
   </data>
   <data name="GoToFileDialog_Watermark" xml:space="preserve">
     <value>Enter the URL of the file to go to</value>
+  </data>
+  <data name="SelectTargetDialog_CouldNotLoadTargets" xml:space="preserve">
+    <value>There was a problem loading the target refs: {0}</value>
+    <comment>{0} = Error message</comment>
+  </data>
+  <data name="GitNotFound" xml:space="preserve">
+    <value>The Git executable cannot be found. Ensure that Git is installed and is in the PATH environment variable.</value>
   </data>
 </root>
