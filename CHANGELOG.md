@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.14.0 (2025-02-05)
+
+### Changes
+
+-   ✨ Visual Studio: Better error messages when Git is not installed.
+
 ## 2.13.0 (2025-01-15)
 
 ### New Features
