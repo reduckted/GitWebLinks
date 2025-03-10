@@ -1,36 +1,45 @@
 version: 2
 updates:
-    - package-ecosystem: "npm"
-      directory: "/vscode"
-      schedule:
-          interval: "weekly"
-      groups:
-          vscode-dependencies:
-              patterns:
-                  - "*"
-      ignore:
-          - dependency-name: "@types/vscode" # Pinned to enable support for older versions of VS Code.
-          - dependency-name: "@types/node" # Pinned because VS Code uses Node.js v16.
-          - dependency-name: "chai" # Pinned because v5 is ESM only.
-          - dependency-name: "sinon-chai" # Pinned because chai@5 is ESM only.
+  - package-ecosystem: "npm"
+    directory: "/vscode"
+    schedule:
+      interval: "weekly"
+    groups:
+      vscode-dependencies:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "@types/vscode" # Pinned to enable support for older versions of VS Code.
+      - dependency-name: "@types/node" # Pinned because VS Code uses Node.js v16.
+      - dependency-name: "chai" # Pinned because v5 is ESM only.
+      - dependency-name: "sinon-chai" # Pinned because chai@5 is ESM only.
 
-    - package-ecosystem: "nuget"
-      directory: "/visual-studio"
-      schedule:
-          interval: "monthly"
-      groups:
-          visual-studio-dependencies:
-              patterns:
-                  - "*"
-      ignore:
-          - dependency-name: "Microsoft.VisualStudio.SDK" # Pinned to support all versions of Visual Studio 2022.
-          - dependency-name: "Fluid.Core" # Pinned due to dependencies in newer versions that are not compatible with Visual Studio.
+    reviewers:
+      - "@reduckted"
 
-    - package-ecosystem: "github-actions"
-      directory: "/"
-      schedule:
-          interval: "weekly"
-      groups:
-          github-actions:
-              patterns:
-                  - "*"
+  - package-ecosystem: "nuget"
+    directory: "/visual-studio"
+    schedule:
+      interval: "monthly"
+    groups:
+      visual-studio-dependencies:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "Microsoft.VisualStudio.SDK" # Pinned to support all versions of Visual Studio 2022.
+      - dependency-name: "Fluid.Core" # Pinned due to dependencies in newer versions that are not compatible with Visual Studio.
+
+    reviewers:
+      - "@reduckted"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+    reviewers:
+      - "@reduckted"
