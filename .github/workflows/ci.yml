@@ -1,73 +1,73 @@
 name: CI
 
 on:
-    push:
-        branches:
-            - "master"
+  push:
+    branches:
+      - "master"
 
-        tags-ignore:
-            - "**"
+    tags-ignore:
+      - "**"
 
-    pull_request:
-        types: [opened, synchronize, edited]
+  pull_request:
+    types: [opened, synchronize, edited]
 
 jobs:
-    build-vscode:
-        strategy:
-            fail-fast: false
-            matrix:
-                os: [macos-latest, ubuntu-latest, windows-latest]
+  build-vscode:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
 
-        runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20.x
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
 
-            - name: Install dependencies
-              working-directory: ./vscode
-              run: npm ci
+      - name: Install dependencies
+        working-directory: ./vscode
+        run: npm ci
 
-            - name: Lint
-              working-directory: ./vscode
-              run: npm run lint
+      - name: Lint
+        working-directory: ./vscode
+        run: npm run lint
 
-            - name: Build
-              working-directory: ./vscode
-              run: npm run build
+      - name: Build
+        working-directory: ./vscode
+        run: npm run build
 
-            - name: Test (Linux)
-              if: runner.os == 'Linux'
-              working-directory: ./vscode
-              run: xvfb-run -a npm run test
-            - name: Test (Not Linux)
-              if: runner.os != 'Linux'
-              working-directory: ./vscode
-              run: npm run test
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
+        working-directory: ./vscode
+        run: xvfb-run -a npm run test
+      - name: Test (Not Linux)
+        if: runner.os != 'Linux'
+        working-directory: ./vscode
+        run: npm run test
 
-    build-visual-studio:
-        runs-on: windows-2022
+  build-visual-studio:
+    runs-on: windows-2022
 
-        env:
-            Configuration: Release
-            DeployExtension: false
+    env:
+      Configuration: Release
+      DeployExtension: false
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Setup MSBuild
-              uses: microsoft/setup-msbuild@v2
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
-            - name: Build
-              working-directory: ./visual-studio
-              run: msbuild /t:Rebuild /Restore /v:Minimal
+      - name: Build
+        working-directory: ./visual-studio
+        run: msbuild /t:Rebuild /Restore /v:Minimal
 
-            - name: Test
-              working-directory: ./visual-studio
-              run: msbuild tests/GitWebLinks.UnitTests /t:Test /v:Minimal
+      - name: Test
+        working-directory: ./visual-studio
+        run: msbuild tests/GitWebLinks.UnitTests /t:Test /v:Minimal
