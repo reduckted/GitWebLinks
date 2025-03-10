@@ -43,7 +43,7 @@
         "liquidjs": "10.21.0"
     },
     "devDependencies": {
-        "@eslint/js": "9.21.0",
+        "@eslint/js": "9.22.0",
         "@types/chai": "4.3.16",
         "@types/mocha": "10.0.10",
         "@types/node": "16.18.97",
@@ -56,11 +56,11 @@
         "@vscode/vsce": "3.2.2",
         "ajv": "8.17.1",
         "chai": "4.4.1",
-        "eslint": "9.21.0",
+        "eslint": "9.22.0",
         "eslint-plugin-jest": "28.11.0",
         "eslint-plugin-jsdoc": "50.6.3",
         "eslint-plugin-n": "17.16.2",
-        "eslint-plugin-perfectionist": "4.9.0",
+        "eslint-plugin-perfectionist": "4.10.1",
         "eslint-plugin-prettier": "5.2.3",
         "glob": "11.0.1",
         "mocha": "11.1.0",
