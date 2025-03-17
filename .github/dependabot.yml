@@ -15,7 +15,7 @@ updates:
       - dependency-name: "sinon-chai" # Pinned because chai@5 is ESM only.
 
     reviewers:
-      - "@reduckted"
+      - "reduckted"
 
   - package-ecosystem: "nuget"
     directory: "/visual-studio"
@@ -30,7 +30,7 @@ updates:
       - dependency-name: "Fluid.Core" # Pinned due to dependencies in newer versions that are not compatible with Visual Studio.
 
     reviewers:
-      - "@reduckted"
+      - "reduckted"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -42,4 +42,4 @@ updates:
           - "*"
 
     reviewers:
-      - "@reduckted"
+      - "reduckted"
