@@ -43,7 +43,7 @@
         "liquidjs": "10.21.0"
     },
     "devDependencies": {
-        "@eslint/js": "9.24.0",
+        "@eslint/js": "9.25.0",
         "@types/chai": "4.3.16",
         "@types/mocha": "10.0.10",
         "@types/node": "16.18.97",
@@ -56,7 +56,7 @@
         "@vscode/vsce": "3.3.2",
         "ajv": "8.17.1",
         "chai": "4.4.1",
-        "eslint": "9.24.0",
+        "eslint": "9.25.0",
         "eslint-plugin-jest": "28.11.0",
         "eslint-plugin-jsdoc": "50.6.9",
         "eslint-plugin-n": "17.17.0",
@@ -71,8 +71,8 @@
         "sinon-chai": "3.7.0",
         "ts-loader": "9.5.2",
         "typescript": "5.8.3",
-        "typescript-eslint": "8.29.1",
-        "webpack": "5.99.5",
+        "typescript-eslint": "8.30.1",
+        "webpack": "5.99.6",
         "webpack-cli": "6.0.1"
     },
     "engines": {
