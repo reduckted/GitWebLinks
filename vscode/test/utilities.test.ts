@@ -1,7 +1,7 @@
 import type { TextEditor } from 'vscode';
 
 import { expect } from 'chai';
-import * as assert from 'node:assert';
+import assert from 'node:assert';
 import { commands, Position, Selection, Uri, window } from 'vscode';
 
 import { getSelectedRange, hasRemote, normalizeUrl, toSelection } from '../src/utilities';

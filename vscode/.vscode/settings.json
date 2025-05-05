@@ -9,5 +9,14 @@
     "editor.codeActionsOnSave": {
         "source.fixAll": "explicit"
     },
-    "typescript.tsdk": "node_modules\\typescript\\lib"
+    "search.exclude": {
+        "dist": true,
+        "package-lock.json": true
+    },
+    "[javascript]": {
+        "editor.formatOnSave": false
+    },
+    "[typescript]": {
+        "editor.formatOnSave": false
+    }
 }

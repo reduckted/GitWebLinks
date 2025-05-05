@@ -15,5 +15,12 @@
     ],
     "settings": {
         "typescript.tsdk": "node_modules\\typescript\\lib"
+    },
+    "extensions": {
+        "recommendations": [
+            "dbaeumer.vscode-eslint",
+            "connor4312.esbuild-problem-matchers",
+            "ms-vscode.extension-test-runner"
+        ]
     }
 }

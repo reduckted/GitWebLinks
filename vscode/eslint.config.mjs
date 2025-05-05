@@ -1,14 +1,16 @@
 // @ts-check
 
-const eslint = require('@eslint/js');
-const jest = require('eslint-plugin-jest');
-const jsdoc = require('eslint-plugin-jsdoc');
-const n = require('eslint-plugin-n');
-const perfectionist = require('eslint-plugin-perfectionist');
-const prettier = require('eslint-plugin-prettier/recommended');
-const tseslint = require('typescript-eslint');
+import eslint from '@eslint/js';
+import jest from 'eslint-plugin-jest';
+import jsdoc from 'eslint-plugin-jsdoc';
+import n from 'eslint-plugin-n';
+import perfectionist from 'eslint-plugin-perfectionist';
+import prettier from 'eslint-plugin-prettier/recommended';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import tseslint from 'typescript-eslint';
 
-module.exports = tseslint.config(
+export default tseslint.config(
     { name: '@eslint/js', ...eslint.configs.recommended },
     ...tseslint.configs.recommendedTypeChecked,
     jsdoc.configs['flat/recommended'],
@@ -16,22 +18,16 @@ module.exports = tseslint.config(
     { name: 'prettier', ...prettier },
     {
         name: 'ignores',
-        ignores: [
-            '.vscode-test.mjs',
-            '.vscode-test',
-            'dist',
-            'eslint.config.js',
-            'out-test',
-            'webpack.config.js',
-            'src/api/**/*'
-        ]
+        ignores: ['.vscode-test.mjs', '.vscode-test', 'dist', 'out-test', 'src/api/**/*']
     },
     {
         name: 'base',
         languageOptions: {
             parserOptions: {
-                projectService: true,
-                tsconfigRootDir: __dirname
+                project: path.join(
+                    path.dirname(fileURLToPath(import.meta.url)),
+                    'tsconfig.eslint.json'
+                )
             }
         }
     },
