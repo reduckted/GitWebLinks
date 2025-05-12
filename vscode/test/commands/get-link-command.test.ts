@@ -24,7 +24,7 @@ import * as chai from 'chai';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import { env, Position, Uri, window } from 'vscode';
 
 import { GetLinkCommand } from '../../src/commands/get-link-command';

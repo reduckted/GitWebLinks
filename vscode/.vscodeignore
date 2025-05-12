@@ -1,15 +1,19 @@
-.github/
 .vscode/
 .vscode-test/
-out/
+images/
 node_modules/
-shared/
+out-test/
 src/
 test/
 
-.eslintrc.json
-.gitignore
+.prettierignore
+.vscode-test.mjs
 .prettierrc.json
-**/*.map
+esbuild.mjs
+eslint.config.mjs
 tsconfig.json
-webpack.config.js
+tsconfig.eslint.json
+
+*.workspace
+**/*.map
+

@@ -233,26 +233,22 @@ export interface DynamicServer {
  * @returns The handler definitions.
  */
 export function load<T extends HandlerDefinition>(): T[] {
-    // If we have been compiled to a webpack bundle, then the definitions
-    // have been included in the bundle and we can require them.
+    let dir: string;
+
+    // If we've been built as a production build, then the "handlers"
+    // directory has been copied alongside the bundle.
     // If not, then we will need to load them from disk.
-    if (process.env.WEBPACK) {
-        let context: __WebpackModuleApi.RequireContext;
-
-        context = require.context('../../shared/handlers');
-
-        return context.keys().map((key) => context(key) as T);
+    if (process.env.NODE_ENV === 'production') {
+        dir = path.join(__dirname, 'handlers');
     } else {
-        let dir: string;
-
         dir = findHandlersDirectory();
-
-        return fs
-            .readdirSync(dir)
-            .filter((entry) => path.extname(entry) === '.json')
-            .map((file) => fs.readFileSync(path.join(dir, file), { encoding: 'utf-8' }))
-            .map((contents) => JSON.parse(contents) as T);
     }
+
+    return fs
+        .readdirSync(dir)
+        .filter((entry) => path.extname(entry) === '.json')
+        .map((file) => fs.readFileSync(path.join(dir, file), { encoding: 'utf-8' }))
+        .map((contents) => JSON.parse(contents) as T);
 }
 
 /**
@@ -261,12 +257,6 @@ export function load<T extends HandlerDefinition>(): T[] {
  * @returns The directory.
  */
 export function findHandlersDirectory(): string {
-    if (process.env.WEBPACK) {
-        throw new Error(
-            'Finding the handlers directory is not supported when compiled with webpack.'
-        );
-    }
-
     let current: string;
 
     current = __dirname;

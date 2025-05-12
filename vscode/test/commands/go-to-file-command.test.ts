@@ -7,7 +7,7 @@ import * as chai from 'chai';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import { commands, env, Position, Range, Selection, Uri, window, workspace } from 'vscode';
 
 import { GoToFileCommand } from '../../src/commands/go-to-file-command';
