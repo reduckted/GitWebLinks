@@ -56,7 +56,7 @@
         "@types/vscode": "1.64.0",
         "@vscode/test-cli": "0.0.10",
         "@vscode/test-electron": "2.5.2",
-        "@vscode/vsce": "3.4.0",
+        "@vscode/vsce": "3.4.1",
         "ajv": "8.17.1",
         "chai": "4.4.1",
         "cpy-cli": "5.0.0",
