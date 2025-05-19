@@ -44,10 +44,10 @@
         "debug-test": "npm run pretest"
     },
     "dependencies": {
-        "liquidjs": "10.21.0"
+        "liquidjs": "10.21.1"
     },
     "devDependencies": {
-        "@eslint/js": "9.26.0",
+        "@eslint/js": "9.27.0",
         "@types/chai": "4.3.16",
         "@types/mocha": "10.0.10",
         "@types/node": "16.18.97",
@@ -56,27 +56,27 @@
         "@types/vscode": "1.64.0",
         "@vscode/test-cli": "0.0.10",
         "@vscode/test-electron": "2.5.2",
-        "@vscode/vsce": "3.3.2",
+        "@vscode/vsce": "3.4.0",
         "ajv": "8.17.1",
         "chai": "4.4.1",
         "cpy-cli": "5.0.0",
-        "esbuild": "0.25.3",
-        "eslint": "9.26.0",
+        "esbuild": "0.25.4",
+        "eslint": "9.27.0",
         "eslint-plugin-jest": "28.11.0",
-        "eslint-plugin-jsdoc": "50.6.14",
+        "eslint-plugin-jsdoc": "50.6.17",
         "eslint-plugin-n": "17.18.0",
-        "eslint-plugin-perfectionist": "4.12.3",
+        "eslint-plugin-perfectionist": "4.13.0",
         "eslint-plugin-prettier": "5.4.0",
         "glob": "11.0.2",
-        "mocha": "11.2.2",
-        "npm-run-all2": "8.0.1",
+        "mocha": "11.3.0",
+        "npm-run-all2": "8.0.2",
         "prettier": "3.5.3",
         "rimraf": "6.0.1",
         "sinon": "20.0.0",
         "sinon-chai": "3.7.0",
         "ts-loader": "9.5.2",
         "typescript": "5.8.3",
-        "typescript-eslint": "8.32.0"
+        "typescript-eslint": "8.32.1"
     },
     "engines": {
         "vscode": "^1.64.0",
