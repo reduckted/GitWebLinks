@@ -14,9 +14,6 @@ updates:
       - dependency-name: "chai" # Pinned because v5 is ESM only.
       - dependency-name: "sinon-chai" # Pinned because chai@5 is ESM only.
 
-    reviewers:
-      - "reduckted"
-
   - package-ecosystem: "nuget"
     directory: "/visual-studio"
     schedule:
@@ -29,9 +26,6 @@ updates:
       - dependency-name: "Microsoft.VisualStudio.SDK" # Pinned to support all versions of Visual Studio 2022.
       - dependency-name: "Fluid.Core" # Pinned due to dependencies in newer versions that are not compatible with Visual Studio.
 
-    reviewers:
-      - "reduckted"
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -40,6 +34,3 @@ updates:
       github-actions:
         patterns:
           - "*"
-
-    reviewers:
-      - "reduckted"
