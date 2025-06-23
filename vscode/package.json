@@ -62,13 +62,13 @@
         "cpy-cli": "5.0.0",
         "esbuild": "0.25.5",
         "eslint": "9.29.0",
-        "eslint-plugin-jest": "28.14.0",
-        "eslint-plugin-jsdoc": "51.0.1",
+        "eslint-plugin-jest": "29.0.1",
+        "eslint-plugin-jsdoc": "51.2.1",
         "eslint-plugin-n": "17.20.0",
-        "eslint-plugin-perfectionist": "4.14.0",
-        "eslint-plugin-prettier": "5.4.1",
+        "eslint-plugin-perfectionist": "4.15.0",
+        "eslint-plugin-prettier": "5.5.0",
         "glob": "11.0.3",
-        "mocha": "11.6.0",
+        "mocha": "11.7.0",
         "npm-run-all2": "8.0.4",
         "prettier": "3.5.3",
         "rimraf": "6.0.1",
@@ -76,7 +76,7 @@
         "sinon-chai": "3.7.0",
         "ts-loader": "9.5.2",
         "typescript": "5.8.3",
-        "typescript-eslint": "8.34.0"
+        "typescript-eslint": "8.34.1"
     },
     "engines": {
         "vscode": "^1.64.0",
