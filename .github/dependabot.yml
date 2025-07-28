@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/vscode"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
       vscode-dependencies:
         patterns:
