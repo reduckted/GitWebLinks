@@ -10,7 +10,7 @@ updates:
           - "*"
     ignore:
       - dependency-name: "@types/vscode" # Pinned to enable support for older versions of VS Code.
-      - dependency-name: "@types/node" # Pinned because VS Code uses Node.js v16.
+      - dependency-name: "@types/node" # Pinned because VS Code uses Node.js v22.
       - dependency-name: "chai" # Pinned because v5 is ESM only.
       - dependency-name: "sinon-chai" # Pinned because chai@5 is ESM only.
 
