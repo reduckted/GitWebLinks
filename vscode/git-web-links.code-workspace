@@ -14,7 +14,7 @@
         }
     ],
     "settings": {
-        "typescript.tsdk": "node_modules\\typescript\\lib"
+        "typescript.tsdk": "vscode\\node_modules\\typescript\\lib"
     },
     "extensions": {
         "recommendations": [
