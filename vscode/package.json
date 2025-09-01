@@ -47,7 +47,7 @@
         "liquidjs": "10.21.1"
     },
     "devDependencies": {
-        "@eslint/js": "9.33.0",
+        "@eslint/js": "9.34.0",
         "@types/chai": "4.3.16",
         "@types/mocha": "10.0.10",
         "@types/node": "22.17.0",
@@ -59,11 +59,11 @@
         "@vscode/vsce": "3.6.0",
         "ajv": "8.17.1",
         "chai": "4.4.1",
-        "cpy-cli": "5.0.0",
-        "esbuild": "0.25.8",
-        "eslint": "9.33.0",
+        "cpy-cli": "6.0.0",
+        "esbuild": "0.25.9",
+        "eslint": "9.34.0",
         "eslint-plugin-jest": "29.0.1",
-        "eslint-plugin-jsdoc": "52.0.4",
+        "eslint-plugin-jsdoc": "54.1.1",
         "eslint-plugin-n": "17.21.3",
         "eslint-plugin-perfectionist": "4.15.0",
         "eslint-plugin-prettier": "5.5.4",
@@ -74,9 +74,9 @@
         "rimraf": "6.0.1",
         "sinon": "21.0.0",
         "sinon-chai": "3.7.0",
-        "ts-loader": "9.5.2",
+        "ts-loader": "9.5.4",
         "typescript": "5.9.2",
-        "typescript-eslint": "8.39.0"
+        "typescript-eslint": "8.41.0"
     },
     "engines": {
         "vscode": "^1.64.0",
