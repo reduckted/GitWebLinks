@@ -72,12 +72,12 @@ export default tseslint.config(
                 'warn',
                 {
                     groups: [
-                        ['builtin-type', 'external-type', 'internal-type'],
-                        'parent-type',
-                        ['sibling-type', 'index-type'],
+                        ['type-builtin', 'type-external', 'type-internal'],
+                        'type-parent',
+                        ['type-sibling', 'type-index'],
                         ['builtin', 'external', 'internal'],
                         'parent',
-                        ['sibling', 'index', 'object'],
+                        ['sibling', 'index'],
                         'unknown'
                     ]
                 }
