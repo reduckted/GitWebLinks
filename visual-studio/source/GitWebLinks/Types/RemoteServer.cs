@@ -50,15 +50,22 @@ public class RemoteServer {
                 StaticServer? result;
 
 
-                match = pattern.Match(url);
+                match = pattern.Match(UrlHelpers.Normalize(url));
 
                 if (match.Success) {
                     TemplateContext context;
+                    string sshUserSpecification;
 
+
+                    sshUserSpecification = UrlHelpers.GetSshUserSpecification(url);
 
                     // The URL matched the pattern. Render the templates to get the HTTP
                     // and SSH URLs, making the match available for the templates to use.
-                    context = TemplateData.Create().Add(match).AsTemplateContext();
+                    context = TemplateData
+                        .Create()
+                        .Add(match)
+                        .Add("sshUserSpecification", sshUserSpecification)
+                        .AsTemplateContext();
 
                     result = new StaticServer(
                         server.Http.Render(context),

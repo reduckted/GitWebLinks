@@ -26,7 +26,7 @@ import { NoRemoteHeadError } from './no-remote-head-error';
 import { RemoteServer } from './remote-server';
 import { Settings } from './settings';
 import { parseTemplate } from './templates';
-import { getErrorMessage, normalizeUrl } from './utilities';
+import { getErrorMessage, getSshUserSpecification, normalizeUrl } from './utilities';
 
 /**
  * Handles the generation of links for a particular type of Git server.
@@ -109,7 +109,7 @@ export class LinkHandler {
      * @returns True if this handler handles the given remote URL; otherwise, false.
      */
     public handlesRemoteUrl(remoteUrl: string): boolean {
-        return this.server.matchRemoteUrl(normalizeUrl(remoteUrl)) !== undefined;
+        return this.server.matchRemoteUrl(remoteUrl) !== undefined;
     }
 
     /**
@@ -127,7 +127,6 @@ export class LinkHandler {
         file: FileInfo,
         options: LinkOptions
     ): Promise<CreateUrlResult> {
-        let remote: string;
         let address: StaticServer;
         let type: LinkType;
         let ref: string;
@@ -156,20 +155,17 @@ export class LinkHandler {
             }
         }
 
-        // Adjust the remote URL so that it's in a
-        // standard format that we can manipulate.
-        remote = normalizeUrl(remoteUrl);
-
-        address = this.getAddress(remote);
+        address = this.getAddress(remoteUrl);
         relativePath = await this.getRelativePath(repository.root.fsPath, file.uri.fsPath);
 
         data = {
             base: address.web ?? address.http,
-            repository: this.getRepositoryPath(remote, address),
+            repository: this.getRepositoryPath(remoteUrl, address),
             ref,
             commit: await this.getRef('commit', repository),
             file: relativePath,
             type: type === 'commit' ? 'commit' : 'branch',
+            sshUserSpecification: getSshUserSpecification(remoteUrl),
             ...file.selection
         };
 
@@ -264,6 +260,8 @@ export class LinkHandler {
      */
     private getRepositoryPath(remoteUrl: string, address: StaticServer): string {
         let repositoryPath: string;
+
+        remoteUrl = normalizeUrl(remoteUrl);
 
         // Remove the server's address from the start of the URL.
         // Note that the remote URL and both URLs in the server

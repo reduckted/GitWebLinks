@@ -200,7 +200,7 @@ describe('RemoteServer', () => {
                     ssh: 'ssh://git@example.com:9000/_{{ match[1] }}'
                 },
                 {
-                    remotePattern: 'ssh://git@example\\.com:9000/_([^/]+)',
+                    remotePattern: 'example\\.com:9000/_([^/]+)',
                     http: 'http://example.com:8000/repos/{{ match[1] }}',
                     ssh: 'ssh://git@example.com:9000/_{{ match[1] }}',
                     webPattern: '^$' // This server should only match SSH remote URLs.

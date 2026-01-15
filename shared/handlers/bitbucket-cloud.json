@@ -3,7 +3,7 @@
     "name": "Bitbucket Cloud",
     "server": {
         "http": "https://bitbucket.org",
-        "ssh": "git@bitbucket.org"
+        "ssh": "bitbucket.org"
     },
     "branchRef": "abbreviated",
     "url": [
@@ -71,6 +71,11 @@
                     "fileName": "src/file.txt",
                     "remote": "https://bitbucket.org/foo/bar.git",
                     "result": "https://bitbucket.org/foo/bar/src/test-branch/src/file.txt"
+                },
+                {
+                    "name": "SSH with non-standard user specification",
+                    "remote": "user@bitbucket.org:foo/bar.git",
+                    "result": "https://bitbucket.org/foo/bar/src/master/src/file.txt"
                 }
             ],
             "selection": {

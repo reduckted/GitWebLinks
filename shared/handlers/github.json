@@ -8,7 +8,7 @@
             "ssh": "git@github.com"
         },
         {
-            "remotePattern": "^(?:git@)?github\\.com",
+            "remotePattern": "^github\\.com",
             "http": "https://github.com",
             "ssh": "git@github.com",
             "webPattern": "^ONLY MATCH TO SSH REMOTE URLS$"
@@ -105,6 +105,11 @@
                     "settings": {
                         "useGitHubDev": false
                     }
+                },
+                {
+                    "name": "SSH with non-standard user specification",
+                    "remote": "user@github.com:foo/bar.git",
+                    "result": "https://github.com/foo/bar/blob/master/src/file.txt"
                 }
             ],
             "selection": {

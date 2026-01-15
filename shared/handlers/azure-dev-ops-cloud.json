@@ -8,7 +8,7 @@
             "ssh": "git@ssh.dev.azure.com:v3/{{ match[1] }}/{{ match[2] }}"
         },
         {
-            "remotePattern": "^(?:git@)?ssh\\.dev\\.azure\\.com:v3\\/([^\\/]+)\\/([^\\/]+)\\/.+$",
+            "remotePattern": "^ssh\\.dev\\.azure\\.com:v3\\/([^\\/]+)\\/([^\\/]+)\\/.+$",
             "http": "https://dev.azure.com/{{ match[1] }}/{{ match[2] }}/_git",
             "ssh": "git@ssh.dev.azure.com:v3/{{ match[1] }}/{{ match[2] }}",
             "webPattern": "^ONLY MATCH TO SSH REMOTE URLS$"
@@ -77,6 +77,13 @@
                 "remote": "https://dev.azure.com/user/foo/_git/bar",
                 "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GC{{ commit }}"
             },
+            "misc": [
+                {
+                    "name": "SSH with non-standard user specification",
+                    "remote": "user@ssh.dev.azure.com:v3/user/foo/bar",
+                    "result": "https://dev.azure.com/user/foo/_git/bar?path=%2Fsrc%2Ffile.txt&version=GBmaster"
+                }
+            ],
             "selection": {
                 "remote": "https://dev.azure.com/user/foo/_git/bar",
                 "point": {
