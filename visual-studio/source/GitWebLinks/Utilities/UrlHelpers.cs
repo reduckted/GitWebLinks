@@ -8,10 +8,13 @@ namespace GitWebLinks;
 public static class UrlHelpers {
 
     private static readonly Regex HttpPattern = new("(https?://)[^@]+@(.+)");
+    private static readonly Regex IsHttpPattern = new("^https?://");
+    private static readonly Regex SshUserSpecificationPattern = new("^([^@:]+)@(.+)");
 
 
     public static string Normalize(string url) {
         Match httpMatch;
+        Match userSpecificationMatch;
 
 
         // Remove the SSH prefix if it exists.
@@ -19,9 +22,12 @@ public static class UrlHelpers {
             url = url.Substring(6);
         }
 
-        // Remove the "git@" prefix if it exists.
-        if (url.StartsWith("git@", StringComparison.Ordinal)) {
-            url = url.Substring(4);
+        // Remove the user specification (for example, "git@")
+        // from the start of the URL if there is one.
+        userSpecificationMatch = SshUserSpecificationPattern.Match(url);
+
+        if (userSpecificationMatch.Success) {
+            url = userSpecificationMatch.Groups[2].Value;
         }
 
         // If the URL is an HTTP(S) address, check if there's
@@ -37,6 +43,23 @@ public static class UrlHelpers {
         }
 
         return url;
+    }
+
+
+    public static string GetSshUserSpecification(string url) {
+        Match match;
+
+        if (IsHttpPattern.IsMatch(url)) {
+            return "";
+        }
+
+        if (url.StartsWith("ssh://")) {
+            url = url.Substring(6);
+        }
+
+        match = SshUserSpecificationPattern.Match(url);
+
+        return match.Success ? match.Groups[1].Value : "";
     }
 
 }

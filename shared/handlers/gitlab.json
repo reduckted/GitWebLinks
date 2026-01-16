@@ -3,7 +3,7 @@
     "name": "GitLab",
     "server": {
         "http": "https://gitlab.com",
-        "ssh": "git@gitlab.com"
+        "ssh": "gitlab.com"
     },
     "branchRef": "abbreviated",
     "url": "{{ base }}/{{ repository }}/-/blob/{{ ref | encode_uri }}/{{ file | encode_uri }}",
@@ -51,6 +51,13 @@
                 "remote": "https://gitlab.com/foo/bar.git",
                 "result": "https://gitlab.com/foo/bar/-/blob/{{ commit }}/src/file.txt"
             },
+            "misc": [
+                {
+                    "name": "SSH with non-standard user specification",
+                    "remote": "user@gitlab.com:foo/bar.git",
+                    "result": "https://gitlab.com/foo/bar/-/blob/master/src/file.txt"
+                }
+            ],
             "selection": {
                 "remote": "https://gitlab.com/foo/bar.git",
                 "point": {

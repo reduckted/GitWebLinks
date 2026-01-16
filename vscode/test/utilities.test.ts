@@ -4,7 +4,13 @@ import { expect } from 'chai';
 import assert from 'node:assert';
 import { commands, Position, Selection, Uri, window } from 'vscode';
 
-import { getSelectedRange, hasRemote, normalizeUrl, toSelection } from '../src/utilities';
+import {
+    getSelectedRange,
+    getSshUserSpecification,
+    hasRemote,
+    normalizeUrl,
+    toSelection
+} from '../src/utilities';
 
 describe('utilities', () => {
     describe('hasRemote', () => {
@@ -39,8 +45,12 @@ describe('utilities', () => {
             expect(normalizeUrl('ssh://example.com')).to.equal('example.com');
         });
 
-        it('should remove the "git@" prefix.', () => {
+        it('should remove the "git@" user specification prefix.', () => {
             expect(normalizeUrl('git@example.com')).to.equal('example.com');
+        });
+
+        it('should remove a non-standard user specification prefix.', () => {
+            expect(normalizeUrl('foo@example.com')).to.equal('example.com');
         });
 
         it('should remove the SSH prefix and the "git@" prefix.', () => {
@@ -57,6 +67,26 @@ describe('utilities', () => {
 
         it('should remove the trailing slash from SSH URLs.', () => {
             expect(normalizeUrl('ssh://example.com/')).to.equal('example.com');
+        });
+    });
+
+    describe('getSshUserSpecification', () => {
+        it('should return empty string for HTTP URLs.', () => {
+            expect(getSshUserSpecification('http://me@example.com')).to.equal('');
+        });
+
+        it('should return empty string for HTTPS URLs.', () => {
+            expect(getSshUserSpecification('https://me@example.com')).to.equal('');
+        });
+
+        ['git', 'user'].forEach((user) => {
+            it(`should return "${user}" user specification from SSH URLs with protocol.`, () => {
+                expect(getSshUserSpecification(`ssh://${user}@example.com`)).to.equal(user);
+            });
+
+            it(`should return "${user}" user specification from SSH URLs without protocol.`, () => {
+                expect(getSshUserSpecification(`${user}@example.com`)).to.equal(user);
+            });
         });
     });
 

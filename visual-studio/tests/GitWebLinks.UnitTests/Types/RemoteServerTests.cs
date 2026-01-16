@@ -251,7 +251,7 @@ public static class RemoteServerTests {
                         null
                     ),
                     new DynamicServer(
-                        new Regex("ssh://git@example\\.com:9000/_([^/]+)"),
+                        new Regex("example\\.com:9000/_([^/]+)"),
                         Parser.Parse("http://example.com:8000/repos/{{ match[1] }}"),
                         Parser.Parse("ssh://git@example.com:9000/_{{ match[1] }}"),
                         new Regex("^$"), // This server should only match SSH remote URLs.

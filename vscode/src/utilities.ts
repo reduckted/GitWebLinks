@@ -4,6 +4,8 @@ import type { Repository, RepositoryWithRemote, SelectedRange } from './types';
 
 import { Position, Selection } from 'vscode';
 
+const SSH_USER_SPECIFICATION_PATTERN = /^([^@:]+)@(.+)/;
+
 /**
  * Determines whether the given repository has a remote.
  *
@@ -22,15 +24,19 @@ export function hasRemote(repository: Repository): repository is RepositoryWithR
  */
 export function normalizeUrl(url: string): string {
     let httpMatch: RegExpExecArray | null;
+    let userSpecificationMatch: RegExpExecArray | null;
 
     // Remove the SSH prefix if it exists.
     if (url.startsWith('ssh://')) {
         url = url.substring(6);
     }
 
-    // Remove the "git@" prefix if it exists.
-    if (url.startsWith('git@')) {
-        url = url.substring(4);
+    // Remove the user specification (for example, "git@")
+    // from the start of the URL if there is one.
+    userSpecificationMatch = SSH_USER_SPECIFICATION_PATTERN.exec(url);
+
+    if (userSpecificationMatch) {
+        url = userSpecificationMatch[2];
     }
 
     // If the URL is an HTTP(S) address, check if there's
@@ -49,7 +55,26 @@ export function normalizeUrl(url: string): string {
 }
 
 /**
- * Determines whether the given error has th egiven code.
+ * Gets the user specification value from the given URL if it is an SSH URL.
+ *
+ * @param url The URL.
+ * @returns The user specification value, or an empty string if there
+ *          is no user specification value or the URL is not an SSH URL.
+ */
+export function getSshUserSpecification(url: string): string {
+    if (/^https?:\/\//.exec(url)) {
+        return '';
+    }
+
+    if (url.startsWith('ssh://')) {
+        url = url.substring(6);
+    }
+
+    return SSH_USER_SPECIFICATION_PATTERN.exec(url)?.[1] ?? '';
+}
+
+/**
+ * Determines whether the given error has the given code.
  *
  * @param err The error object.
  * @param code The code to test for.

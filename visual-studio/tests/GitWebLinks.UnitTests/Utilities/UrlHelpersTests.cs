@@ -29,8 +29,14 @@ public static class UrlHelpersTests {
 
 
         [Fact]
-        public void ShouldRemoveTheGitAtPrefix() {
+        public void ShouldRemoveTheGitAtUserSpecificationPrefix() {
             Assert.Equal("example.com", UrlHelpers.Normalize("git@example.com"));
+        }
+
+
+        [Fact]
+        public void ShouldRemoveNonStandardUserSpecificationPrefix() {
+            Assert.Equal("example.com", UrlHelpers.Normalize("foo@example.com"));
         }
 
 
@@ -55,6 +61,38 @@ public static class UrlHelpersTests {
         [Fact]
         public void ShouldRemoveTheTrailingSlashFromSshUrls() {
             Assert.Equal("example.com", UrlHelpers.Normalize("ssh://example.com/"));
+        }
+
+    }
+
+
+    public class GetSshUserSpecificationMethod {
+
+        [Fact]
+        public void ShouldReturnEmptyStringForHttpUrls() {
+            Assert.Equal("", UrlHelpers.GetSshUserSpecification("http://me@example.com"));
+        }
+
+
+        [Fact]
+        public void ShouldReturnEmptyStringForHttpsUrls() {
+            Assert.Equal("", UrlHelpers.GetSshUserSpecification("https://me@example.com"));
+        }
+
+
+        [Theory]
+        [InlineData("git")]
+        [InlineData("foo")]
+        public void ShouldReturnUserSpecificationFromSshUrlsWithProtocol(string user) {
+            Assert.Equal(user, UrlHelpers.GetSshUserSpecification($"ssh://{user}@example.com"));
+        }
+
+
+        [Theory]
+        [InlineData("git")]
+        [InlineData("foo")]
+        public void ShouldReturnUserSpecificationFromSshUrlsWithoutProtocol(string user) {
+            Assert.Equal(user, UrlHelpers.GetSshUserSpecification($"{user}@example.com"));
         }
 
     }

@@ -37,7 +37,7 @@ public class LinkHandler : ILinkHandler {
 
 
     public async Task<bool> HandlesRemoteUrlAsync(string remoteUrl) {
-        return await _server.MatchRemoteUrlAsync(UrlHelpers.Normalize(remoteUrl)) is not null;
+        return await _server.MatchRemoteUrlAsync(remoteUrl) is not null;
     }
 
 
@@ -86,10 +86,6 @@ public class LinkHandler : ILinkHandler {
             throw new NotSupportedException($"Unknown link target {options.Target.GetType().Name}.");
         }
 
-        // Adjust the remote URL so that it's in a
-        // standard format that we can manipulate.
-        remoteUrl = UrlHelpers.Normalize(remoteUrl);
-
         address = await GetAddressAsync(remoteUrl);
         relativePath = GetRelativePath(repository.Root, file.FilePath);
 
@@ -100,7 +96,8 @@ public class LinkHandler : ILinkHandler {
             .Add("ref", refValue)
             .Add("commit", await GetRefAsync(LinkType.Commit, repository.Root, repository.Remote))
             .Add("file", relativePath)
-            .Add("type", refType == RefType.Commit ? "commit" : "branch");
+            .Add("type", refType == RefType.Commit ? "commit" : "branch")
+            .Add("sshUserSpecification", UrlHelpers.GetSshUserSpecification(remoteUrl));
 
         if (file.Selection is not null) {
             data.Add("startLine", file.Selection.StartLine);
@@ -183,6 +180,7 @@ public class LinkHandler : ILinkHandler {
     private static string GetRepositoryPath(string remoteUrl, StaticServer address) {
         string repositoryPath;
 
+        remoteUrl = UrlHelpers.Normalize(remoteUrl);
 
         // Remove the server's address from the start of the URL.
         // Note that the remote URL and both URLs in the server

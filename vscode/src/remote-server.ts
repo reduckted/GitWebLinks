@@ -4,7 +4,7 @@ import type { Mutable } from './types';
 
 import { log } from './log';
 import { parseTemplate } from './templates';
-import { normalizeUrl } from './utilities';
+import { getSshUserSpecification, normalizeUrl } from './utilities';
 
 /**
  * Defines a remote server that can be matched to a Git server URL.
@@ -147,23 +147,23 @@ function createDynamicServerMatcher(server: DynamicServer): Matcher {
         return (url) => {
             let match: RegExpMatchArray | null;
 
-            match = pattern.exec(url);
+            match = pattern.exec(normalizeUrl(url));
 
             if (match) {
-                let http: string;
+                let sshUserSpecification: string;
                 let server: Mutable<StaticServer>;
 
-                http = httpTemplate.render({ match });
+                sshUserSpecification = getSshUserSpecification(url);
 
                 // The URL matched the pattern. Render the templates to get the
                 // URLs, making the match available for the templates to use.
                 server = {
-                    http,
-                    ssh: sshTemplate.render({ match })
+                    http: httpTemplate.render({ match, sshUserSpecification }),
+                    ssh: sshTemplate.render({ match, sshUserSpecification })
                 };
 
                 if (webTemplate) {
-                    server.web = webTemplate?.render({ match });
+                    server.web = webTemplate?.render({ match, sshUserSpecification });
                 }
 
                 return server;

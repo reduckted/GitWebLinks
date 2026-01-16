@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.14.1 (2026-01-16)
+
+-   🐛 Supported SSH user specifications other than "git".
+-   🔨 Dependency updates.
+
 ## 2.14.0 (2025-02-05)
 
 ### Changes
