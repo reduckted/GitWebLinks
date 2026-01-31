@@ -43,6 +43,9 @@ export class Settings {
             case 'defaultBranch':
                 return 'defaultBranch';
 
+            case 'tag':
+                return 'tag';
+
             default:
                 return 'commit';
         }

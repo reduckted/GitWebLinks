@@ -5,7 +5,7 @@ import type { StaticServer } from './schema';
 /**
  * The type of link to generate.
  */
-export type LinkType = 'branch' | 'commit' | 'defaultBranch';
+export type LinkType = 'branch' | 'commit' | 'defaultBranch' | 'tag';
 
 /**
  * The format to use when copying a link.
@@ -103,7 +103,7 @@ export interface LinkTargetRef {
     /**
      * What the ref refers to.
      */
-    readonly type: 'branch' | 'commit';
+    readonly type: 'branch' | 'commit' | 'tag';
 }
 
 export interface LinkTargetPreset {
