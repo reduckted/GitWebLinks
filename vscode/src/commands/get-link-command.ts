@@ -293,7 +293,8 @@ export class GetLinkCommand {
         targets = await Promise.all([
             this.tryGetRef(info, 'branch'),
             this.tryGetRef(info, 'commit'),
-            this.tryGetRef(info, 'defaultBranch')
+            this.tryGetRef(info, 'defaultBranch'),
+            this.tryGetRef(info, 'tag')
         ]);
 
         defaultType = this.settings.getDefaultLinkType();
@@ -322,6 +323,14 @@ export class GetLinkCommand {
                     target: { preset: 'defaultBranch' }
                 },
                 default: defaultType === 'defaultBranch'
+            },
+            {
+                item: {
+                    label: 'Current tag',
+                    description: targets[3],
+                    target: { preset: 'tag' }
+                },
+                default: defaultType === 'tag'
             }
         ];
 
@@ -361,27 +370,40 @@ export class GetLinkCommand {
     ): Promise<(QuickPickItem | QuickPickLinkTargetItem)[]> {
         let branches: (QuickPickItem | QuickPickLinkTargetItem)[];
         let commits: (QuickPickItem | QuickPickLinkTargetItem)[];
-        let lines: string[];
+        let tags: (QuickPickItem | QuickPickLinkTargetItem)[];
+        let branchLines: string[];
+        let tagLines: string[];
         let useShortHashes: boolean;
 
-        lines = (
-            await this.git.exec(
-                info.repository.root,
-                'branch',
-                '--list',
-                '--no-color',
-                '--format',
-                '%(refname:short) %(refname) %(objectname:short) %(objectname)'
-            )
-        )
-            .split(/\r?\n/)
-            .filter((x) => x.length > 0);
+        // Get branches and tags in parallel.
+        [branchLines, tagLines] = await Promise.all([
+            this.git
+                .exec(
+                    info.repository.root,
+                    'branch',
+                    '--list',
+                    '--no-color',
+                    '--format',
+                    '%(refname:short) %(refname) %(objectname:short) %(objectname)'
+                )
+                .then((output) => output.split(/\r?\n/).filter((x) => x.length > 0)),
+            this.git
+                .exec(
+                    info.repository.root,
+                    'tag',
+                    '-l',
+                    '--format',
+                    '%(refname:short) %(objectname:short) %(objectname)'
+                )
+                .then((output) => output.split(/\r?\n/).filter((x) => x.length > 0))
+        ]);
 
         branches = [];
         commits = [];
+        tags = [];
         useShortHashes = this.settings.getUseShortHash();
 
-        for (let line of lines) {
+        for (let line of branchLines) {
             let [branchName, branchRef, shortHash, fullHash] = line.split(' ');
 
             branches.push({
@@ -397,12 +419,25 @@ export class GetLinkCommand {
             });
         }
 
+        for (let line of tagLines) {
+            let [tagName, shortHash, fullHash] = line.split(' ');
+
+            tags.push({
+                label: tagName,
+                description: useShortHashes ? shortHash : fullHash,
+                target: { ref: { abbreviated: tagName, symbolic: tagName }, type: 'tag' }
+            });
+        }
+
         branches.sort((x, y) => x.label.localeCompare(y.label));
         commits.sort((x, y) => x.label.localeCompare(y.label));
+        tags.sort((x, y) => x.label.localeCompare(y.label));
 
         return [
             { label: 'Branches', kind: QuickPickItemKind.Separator },
             ...branches,
+            { label: 'Tags', kind: QuickPickItemKind.Separator },
+            ...tags,
             { label: 'Commits', kind: QuickPickItemKind.Separator },
             ...commits
         ];

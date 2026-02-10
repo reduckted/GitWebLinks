@@ -147,6 +147,9 @@ export class LinkHandler {
                     this.definition.branchRef === 'abbreviated'
                         ? options.target.ref.abbreviated
                         : options.target.ref.symbolic;
+            } else if (options.target.type === 'tag') {
+                type = 'tag';
+                ref = options.target.ref.abbreviated;
             } else {
                 type = 'commit';
                 ref = this.settings.getUseShortHash()
@@ -164,7 +167,7 @@ export class LinkHandler {
             ref,
             commit: await this.getRef('commit', repository),
             file: relativePath,
-            type: type === 'commit' ? 'commit' : 'branch',
+            type: type === 'commit' ? 'commit' : type === 'tag' ? 'tag' : 'branch',
             sshUserSpecification: getSshUserSpecification(remoteUrl),
             ...file.selection
         };
@@ -314,6 +317,17 @@ export class LinkHandler {
                 } else {
                     return (await this.git.exec(repository.root, 'rev-parse', 'HEAD')).trim();
                 }
+
+            case 'tag':
+                return (
+                    await this.git.exec(
+                        repository.root,
+                        'describe',
+                        '--exact-match',
+                        '--tags',
+                        'HEAD'
+                    )
+                ).trim();
 
             default:
                 // Use the default branch if one is specified in the settings; otherwise find the
@@ -571,7 +585,7 @@ interface UrlData {
     /**
      * The type of link being generated.
      */
-    readonly type: 'branch' | 'commit';
+    readonly type: 'branch' | 'commit' | 'tag';
 
     /**
      * The Git ref to generate the link to. This will be a branch name or commit hash depending on the link type.

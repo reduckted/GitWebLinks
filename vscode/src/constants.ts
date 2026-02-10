@@ -26,6 +26,7 @@ export const COMMANDS = {
     copySelectionToDefaultBranch: `${EXTENSION.id}.copySelectionToDefaultBranch`,
     copySelectionToBranch: `${EXTENSION.id}.copySelectionToBranch`,
     copySelectionToCommit: `${EXTENSION.id}.copySelectionToCommit`,
+    copySelectionToTag: `${EXTENSION.id}.copySelectionToTag`,
     copySelectionToChoice: `${EXTENSION.id}.copySelectionToChoice`,
     openFile: `${EXTENSION.id}.openFile`,
     openSelection: `${EXTENSION.id}.openSelection`,
