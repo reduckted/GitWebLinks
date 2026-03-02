@@ -417,7 +417,8 @@ export class LinkHandler {
                 throw new Error(
                     `Unable to resolve the symbolic link '${to}' to a real path.\n${getErrorMessage(
                         ex
-                    )}`
+                    )}`,
+                    { cause: ex }
                 );
             }
         }
