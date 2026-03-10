@@ -44,7 +44,7 @@
         "debug-test": "npm run pretest"
     },
     "dependencies": {
-        "liquidjs": "10.24.0"
+        "liquidjs": "10.25.0"
     },
     "devDependencies": {
         "@eslint/js": "10.0.1",
