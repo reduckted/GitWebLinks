@@ -32,11 +32,11 @@
         "lint": "eslint . --max-warnings=0",
         "build": "run-s build:*",
         "build:esbuild": "node esbuild.mjs --production",
-        "build:tsc": "tsc --noEmit",
+        "build:tsc": "tsc -p tsconfig.extension.json --noEmit",
         "build:copy": "cpy ../shared/handlers dist",
         "pretest": "run-s pretest:clean pretest:build",
         "pretest:clean": "rimraf ./out-test",
-        "pretest:build": "tsc -p ./",
+        "pretest:build": "tsc -p tsconfig.test.json",
         "test": "vscode-test",
         "watch": "run-p watch:*",
         "watch:esbuild": "node esbuild.mjs --watch",
@@ -44,7 +44,7 @@
         "debug-test": "npm run pretest"
     },
     "dependencies": {
-        "liquidjs": "10.25.0"
+        "liquidjs": "10.25.2"
     },
     "devDependencies": {
         "@eslint/js": "10.0.1",
@@ -60,24 +60,24 @@
         "ajv": "8.18.0",
         "chai": "4.4.1",
         "cpy-cli": "7.0.0",
-        "esbuild": "0.27.3",
-        "eslint": "10.0.2",
+        "esbuild": "0.27.4",
+        "eslint": "10.1.0",
         "eslint-config-prettier": "10.1.8",
-        "eslint-plugin-jest": "29.15.0",
-        "eslint-plugin-jsdoc": "62.7.1",
+        "eslint-plugin-jest": "29.15.1",
+        "eslint-plugin-jsdoc": "62.8.1",
         "eslint-plugin-n": "17.24.0",
-        "eslint-plugin-perfectionist": "5.6.0",
+        "eslint-plugin-perfectionist": "5.7.0",
         "eslint-plugin-prettier": "5.5.5",
         "glob": "13.0.6",
         "mocha": "11.7.5",
         "npm-run-all2": "8.0.4",
         "prettier": "3.8.1",
         "rimraf": "6.1.3",
-        "sinon": "21.0.1",
+        "sinon": "21.0.3",
         "sinon-chai": "3.7.0",
         "ts-loader": "9.5.4",
-        "typescript": "5.9.3",
-        "typescript-eslint": "8.56.1"
+        "typescript": "6.0.2",
+        "typescript-eslint": "8.58.0"
     },
     "engines": {
         "vscode": "^1.64.0",
