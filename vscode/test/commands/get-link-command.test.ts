@@ -653,7 +653,7 @@ describe('GetLinkCommand', () => {
             });
 
         it(`should use the selected branch.`, async () => {
-            showQuickPick.callsFake(async (items) => (await items)[4]);
+            showQuickPick.callsFake(async (items) => (await items)[5]);
             await command.execute(file);
 
             expect(createUrl, 'branch #1').to.have.been.calledWithExactly(
@@ -668,7 +668,7 @@ describe('GetLinkCommand', () => {
                 }
             );
 
-            showQuickPick.callsFake(async (items) => (await items)[5]);
+            showQuickPick.callsFake(async (items) => (await items)[6]);
             await command.execute(file);
 
             expect(createUrl, 'branch #2').to.have.been.calledWithExactly(
@@ -683,7 +683,7 @@ describe('GetLinkCommand', () => {
                 }
             );
 
-            showQuickPick.callsFake(async (items) => (await items)[6]);
+            showQuickPick.callsFake(async (items) => (await items)[7]);
             await command.execute(file);
 
             expect(createUrl, 'branch #3').to.have.been.calledWithExactly(
@@ -700,7 +700,7 @@ describe('GetLinkCommand', () => {
         });
 
         it(`should use the selected commit.`, async () => {
-            showQuickPick.callsFake(async (items) => (await items)[8]);
+            showQuickPick.callsFake(async (items) => (await items)[10]);
             await command.execute(file);
 
             expect(createUrl, 'commit #1').to.have.been.calledWithExactly(
@@ -710,7 +710,7 @@ describe('GetLinkCommand', () => {
                 { target: { ref: commits[0], type: 'commit' } }
             );
 
-            showQuickPick.callsFake(async (items) => (await items)[9]);
+            showQuickPick.callsFake(async (items) => (await items)[11]);
             await command.execute(file);
 
             expect(createUrl, 'commit #2').to.have.been.calledWithExactly(
@@ -720,7 +720,7 @@ describe('GetLinkCommand', () => {
                 { target: { ref: commits[1], type: 'commit' } }
             );
 
-            showQuickPick.callsFake(async (items) => (await items)[10]);
+            showQuickPick.callsFake(async (items) => (await items)[12]);
             await command.execute(file);
 
             expect(createUrl, 'commit #3').to.have.been.calledWithExactly(
@@ -783,6 +783,6 @@ describe('GetLinkCommand', () => {
     }
 
     function getLinkTypes(): (LinkType | undefined)[] {
-        return ['commit', 'branch', 'defaultBranch', undefined];
+        return ['commit', 'branch', 'defaultBranch', 'tag', undefined];
     }
 });

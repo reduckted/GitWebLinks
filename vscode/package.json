@@ -120,6 +120,11 @@
                 "category": "Git Web Links"
             },
             {
+                "command": "gitweblinks.copySelectionToTag",
+                "title": "Copy Link to Selection (at current tag)",
+                "category": "Git Web Links"
+            },
+            {
                 "command": "gitweblinks.copySelectionToChoice",
                 "title": "Copy Link to Selection (choose type)",
                 "category": "Git Web Links"
@@ -194,12 +199,14 @@
                     "enum": [
                         "defaultBranch",
                         "commit",
-                        "branch"
+                        "branch",
+                        "tag"
                     ],
                     "enumDescriptions": [
                         "Create a link to the default branch.",
                         "Create a link to the current commit.",
-                        "Create a link to the current branch."
+                        "Create a link to the current branch.",
+                        "Create a link to the current tag."
                     ],
                     "default": "commit"
                 },

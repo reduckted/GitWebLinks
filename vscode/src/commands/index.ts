@@ -126,6 +126,20 @@ export function registerGetLinkCommands(
         )
     );
 
+    subscriptions.push(
+        registerGetLinkCommand(
+            COMMANDS.copySelectionToTag,
+            repositoryFinder,
+            handlerProvider,
+            git,
+            {
+                linkType: 'tag',
+                includeSelection: true,
+                action: 'copy'
+            }
+        )
+    );
+
     // And add a command where you can choose what to generate the link to.
     subscriptions.push(
         registerGetLinkCommand(
