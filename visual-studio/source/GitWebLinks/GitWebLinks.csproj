@@ -74,6 +74,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)..\..\build\PublishToMarketplace.targets" />
-
 </Project>
