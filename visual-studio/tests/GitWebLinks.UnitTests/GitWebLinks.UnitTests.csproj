@@ -17,18 +17,10 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="xunit.v3" />
-        <PackageReference Include="xunit.v3.runner.msbuild">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\source\GitWebLinks\GitWebLinks.csproj" />
     </ItemGroup>
-
-    <Target Name="Test">
-        <xunit Assemblies="$(TargetPath)" />
-    </Target>
 
 </Project>

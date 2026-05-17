@@ -37,9 +37,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v3
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
 
       - name: Publish
-        working-directory: ./visual-studio
-        run: msbuild source/GitWebLinks/GitWebLinks.csproj /t:PublishToMarketplace /Restore /v:Minimal /p:PersonalAccessToken=${{ secrets.PUBLISHER_TOKEN }}
+        working-directory: ./visual-studio/source/GitWebLinks
+        run: dotnet msbuild -target:PublishToMarketplace -property:BuildBeforePublish=true -property:PersonalAccessToken=${{ secrets.PUBLISHER_TOKEN }}

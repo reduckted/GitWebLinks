@@ -60,13 +60,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v3
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
 
       - name: Build
         working-directory: ./visual-studio
-        run: msbuild /t:Rebuild /Restore /v:Minimal
+        run: dotnet build
 
       - name: Test
         working-directory: ./visual-studio
-        run: msbuild tests/GitWebLinks.UnitTests /t:Test /v:Minimal
+        run: dotnet test
