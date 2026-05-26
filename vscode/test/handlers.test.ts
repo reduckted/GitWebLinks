@@ -32,6 +32,7 @@ import { Directory, getGitService, markAsSlow, setupRemote, setupRepository } fr
 const TEST_FILE_NAME: string = 'src/file.txt';
 const TEST_FILE_NAME_WITH_SPACES: string = 'src/path spaces/file spaces.txt';
 const TEST_BRANCH_NAME: string = 'feature/test';
+const TEST_TAG_NAME: string = 'v1.2.3';
 
 let definitions: HandlerWithTests[];
 
@@ -125,6 +126,17 @@ describe('Link handlers', function () {
                     await runUrlTest('commit', { target: { preset: 'commit' } });
                 });
 
+                if (definition.supportsTags) {
+                    it('tag', async () => {
+                        await runUrlTest('tag', {
+                            target: {
+                                ref: { abbreviated: TEST_TAG_NAME, symbolic: TEST_TAG_NAME },
+                                type: 'tag'
+                            }
+                        });
+                    });
+                }
+
                 it('default branch', async () => {
                     await runTest(
                         {
@@ -193,7 +205,13 @@ describe('Link handlers', function () {
                     name: UrlTestName,
                     options: TestOptions = {}
                 ): Promise<void> {
-                    await runTest(definition.tests.createUrl[name], options);
+                    if (definition.tests.createUrl[name]) {
+                        await runTest(definition.tests.createUrl[name], options);
+                    } else {
+                        throw new Error(
+                            `Test '${name}' is not defined for handler '${definition.name}'.`
+                        );
+                    }
                 }
 
                 async function runSelectionTest<T extends SelectionTestName>(
@@ -295,6 +313,17 @@ describe('Link handlers', function () {
                     await runUrlTest('commit', { target: { preset: 'commit' } });
                 });
 
+                if (definition.supportsTags) {
+                    it('tag', async () => {
+                        await runUrlTest('tag', {
+                            target: {
+                                ref: { abbreviated: TEST_TAG_NAME, symbolic: TEST_TAG_NAME },
+                                type: 'tag'
+                            }
+                        });
+                    });
+                }
+
                 definition.tests.createUrl.misc?.forEach((test) => {
                     it(test.name, async () => {
                         await runTest(
@@ -337,7 +366,13 @@ describe('Link handlers', function () {
                     name: UrlTestName,
                     options: ReverseTestOptions = {}
                 ): Promise<void> {
-                    await runTest(definition.tests.createUrl[name], options);
+                    if (definition.tests.createUrl[name]) {
+                        await runTest(definition.tests.createUrl[name], options);
+                    } else {
+                        throw new Error(
+                            `Test '${name}' is not defined for handler '${definition.name}'.`
+                        );
+                    }
                 }
 
                 async function runSelectionTest<T extends SelectionTestName>(

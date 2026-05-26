@@ -99,28 +99,35 @@ public class LinkTargetLoader : ILinkTargetLoader {
     }
 
 
-    public async Task<IReadOnlyList<LinkTargetListItem>> LoadBranchesAndCommitsAsync() {
+    public async Task<IReadOnlyList<LinkTargetListItem>> LoadRefsAsync() {
         try {
-            IReadOnlyList<string> lines;
+            IReadOnlyList<string>[] lines;
             List<LinkTargetListItem> branches;
             List<LinkTargetListItem> commits;
+            List<LinkTargetListItem> tags;
             bool useShortHashes;
 
 
-            lines = await _git.ExecuteAsync(
-                _repositoryRoot,
-                "branch",
-                "--list",
-                "--no-color",
-                "--format",
-                "\"%(refname:short) %(refname) %(objectname:short) %(objectname)\""
+            lines = await Task.WhenAll(
+                _git.ExecuteAsync(
+                    _repositoryRoot,
+                    "branch",
+                    "--list",
+                    "--no-color",
+                    "--format",
+                    "\"%(refname:short) %(refname) %(objectname:short) %(objectname)\""
+                ),
+                _handler.SupportsTags ?
+                    _git.ExecuteAsync(_repositoryRoot, "tag", "--points-at", "HEAD") :
+                    Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>())
             );
 
             branches = new List<LinkTargetListItem>();
             commits = new List<LinkTargetListItem>();
+            tags = new List<LinkTargetListItem>();
             useShortHashes = await _settings.GetUseShortHashesAsync();
 
-            foreach (string line in lines.Where((x) => x.Length > 0)) {
+            foreach (string line in lines[0].Where((x) => x.Length > 0)) {
                 string[] parts;
 
 
@@ -143,10 +150,21 @@ public class LinkTargetLoader : ILinkTargetLoader {
                 );
             }
 
+            foreach (string line in lines[1].Where((x) => x.Length > 0)) {
+                tags.Add(
+                    new LinkTargetListItem(
+                        LinkTargetListItemKind.Tag,
+                        line,
+                        new LinkTargetRef(new RefInfo(line, line), RefType.Tag)
+                    )
+                );
+            }
+
             branches.Sort((x, y) => string.Compare(x.Name, y.Name, true));
             commits.Sort((x, y) => string.Compare(x.Name, y.Name, true));
+            tags.Sort((x, y) => string.Compare(x.Name, y.Name, true));
 
-            return branches.Concat(commits).ToList();
+            return branches.Concat(commits).Concat(tags).ToList();
 
         } catch (GitCommandException ex) {
             await _logger.LogAsync($"Error while finding branch and commit link targets: {ex}");

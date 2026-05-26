@@ -3,6 +3,7 @@
     "name": "GitHub Enterprise",
     "private": "gitHubEnterprise",
     "branchRef": "abbreviated",
+    "supportsTags": true,
     "url": "{{ base }}/{{ repository }}/blob/{{ ref | encode_uri }}/{{ file | encode_uri_component_segments }}",
     "query": [{ "pattern": "\\.(md|markdown)$", "key": "plain", "value": "1" }],
     "selection": "#L{{ startLine }}{% if startLine != endLine %}-L{{ endLine }}{% endif %}",
@@ -55,6 +56,10 @@
             "commit": {
                 "remote": "https://local-github.server:8080/context/foo/bar.git",
                 "result": "https://local-github.server:8080/context/foo/bar/blob/{{ commit }}/src/file.txt"
+            },
+            "tag": {
+                "remote": "https://local-github.server:8080/context/foo/bar.git",
+                "result": "https://local-github.server:8080/context/foo/bar/blob/v1.2.3/src/file.txt"
             },
             "misc": [
                 {

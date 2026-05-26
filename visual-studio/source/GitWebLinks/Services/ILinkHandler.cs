@@ -9,6 +9,9 @@ public interface ILinkHandler {
     string Name { get; }
 
 
+    bool SupportsTags { get; }
+
+
     Task<CreateUrlResult> CreateUrlAsync(Repository repository, string remoteUrl, FileInfo file, LinkOptions options);
 
 

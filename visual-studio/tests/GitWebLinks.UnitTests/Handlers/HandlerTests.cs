@@ -45,7 +45,10 @@ public static class HandlerTests {
         public async Task Branch() {
             await RunUrlTestAsync(
                 Definition.Tests.CreateUrl.Branch,
-                new TestOptions { Type = LinkType.CurrentBranch, Branch = TestBranchName }
+                new TestOptions {
+                    Target = new LinkTargetPreset(LinkType.CurrentBranch),
+                    Branch = TestBranchName
+                }
             );
         }
 
@@ -54,7 +57,22 @@ public static class HandlerTests {
         public async Task Commit() {
             await RunUrlTestAsync(
                 Definition.Tests.CreateUrl.Commit,
-                new TestOptions { Type = LinkType.Commit }
+                new TestOptions {
+                    Target = new LinkTargetPreset(LinkType.Commit)
+                }
+            );
+        }
+
+
+        [HandlerFact(WhenExists = nameof(UrlTests.Tag))]
+        public async Task Tag() {
+            Assert.NotNull(Definition.Tests.CreateUrl.Tag);
+
+            await RunUrlTestAsync(
+                Definition.Tests.CreateUrl.Tag,
+                new TestOptions {
+                    Target = new LinkTargetRef(new RefInfo(TestTagName, TestTagName), RefType.Tag)
+                }
             );
         }
 
@@ -66,7 +84,7 @@ public static class HandlerTests {
                 Definition.Tests.CreateUrl.Remotes.Settings,
                 Definition.Tests.CreateUrl.Remotes.Result,
                 new TestOptions {
-                    Type = LinkType.DefaultBranch,
+                    Target = new LinkTargetPreset(LinkType.DefaultBranch),
                     RemoteName = "origin",
                     // Run with a different branch to confirm that the remote's default branch is used.
                     Branch = TestBranchName
@@ -100,7 +118,7 @@ public static class HandlerTests {
                     Branch = test.Branch,
                     FileName = test.FileName,
                     Selection = selection,
-                    Type = test.LinkType
+                    Target = new LinkTargetPreset(test.LinkType ?? LinkType.CurrentBranch)
                 }
             );
         }
@@ -137,8 +155,7 @@ public static class HandlerTests {
             await RunTestAsync(
                 remote,
                 Definition.Tests.CreateUrl.Remotes.Settings,
-                Definition.Tests.CreateUrl.Remotes.Result,
-                new TestOptions()
+                Definition.Tests.CreateUrl.Remotes.Result
             );
         }
 
@@ -184,7 +201,7 @@ public static class HandlerTests {
                     repository,
                     match.RemoteUrl,
                     new FileInfo(Path.Combine(RepositoryRoot, options.FileName ?? TestFileName), options.Selection),
-                    new LinkOptions(new LinkTargetPreset(options.Type ?? LinkType.CurrentBranch))
+                    new LinkOptions(options.Target ?? new LinkTargetPreset(LinkType.CurrentBranch))
                 )
             ).Url;
 
@@ -200,7 +217,7 @@ public static class HandlerTests {
             public SelectedRange? Selection { get; set; }
 
 
-            public LinkType? Type { get; set; }
+            public ILinkTarget? Target { get; set; }
 
         }
 
@@ -251,7 +268,6 @@ public static class HandlerTests {
             await RunUrlTestAsync(
                 Definition.Tests.CreateUrl.Branch,
                 new ReverseTestOptions {
-                    Type = LinkType.CurrentBranch,
                     Branch = TestBranchName,
                     FileMayStartWithBranch = Definition.Reverse.FileMayStartWithBranch
                 }
@@ -262,10 +278,17 @@ public static class HandlerTests {
         [HandlerFact]
         public async Task Commit() {
             await RunUrlTestAsync(
-                Definition.Tests.CreateUrl.Commit,
-                new ReverseTestOptions {
-                    Type = LinkType.Commit
-                }
+                Definition.Tests.CreateUrl.Commit
+            );
+        }
+
+
+        [HandlerFact(WhenExists = nameof(UrlTests.Tag))]
+        public async Task Tag() {
+            Assert.NotNull(Definition.Tests.CreateUrl.Tag);
+
+            await RunUrlTestAsync(
+                Definition.Tests.CreateUrl.Tag
             );
         }
 
@@ -295,8 +318,7 @@ public static class HandlerTests {
                     Branch = test.Branch,
                     FileMayStartWithBranch = Definition.Reverse.FileMayStartWithBranch,
                     FileName = test.FileName,
-                    Selection = selection,
-                    Type = test.LinkType
+                    Selection = selection
                 }
             );
         }
@@ -392,9 +414,6 @@ public static class HandlerTests {
             public PartialSelectedRange? Selection { get; set; }
 
 
-            public LinkType? Type { get; set; }
-
-
             public bool FileMayStartWithBranch { get; set; }
 
         }
@@ -427,6 +446,7 @@ public static class HandlerTests {
         protected const string TestFileName = "src/file.txt";
         protected const string TestFileNameWithSpaces = "src/path spaces/file spaces.txt";
         protected const string TestBranchName = "feature/test";
+        protected const string TestTagName = "v1.2.3";
 
 
         private readonly ISettings _settings;

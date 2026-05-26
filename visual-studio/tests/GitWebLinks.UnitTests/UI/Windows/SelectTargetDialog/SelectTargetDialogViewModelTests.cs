@@ -85,7 +85,7 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
 
         await loader.Received(1).LoadPresetsAsync();
         await loader.Received(1).PopulatePresetDescriptionsAsync(Arg.Any<IEnumerable<LinkTargetListItem>>());
-        await loader.Received(1).LoadBranchesAndCommitsAsync();
+        await loader.Received(1).LoadRefsAsync();
         Assert.Equal(3, loader.ReceivedCalls().Count());
     }
 
@@ -243,7 +243,7 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
             }
         );
 
-        loader.LoadBranchesAndCommitsAsync().Returns(branchesAndCommits);
+        loader.LoadRefsAsync().Returns(branchesAndCommits);
 
         return loader;
     }

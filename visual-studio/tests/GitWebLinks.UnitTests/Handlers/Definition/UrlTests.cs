@@ -17,6 +17,9 @@ public class UrlTests {
     public UrlTest Commit { get; } = new();
 
 
+    public UrlTest? Tag { get; set; }
+
+
     public SelectionTests Selection { get; } = new();
 
 }

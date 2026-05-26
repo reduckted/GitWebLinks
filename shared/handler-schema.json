@@ -177,6 +177,10 @@
                             "$ref": "#/definitions/urlTest",
                             "description": "A test for creating a link using the current commit hash.\n\nThe commit hash is made available to the template via the `commit` variable, and the file is always 'src/file.txt'."
                         },
+                        "tag": {
+                            "$ref": "#/definitions/urlTest",
+                            "description": "A test for creating a link using a tag.\n\nThe tag name is always 'v1.2.3', and the file is always 'src/file.txt'."
+                        },
                         "selection": {
                             "$ref": "#/definitions/selectionTests",
                             "description": "Tests for including the selected range in the URL."
@@ -470,6 +474,10 @@
             "type": "string",
             "enum": ["abbreviated", "symbolic"],
             "description": "The type of ref that is used for branch names."
+        },
+        "supportsTags": {
+            "type": "boolean",
+            "description": "Whether the handler supports creating links to tags."
         },
         "settingsKeys": {
             "type": "array",

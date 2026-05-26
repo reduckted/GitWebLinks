@@ -2,6 +2,7 @@ import type { Uri } from 'vscode';
 
 import type { Git } from '../../src/git';
 
+import { expect } from 'chai';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as sinon from 'sinon';
@@ -90,4 +91,13 @@ export async function tick(): Promise<void> {
  */
 export function matchUri(expected: Uri): sinon.SinonMatcher {
     return sinon.match((actual: Uri) => expected.toString() === actual.toString());
+}
+
+/**
+ * Asserts that the value is not undefined.
+ *
+ * @param value The value to test.
+ */
+export function expectToExist<T>(value: T | undefined): asserts value is T {
+    expect(value).to.not.be.undefined; // eslint-disable-line @typescript-eslint/no-unused-expressions
 }

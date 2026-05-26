@@ -4,5 +4,6 @@ namespace GitWebLinks;
 
 public enum RefType {
     Commit,
-    Branch
+    Branch,
+    Tag
 }

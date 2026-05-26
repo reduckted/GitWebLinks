@@ -151,7 +151,7 @@ public static class LinkTargetLoaderTests {
     }
 
 
-    public class LoadBranchesAndCommitsAsyncMethod : TestBase {
+    public class LoadRefsAsyncMethod : TestBase {
 
         private readonly List<Ref> _commitsInBranchOrder = [];
         private readonly List<Ref> _commitsInHashOrder = [];
@@ -168,7 +168,7 @@ public static class LinkTargetLoaderTests {
 
             loader = CreateLoader(Substitute.For<ILinkHandler>());
 
-            items = await loader.LoadBranchesAndCommitsAsync();
+            items = await loader.LoadRefsAsync();
 
             Assert.Equal(
                 new[] {
@@ -195,7 +195,7 @@ public static class LinkTargetLoaderTests {
 
             loader = CreateLoader(Substitute.For<ILinkHandler>());
 
-            items = await loader.LoadBranchesAndCommitsAsync();
+            items = await loader.LoadRefsAsync();
 
             Assert.Equal(
                 new[] {
@@ -205,6 +205,39 @@ public static class LinkTargetLoaderTests {
                     (_commitsInHashOrder[0].Symbolic, _commitsInHashOrder[0].BranchName, LinkTargetListItemKind.Commit),
                     (_commitsInHashOrder[1].Symbolic, _commitsInHashOrder[1].BranchName, LinkTargetListItemKind.Commit),
                     (_commitsInHashOrder[2].Symbolic, _commitsInHashOrder[2].BranchName, LinkTargetListItemKind.Commit)
+                },
+                items.Select((x) => (x.Name, x.Description, x.Kind)).ToArray()
+            );
+        }
+
+
+        [Fact]
+        public async Task IncludesTagsWhenHandlerSupportsTags() {
+            LinkTargetLoader loader;
+            IReadOnlyList<LinkTargetListItem> items;
+            ILinkHandler handler;
+
+
+            Settings.GetUseShortHashesAsync().Returns(false);
+            await SetupRepositoryAsync();
+
+            handler = Substitute.For<ILinkHandler>();
+            handler.SupportsTags.Returns(true);
+
+            loader = CreateLoader(handler);
+
+            items = await loader.LoadRefsAsync();
+
+            Assert.Equal(
+                new[] {
+                    ("first", _commitsInBranchOrder[1].Symbolic, LinkTargetListItemKind.Branch),
+                    ("master", _commitsInBranchOrder[0].Symbolic, LinkTargetListItemKind.Branch),
+                    ("second", _commitsInBranchOrder[2].Symbolic, LinkTargetListItemKind.Branch),
+                    (_commitsInHashOrder[0].Symbolic, _commitsInHashOrder[0].BranchName, LinkTargetListItemKind.Commit),
+                    (_commitsInHashOrder[1].Symbolic, _commitsInHashOrder[1].BranchName, LinkTargetListItemKind.Commit),
+                    (_commitsInHashOrder[2].Symbolic, _commitsInHashOrder[2].BranchName, LinkTargetListItemKind.Commit),
+                    ("v1.0.0", "", LinkTargetListItemKind.Tag),
+                    ("v2.0.0", "", LinkTargetListItemKind.Tag )
                 },
                 items.Select((x) => (x.Name, x.Description, x.Kind)).ToArray()
             );
@@ -233,6 +266,9 @@ public static class LinkTargetLoaderTests {
             await Git.ExecuteAsync(RootDirectory, "add", "*");
             await Git.ExecuteAsync(RootDirectory, "commit", "-m", "2");
             _commitsInBranchOrder.Add(await GetRefAsync("second"));
+
+            await Git.ExecuteAsync(RootDirectory, "tag", "v1.0.0");
+            await Git.ExecuteAsync(RootDirectory, "tag", "v2.0.0");
 
             _commitsInHashOrder.AddRange(_commitsInBranchOrder.OrderBy((x) => x.Abbreviated));
         }

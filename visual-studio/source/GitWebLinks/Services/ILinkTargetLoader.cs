@@ -13,6 +13,6 @@ public interface ILinkTargetLoader {
     Task PopulatePresetDescriptionsAsync(IEnumerable<LinkTargetListItem> presets);
 
 
-    Task<IReadOnlyList<LinkTargetListItem>> LoadBranchesAndCommitsAsync();
+    Task<IReadOnlyList<LinkTargetListItem>> LoadRefsAsync();
 
 }

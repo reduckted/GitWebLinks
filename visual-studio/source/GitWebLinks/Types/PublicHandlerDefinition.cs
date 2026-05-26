@@ -10,13 +10,14 @@ public class PublicHandlerDefinition : HandlerDefinition {
     public PublicHandlerDefinition(
         string name,
         BranchRefType branchRef,
+        bool supportsTags,
         IReadOnlyList<string> settingsKeys,
         IFluidTemplate url,
         IReadOnlyList<QueryModification> query,
         IFluidTemplate selection,
         ReverseSettings reverse,
         IReadOnlyList<IServer> servers
-    ) : base(name, branchRef, settingsKeys, url, query, selection, reverse) {
+    ) : base(name, branchRef, supportsTags, settingsKeys, url, query, selection, reverse) {
         Servers = servers;
     }
 

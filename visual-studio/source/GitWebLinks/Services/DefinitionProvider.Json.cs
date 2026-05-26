@@ -20,6 +20,9 @@ public static partial class DefinitionProvider {
         public BranchRefType BranchRef { get; set; }
 
 
+        public bool? SupportsTags { get; set; }
+
+
         public IReadOnlyList<string>? SettingsKeys { get; set; }
 
 

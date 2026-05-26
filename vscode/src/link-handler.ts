@@ -103,6 +103,13 @@ export class LinkHandler {
     }
 
     /**
+     * Indicates whether the handler supports creating links for tags.
+     */
+    public get supportsTags(): boolean {
+        return !!this.definition.supportsTags;
+    }
+
+    /**
      * Determines whether this handler can generate links for the given remote URL.
      *
      * @param remoteUrl The remote URL to check.
@@ -128,7 +135,7 @@ export class LinkHandler {
         options: LinkOptions
     ): Promise<CreateUrlResult> {
         let address: StaticServer;
-        let type: LinkType;
+        let type: UrlData['type'];
         let ref: string;
         let url: string;
         let data: UrlData;
@@ -138,20 +145,37 @@ export class LinkHandler {
         // If a link type wasn't specified, then we'll use
         // the default type that's defined in the settings.
         if ('preset' in options.target) {
-            type = options.target.preset ?? this.settings.getDefaultLinkType();
-            ref = await this.getRef(type, repository);
+            let presetType: LinkType;
+
+            presetType = options.target.preset ?? this.settings.getDefaultLinkType();
+
+            ref = await this.getRef(presetType, repository);
+
+            // Presets are either commits or branches.
+            type = presetType === 'commit' ? 'commit' : 'branch';
         } else {
-            if (options.target.type === 'branch') {
-                type = 'branch';
-                ref =
-                    this.definition.branchRef === 'abbreviated'
+            switch (options.target.type) {
+                case 'branch':
+                    type = 'branch';
+                    ref =
+                        this.definition.branchRef === 'abbreviated'
+                            ? options.target.ref.abbreviated
+                            : options.target.ref.symbolic;
+                    break;
+
+                case 'tag':
+                    type = 'tag';
+                    // We don't differentiate between abbreviated and symbolic
+                    // refs for tags, so just use the abbreviated ref value.
+                    ref = options.target.ref.abbreviated;
+                    break;
+
+                default:
+                    type = 'commit';
+                    ref = this.settings.getUseShortHash()
                         ? options.target.ref.abbreviated
                         : options.target.ref.symbolic;
-            } else {
-                type = 'commit';
-                ref = this.settings.getUseShortHash()
-                    ? options.target.ref.abbreviated
-                    : options.target.ref.symbolic;
+                    break;
             }
         }
 
@@ -164,7 +188,7 @@ export class LinkHandler {
             ref,
             commit: await this.getRef('commit', repository),
             file: relativePath,
-            type: type === 'commit' ? 'commit' : 'branch',
+            type,
             sshUserSpecification: getSshUserSpecification(remoteUrl),
             ...file.selection
         };
@@ -572,7 +596,7 @@ interface UrlData {
     /**
      * The type of link being generated.
      */
-    readonly type: 'branch' | 'commit';
+    readonly type: 'branch' | 'commit' | 'tag';
 
     /**
      * The Git ref to generate the link to. This will be a branch name or commit hash depending on the link type.

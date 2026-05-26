@@ -62,7 +62,7 @@ public class SelectTargetDialogViewModel : ObservableObject {
         try {
             await Task.WhenAll(
                 PopulatePresetDescriptionsAsync(),
-                LoadBranchesAndCommitsAsync()
+                LoadRefsAsync()
             );
 
             ApplyFilter();
@@ -83,8 +83,8 @@ public class SelectTargetDialogViewModel : ObservableObject {
     }
 
 
-    private async Task LoadBranchesAndCommitsAsync() {
-        _allTargets = _presets.Concat(await _loader.LoadBranchesAndCommitsAsync()).ToList();
+    private async Task LoadRefsAsync() {
+        _allTargets = _presets.Concat(await _loader.LoadRefsAsync()).ToList();
         ApplyFilter();
     }
 

@@ -66,6 +66,7 @@ public static partial class DefinitionProvider {
             return new PrivateHandlerDefinition(
                 json.Name,
                 json.BranchRef,
+                json.SupportsTags ?? false,
                 json.SettingsKeys ?? Array.Empty<string>(),
                 parser.Parse(json.Url),
                 json.Query is not null ? ParseQueryModifications(json.Query) : Array.Empty<QueryModification>(),
@@ -78,6 +79,7 @@ public static partial class DefinitionProvider {
             return new PublicHandlerDefinition(
                 json.Name,
                 json.BranchRef,
+                json.SupportsTags ?? false,
                 json.SettingsKeys ?? Array.Empty<string>(),
                 parser.Parse(json.Url),
                 json.Query is not null ? ParseQueryModifications(json.Query) : Array.Empty<QueryModification>(),
