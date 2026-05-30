@@ -49,6 +49,9 @@ public class Git {
                 StandardErrorEncoding = Encoding.UTF8
             };
 
+            info.Environment["LANG"] = "C.UTF-8";
+            info.Environment["LC_ALL"] = "C.UTF-8";
+
             output = new List<string>();
             errors = new List<string>();
 

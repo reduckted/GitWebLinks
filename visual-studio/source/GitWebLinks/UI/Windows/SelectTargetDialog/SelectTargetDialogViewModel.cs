@@ -20,8 +20,7 @@ public class SelectTargetDialogViewModel : ObservableObject {
 
     private readonly ILinkTargetLoader _loader;
     private readonly IPatternMatcherFactory _patternMatcherFactory;
-    private readonly IEnumerable<LinkTargetListItem> _presets;
-    private List<LinkTargetListItem> _allTargets;
+    private readonly List<LinkTargetListItem> _allTargets;
     private List<LinkTargetListItem> _filteredTargets;
     private LinkTargetListItem? _selectedTarget;
     private bool _isLoading;
@@ -34,23 +33,21 @@ public class SelectTargetDialogViewModel : ObservableObject {
         IPatternMatcherFactory patternMatcherFactory,
         JoinableTaskFactory joinableTaskFactory
     ) {
-        return new SelectTargetDialogViewModel(await loader.LoadPresetsAsync(), loader, patternMatcherFactory, joinableTaskFactory);
+        return new SelectTargetDialogViewModel(loader, patternMatcherFactory, joinableTaskFactory);
     }
 
 
     private SelectTargetDialogViewModel(
-        IEnumerable<LinkTargetListItem> presets,
         ILinkTargetLoader loader,
         IPatternMatcherFactory patternMatcherFactory,
         JoinableTaskFactory joinableTaskFactory
     ) {
-        _presets = presets;
         _loader = loader;
         _patternMatcherFactory = patternMatcherFactory;
         _isLoading = true;
         _filterText = "";
 
-        _allTargets = _presets.ToList();
+        _allTargets = new List<LinkTargetListItem>();
         _filteredTargets = _allTargets.ToList();
         _selectedTarget = _filteredTargets.FirstOrDefault();
 
@@ -60,11 +57,7 @@ public class SelectTargetDialogViewModel : ObservableObject {
 
     public async Task OnLoadedAsync() {
         try {
-            await Task.WhenAll(
-                PopulatePresetDescriptionsAsync(),
-                LoadRefsAsync()
-            );
-
+            _allTargets.AddRange(await _loader.LoadAsync());
             ApplyFilter();
 
         } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
@@ -74,18 +67,6 @@ public class SelectTargetDialogViewModel : ObservableObject {
         }
 
         IsLoading = false;
-    }
-
-
-    private async Task PopulatePresetDescriptionsAsync() {
-        await _loader.PopulatePresetDescriptionsAsync(_presets);
-        ApplyFilter();
-    }
-
-
-    private async Task LoadRefsAsync() {
-        _allTargets = _presets.Concat(await _loader.LoadRefsAsync()).ToList();
-        ApplyFilter();
     }
 
 
@@ -115,7 +96,9 @@ public class SelectTargetDialogViewModel : ObservableObject {
     }
 
 
-    public Visibility NoTargetsVisibility => Targets.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility NoTargetsVisibility => IsLoading ?
+        Visibility.Collapsed :
+        Targets.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
 
     public LinkTargetListItem? SelectedTarget {

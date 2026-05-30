@@ -305,16 +305,22 @@ export class GetLinkCommand {
         ]);
 
         defaultType = this.settings.getDefaultLinkType();
+        items = [];
 
-        items = [
-            {
+        // Omit the current branch as a preset target
+        // if the current commit is a detached HEAD.
+        if (targets[0] !== 'HEAD') {
+            items.push({
                 item: {
                     label: '$(git-branch) Current branch',
                     description: targets[0],
                     target: { preset: 'branch' }
                 },
                 default: defaultType === 'branch'
-            },
+            });
+        }
+
+        items.push(
             {
                 item: {
                     label: '$(git-commit) Current commit',
@@ -331,7 +337,7 @@ export class GetLinkCommand {
                 },
                 default: defaultType === 'defaultBranch'
             }
-        ];
+        );
 
         // Sort the presets so that the default link type is at
         // the top. This will cause it to be the initial selection.
@@ -381,7 +387,7 @@ export class GetLinkCommand {
                 '--list',
                 '--no-color',
                 '--format',
-                '%(refname:short) %(refname) %(objectname:short) %(objectname)'
+                '%(refname:short)~%(refname)~%(objectname:short)~%(objectname)'
             ),
             info.handler.supportsTags
                 ? this.git.exec(info.repository.root, 'tag', '--points-at', 'HEAD')
@@ -394,13 +400,19 @@ export class GetLinkCommand {
         useShortHashes = this.settings.getUseShortHash();
 
         for (let line of branchOutput.split(/\r?\n/).filter((x) => x.length > 0)) {
-            let [branchName, branchRef, shortHash, fullHash] = line.split(' ');
+            let [branchName, branchRef, shortHash, fullHash] = line.split('~');
 
-            branches.push({
-                label: `$(git-branch) ${branchName}`,
-                description: useShortHashes ? shortHash : fullHash,
-                target: { ref: { abbreviated: branchName, symbolic: branchRef }, type: 'branch' }
-            });
+            // Omit the branch item for a detached HEAD, but include the commit.
+            if (!branchName.startsWith('(HEAD detached')) {
+                branches.push({
+                    label: `$(git-branch) ${branchName}`,
+                    description: useShortHashes ? shortHash : fullHash,
+                    target: {
+                        ref: { abbreviated: branchName, symbolic: branchRef },
+                        type: 'branch'
+                    }
+                });
+            }
 
             commits.push({
                 label: `$(git-commit) ${useShortHashes ? shortHash : fullHash}`,

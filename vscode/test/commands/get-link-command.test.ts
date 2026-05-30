@@ -613,13 +613,20 @@ describe('GetLinkCommand', () => {
             await git.exec(root.path, 'commit', '-m', '2');
             commits.push(await getRef());
 
+            // Add another commit so that we can checkout the
+            // previous commit and end up in a detached HEAD state.
+            await fs.writeFile(path.join(root.path, '3'), '');
+            await git.exec(root.path, 'add', '*');
+            await git.exec(root.path, 'commit', '-m', '3');
+            commits.push(await getRef());
+
             await git.exec(root.path, 'tag', 'v1.0.0');
             await git.exec(root.path, 'tag', 'v2.0.0');
 
             expectedPresets = [
                 {
                     label: '$(git-commit) Current commit',
-                    description: commits[2].abbreviated,
+                    description: commits[3].abbreviated,
                     target: { preset: 'commit' }
                 },
                 {
@@ -653,7 +660,7 @@ describe('GetLinkCommand', () => {
                 },
                 {
                     label: '$(git-branch) second',
-                    description: commits[2].abbreviated,
+                    description: commits[3].abbreviated,
                     target: {
                         ref: { abbreviated: 'second', symbolic: 'refs/heads/second' },
                         type: 'branch'
@@ -673,9 +680,9 @@ describe('GetLinkCommand', () => {
                     target: { ref: commits[1], type: 'commit' as const }
                 },
                 {
-                    label: '$(git-commit) ' + commits[2].abbreviated,
+                    label: '$(git-commit) ' + commits[3].abbreviated,
                     description: 'second',
-                    target: { ref: commits[2], type: 'commit' as const }
+                    target: { ref: commits[3], type: 'commit' as const }
                 }
             ].sort((a, b) => a.label.localeCompare(b.label));
 
@@ -695,8 +702,6 @@ describe('GetLinkCommand', () => {
                     }
                 }
             ];
-
-            commits.sort((x, y) => x.abbreviated.localeCompare(y.abbreviated));
         });
 
         beforeEach(() => {
@@ -768,6 +773,51 @@ describe('GetLinkCommand', () => {
             ]);
         });
 
+        it('should omit detached HEAD from list of branches.', async () => {
+            await git.exec(root.path, 'checkout', commits[2].symbolic);
+
+            try {
+                sinon.stub(Settings.prototype, 'getUseShortHash').returns(true);
+                sinon.stub(Settings.prototype, 'getDefaultBranch').returns('master');
+
+                expectToExist(selectedHandler);
+                sinon.stub(selectedHandler.handler, 'supportsTags').get(() => true);
+
+                showQuickPick.resolves(undefined);
+
+                await command.execute(file);
+
+                expect(await showQuickPick.getCall(0).args[0]).to.deep.equal([
+                    {
+                        label: '$(git-commit) Current commit',
+                        description: commits[2].abbreviated,
+                        target: { preset: 'commit' }
+                    },
+                    {
+                        label: '$(git-branch) Default branch',
+                        description: 'master',
+                        target: { preset: 'defaultBranch' }
+                    },
+                    { label: 'Branches', kind: QuickPickItemKind.Separator },
+                    // The expected branches don't change. The detached HEAD would be listed
+                    // by `git branch`, but it should be omitted from the quick pick items.
+                    ...expectedBranches,
+                    { label: 'Commits', kind: QuickPickItemKind.Separator },
+                    // The commit for the detached HEAD should be included.
+                    ...[
+                        ...expectedCommits,
+                        {
+                            label: '$(git-commit) ' + commits[2].abbreviated,
+                            description: '(HEAD detached at ' + commits[2].abbreviated + ')',
+                            target: { ref: commits[2], type: 'commit' as const }
+                        }
+                    ].sort((a, b) => a.label.localeCompare(b.label))
+                ]);
+            } finally {
+                await git.exec(root.path, 'checkout', '-');
+            }
+        });
+
         getLinkTypes()
             .filter((x): x is LinkType => x !== undefined)
             .forEach((type) => {
@@ -795,12 +845,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                {
-                    target: {
-                        ref: { abbreviated: 'first', symbolic: 'refs/heads/first' },
-                        type: 'branch'
-                    }
-                }
+                { target: expectedBranches[0].target }
             );
 
             showQuickPick.callsFake(async (items) => (await items)[5]);
@@ -810,12 +855,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                {
-                    target: {
-                        ref: { abbreviated: 'master', symbolic: 'refs/heads/master' },
-                        type: 'branch'
-                    }
-                }
+                { target: expectedBranches[1].target }
             );
 
             showQuickPick.callsFake(async (items) => (await items)[6]);
@@ -825,12 +865,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                {
-                    target: {
-                        ref: { abbreviated: 'second', symbolic: 'refs/heads/second' },
-                        type: 'branch'
-                    }
-                }
+                { target: expectedBranches[2].target }
             );
         });
 
@@ -842,7 +877,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                { target: { ref: commits[0], type: 'commit' } }
+                { target: expectedCommits[0].target }
             );
 
             showQuickPick.callsFake(async (items) => (await items)[9]);
@@ -852,7 +887,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                { target: { ref: commits[1], type: 'commit' } }
+                { target: expectedCommits[1].target }
             );
 
             showQuickPick.callsFake(async (items) => (await items)[10]);
@@ -862,7 +897,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                { target: { ref: commits[2], type: 'commit' } }
+                { target: expectedCommits[2].target }
             );
         });
 

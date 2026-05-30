@@ -9,17 +9,22 @@ namespace GitWebLinks;
 
 public class LinkTargetListItem : ObservableObject {
 
-    private string _description;
-    private ImageMoniker _icon;
     private ImmutableArray<Span> _nameHighlightSpans;
     private ImmutableArray<Span> _descriptionHighlightSpans;
 
 
-    public LinkTargetListItem(LinkTargetListItemKind kind, string name, ILinkTarget target) {
+    public LinkTargetListItem(
+        LinkTargetListItemKind kind,
+        string name,
+        string description,
+        ImageMoniker icon,
+        ILinkTarget target
+    ) {
         Kind = kind;
         Name = name;
+        Description = description;
+        Icon = icon;
         Target = target;
-        _description = "";
         _nameHighlightSpans = ImmutableArray<Span>.Empty;
         _descriptionHighlightSpans = ImmutableArray<Span>.Empty;
     }
@@ -34,16 +39,10 @@ public class LinkTargetListItem : ObservableObject {
     public ILinkTarget Target { get; }
 
 
-    public string Description {
-        get => _description;
-        set => SetProperty(ref _description, value);
-    }
+    public string Description { get; }
 
 
-    public ImageMoniker Icon {
-        get => _icon;
-        set => SetProperty(ref _icon, value);
-    }
+    public ImageMoniker Icon { get; }
 
 
     public ImmutableArray<Span> NameHighlightSpans {

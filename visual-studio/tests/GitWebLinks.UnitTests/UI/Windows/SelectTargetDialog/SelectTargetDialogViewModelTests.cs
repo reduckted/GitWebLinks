@@ -1,3 +1,4 @@
+using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.PatternMatching;
 using Microsoft.VisualStudio.Threading;
@@ -9,58 +10,56 @@ namespace GitWebLinks;
 
 public sealed class SelectTargetDialogViewModelTests : IDisposable {
 
-    private readonly JoinableTaskContext _joinableTaskContext = new();
+    private readonly JoinableTaskContext _joinableTaskContext;
+    private readonly ILinkTargetLoader _loader;
 
 
-    [Fact]
-    public async Task IsInitializedWithPresets() {
-        SelectTargetDialogViewModel viewModel;
-        ILinkTargetLoader loader;
+    public SelectTargetDialogViewModelTests() {
+        _joinableTaskContext = new JoinableTaskContext();
 
-
-        loader = CreateLoader(
+        _loader = CreateLoader(
             [
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>())
-            ],
-            [],
-            []
+                new LinkTargetListItem(
+                LinkTargetListItemKind.Preset,
+                "one",
+                "alpha",
+                KnownMonikers.Abbreviation,
+                Substitute.For<ILinkTarget>()
+            ),
+            new LinkTargetListItem(
+                LinkTargetListItemKind.Preset,
+                "two",
+                "beta",
+                KnownMonikers.Abbreviation,
+                Substitute.For<ILinkTarget>()
+            ),
+            new LinkTargetListItem(
+                LinkTargetListItemKind.Preset,
+                "three",
+                "gamma",
+                KnownMonikers.Abbreviation,
+                Substitute.For<ILinkTarget>()
+            ),
+            new LinkTargetListItem(
+                LinkTargetListItemKind.Preset,
+                "four",
+                "delta",
+                KnownMonikers.Abbreviation,
+                Substitute.For <ILinkTarget>()
+            )
+            ]
         );
 
-        viewModel = await SelectTargetDialogViewModel.CreateAsync(
-            loader,
-            Substitute.For<IPatternMatcherFactory>(),
-            new JoinableTaskFactory(_joinableTaskContext)
-        );
-
-        Assert.Equal(["one", "two", "three"], viewModel.Targets.Select((x) => x.Name));
-
-        await loader.Received(1).LoadPresetsAsync();
-        Assert.Single(loader.ReceivedCalls());
     }
 
 
     [Fact]
-    public async Task LoadsPresetDescriptionsAndBranchesAndCommitsOnLoad() {
+    public async Task LoadsItemsOnLoad() {
         SelectTargetDialogViewModel viewModel;
-        ILinkTargetLoader loader;
 
-
-        loader = CreateLoader(
-            [
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>())
-            ],
-            ["1", "2"],
-            [
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>()) { Description = "3" },
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Substitute.For <ILinkTarget>()) { Description = "4" }
-            ]
-        );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
-            loader,
+            _loader,
             Substitute.For<IPatternMatcherFactory>(),
             new JoinableTaskFactory(_joinableTaskContext)
         );
@@ -75,41 +74,25 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
 
         Assert.Equal(
             [
-                ("one", "1"),
-                ("two", "2"),
-                ("three", "3"),
-                ("four", "4")
+                ("one", "alpha"),
+                ("two", "beta"),
+                ("three", "gamma"),
+                ("four", "delta")
             ],
             viewModel.Targets.Select((x) => (x.Name, x.Description))
         );
 
-        await loader.Received(1).LoadPresetsAsync();
-        await loader.Received(1).PopulatePresetDescriptionsAsync(Arg.Any<IEnumerable<LinkTargetListItem>>());
-        await loader.Received(1).LoadRefsAsync();
-        Assert.Equal(3, loader.ReceivedCalls().Count());
+        await _loader.Received(1).LoadAsync();
     }
 
 
     [Fact]
     public async Task CanFilterTargetsByName() {
         SelectTargetDialogViewModel viewModel;
-        ILinkTargetLoader loader;
 
-
-        loader = CreateLoader(
-        [
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>())
-            ],
-            ["1", "2"],
-            [
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>()) { Description = "3" },
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Substitute.For<ILinkTarget>()) { Description = "4" }
-            ]
-        );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
-            loader,
+            _loader,
             CreateMatcherFactory(),
             new JoinableTaskFactory(_joinableTaskContext)
         );
@@ -119,10 +102,10 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         Assert.Equal(Visibility.Collapsed, viewModel.NoTargetsVisibility);
         Assert.Equal(["one", "two", "three", "four"], viewModel.Targets.Select((x) => x.Name));
 
-        viewModel.FilterText = "t";
+        viewModel.FilterText = "o";
 
         Assert.Equal(Visibility.Collapsed, viewModel.NoTargetsVisibility);
-        Assert.Equal(["two", "three"], viewModel.Targets.Select((x) => x.Name));
+        Assert.Equal(["one", "two", "four"], viewModel.Targets.Select((x) => x.Name));
 
         viewModel.FilterText = "x";
 
@@ -139,23 +122,10 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
     [Fact]
     public async Task CanFilterTargetsByDescription() {
         SelectTargetDialogViewModel viewModel;
-        ILinkTargetLoader loader;
 
-
-        loader = CreateLoader(
-            [
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "1", Substitute.For<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "2", Substitute.For<ILinkTarget>())
-            ],
-            ["first", "second"],
-            [
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "3", Substitute.For<ILinkTarget>()) { Description = "third" },
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "4", Substitute.For<ILinkTarget>()) { Description = "fourth" }
-            ]
-        );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
-            loader,
+            _loader,
             CreateMatcherFactory(),
             new JoinableTaskFactory(_joinableTaskContext)
         );
@@ -163,12 +133,12 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         await viewModel.OnLoadedAsync();
 
         Assert.Equal(Visibility.Collapsed, viewModel.NoTargetsVisibility);
-        Assert.Equal(["first", "second", "third", "fourth"], viewModel.Targets.Select((x) => x.Description));
+        Assert.Equal(["alpha", "beta", "gamma", "delta"], viewModel.Targets.Select((x) => x.Description));
 
-        viewModel.FilterText = "t";
+        viewModel.FilterText = "l";
 
         Assert.Equal(Visibility.Collapsed, viewModel.NoTargetsVisibility);
-        Assert.Equal(["first", "third", "fourth"], viewModel.Targets.Select((x) => x.Description));
+        Assert.Equal(["alpha", "delta"], viewModel.Targets.Select((x) => x.Description));
 
         viewModel.FilterText = "x";
 
@@ -178,72 +148,38 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         viewModel.FilterText = "";
 
         Assert.Equal(Visibility.Collapsed, viewModel.NoTargetsVisibility);
-        Assert.Equal(["first", "second", "third", "fourth"], viewModel.Targets.Select((x) => x.Description));
+        Assert.Equal(["alpha", "beta", "gamma", "delta"], viewModel.Targets.Select((x) => x.Description));
     }
 
 
     [Fact]
     public async Task AppliesFilterAfterLoading() {
         SelectTargetDialogViewModel viewModel;
-        ILinkTargetLoader loader;
 
-
-        loader = CreateLoader(
-            [
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "one", Substitute.For<ILinkTarget>()),
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "two", Substitute.For<ILinkTarget>())
-            ],
-            ["1", "2"],
-            [
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "three", Substitute.For<ILinkTarget>()) { Description = "3" },
-                new LinkTargetListItem(LinkTargetListItemKind.Preset, "four", Substitute.For<ILinkTarget>()) { Description = "4" }
-            ]
-        );
 
         viewModel = await SelectTargetDialogViewModel.CreateAsync(
-            loader,
+            _loader,
             CreateMatcherFactory(),
             new JoinableTaskFactory(_joinableTaskContext)
         );
 
-        viewModel.FilterText = "t";
-        Assert.Equal(["two"], viewModel.Targets.Select((x) => x.Name));
+        viewModel.FilterText = "o";
+        Assert.Empty(viewModel.Targets);
 
         await viewModel.OnLoadedAsync();
-        Assert.Equal(["two", "three"], viewModel.Targets.Select((x) => x.Name));
+        Assert.Equal(["one", "two", "four"], viewModel.Targets.Select((x) => x.Name));
 
         viewModel.FilterText = "";
         Assert.Equal(["one", "two", "three", "four"], viewModel.Targets.Select((x) => x.Name));
     }
 
 
-    private ILinkTargetLoader CreateLoader(
-        IReadOnlyList<LinkTargetListItem> presets,
-        IReadOnlyList<string> presetDescriptions,
-        IReadOnlyList<LinkTargetListItem> branchesAndCommits
-    ) {
+    private ILinkTargetLoader CreateLoader(IReadOnlyList<LinkTargetListItem> items) {
         ILinkTargetLoader loader;
 
 
         loader = Substitute.For<ILinkTargetLoader>();
-
-        loader.LoadPresetsAsync().Returns(presets);
-
-        loader.PopulatePresetDescriptionsAsync(Arg.Any<IEnumerable<LinkTargetListItem>>()).Returns(
-            (args) => {
-                IEnumerable<LinkTargetListItem> collection;
-
-                collection = args.ArgAt<IEnumerable<LinkTargetListItem>>(0);
-
-                foreach ((LinkTargetListItem preset, string description) in collection.Zip(presetDescriptions, (preset, description) => (preset, description))) {
-                    preset.Description = description;
-                }
-
-                return Task.CompletedTask;
-            }
-        );
-
-        loader.LoadRefsAsync().Returns(branchesAndCommits);
+        loader.LoadAsync().Returns(items);
 
         return loader;
     }

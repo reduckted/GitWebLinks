@@ -191,6 +191,15 @@
                 Margin="7"
                 />
 
+            <TextBlock
+                Grid.Row="1"
+                VerticalAlignment="Top"
+                TextAlignment="Center"
+                Text="Loading link targets..."
+                Visibility="{Binding LoadingVisibility}"
+                Margin="7"
+                />
+            
             <platform:SmoothProgressBar
                 Grid.Row="1"
                 IsIndeterminate="True"

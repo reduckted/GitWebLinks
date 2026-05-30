@@ -78,7 +78,12 @@ export class Git extends Disposable {
         log('Executing git %s', args.join(' '));
 
         child = spawn(this.api.git.path, args, {
-            cwd: typeof root === 'string' ? root : root.fsPath
+            cwd: typeof root === 'string' ? root : root.fsPath,
+            env: {
+                ...process.env,
+                LANG: 'C.UTF-8',
+                LC_ALL: 'C.UTF-8'
+            }
         });
 
         let [code, stdout, stderr] = await Promise.all([
