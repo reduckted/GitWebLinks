@@ -309,7 +309,7 @@ export class GetLinkCommand {
         items = [
             {
                 item: {
-                    label: 'Current branch',
+                    label: '$(git-branch) Current branch',
                     description: targets[0],
                     target: { preset: 'branch' }
                 },
@@ -317,7 +317,7 @@ export class GetLinkCommand {
             },
             {
                 item: {
-                    label: 'Current commit',
+                    label: '$(git-commit) Current commit',
                     description: targets[1],
                     target: { preset: 'commit' }
                 },
@@ -325,7 +325,7 @@ export class GetLinkCommand {
             },
             {
                 item: {
-                    label: 'Default branch',
+                    label: '$(git-branch) Default branch',
                     description: targets[2],
                     target: { preset: 'defaultBranch' }
                 },
@@ -397,13 +397,13 @@ export class GetLinkCommand {
             let [branchName, branchRef, shortHash, fullHash] = line.split(' ');
 
             branches.push({
-                label: branchName,
+                label: `$(git-branch) ${branchName}`,
                 description: useShortHashes ? shortHash : fullHash,
                 target: { ref: { abbreviated: branchName, symbolic: branchRef }, type: 'branch' }
             });
 
             commits.push({
-                label: useShortHashes ? shortHash : fullHash,
+                label: `$(git-commit) ${useShortHashes ? shortHash : fullHash}`,
                 description: branchName,
                 target: { ref: { abbreviated: shortHash, symbolic: fullHash }, type: 'commit' }
             });
@@ -414,7 +414,7 @@ export class GetLinkCommand {
 
         for (let line of tagOutput.split(/\r?\n/).filter((x) => x.length > 0)) {
             tags.push({
-                label: `${line}`,
+                label: `$(tag) ${line}`,
                 target: {
                     ref: { abbreviated: line, symbolic: line },
                     type: 'tag'

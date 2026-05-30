@@ -147,7 +147,7 @@
                                 <imaging:CrispImage
                                     Grid.Column="0"
                                     x:Name="TargetIcon"
-                                    Moniker="{x:Static catalog:KnownMonikers.PushPin}"
+                                    Moniker="{Binding Icon}"
                                     Margin="3"
                                     VerticalAlignment="Center"
                                     />
@@ -178,16 +178,6 @@
                                     />
                             </Grid>
                         </Border>
-
-                        <DataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:LinkTargetListItemKind.Commit}">
-                                <Setter TargetName="TargetIcon" Property="Moniker" Value="{x:Static catalog:KnownMonikers.Commit}"/>
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding Kind}" Value="{x:Static local:LinkTargetListItemKind.Branch}">
-                                <Setter TargetName="TargetIcon" Property="Moniker" Value="{x:Static catalog:KnownMonikers.Branch}"/>
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

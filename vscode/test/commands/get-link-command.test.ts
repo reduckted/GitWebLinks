@@ -618,17 +618,17 @@ describe('GetLinkCommand', () => {
 
             expectedPresets = [
                 {
-                    label: 'Current commit',
+                    label: '$(git-commit) Current commit',
                     description: commits[2].abbreviated,
                     target: { preset: 'commit' }
                 },
                 {
-                    label: 'Current branch',
+                    label: '$(git-branch) Current branch',
                     description: 'second',
                     target: { preset: 'branch' }
                 },
                 {
-                    label: 'Default branch',
+                    label: '$(git-branch) Default branch',
                     description: 'master',
                     target: { preset: 'defaultBranch' }
                 }
@@ -636,7 +636,7 @@ describe('GetLinkCommand', () => {
 
             expectedBranches = [
                 {
-                    label: 'first',
+                    label: '$(git-branch) first',
                     description: commits[1].abbreviated,
                     target: {
                         ref: { abbreviated: 'first', symbolic: 'refs/heads/first' },
@@ -644,7 +644,7 @@ describe('GetLinkCommand', () => {
                     }
                 },
                 {
-                    label: 'master',
+                    label: '$(git-branch) master',
                     description: commits[0].abbreviated,
                     target: {
                         ref: { abbreviated: 'master', symbolic: 'refs/heads/master' },
@@ -652,7 +652,7 @@ describe('GetLinkCommand', () => {
                     }
                 },
                 {
-                    label: 'second',
+                    label: '$(git-branch) second',
                     description: commits[2].abbreviated,
                     target: {
                         ref: { abbreviated: 'second', symbolic: 'refs/heads/second' },
@@ -663,17 +663,17 @@ describe('GetLinkCommand', () => {
 
             expectedCommits = [
                 {
-                    label: commits[0].abbreviated,
+                    label: '$(git-commit) ' + commits[0].abbreviated,
                     description: 'master',
                     target: { ref: commits[0], type: 'commit' as const }
                 },
                 {
-                    label: commits[1].abbreviated,
+                    label: '$(git-commit) ' + commits[1].abbreviated,
                     description: 'first',
                     target: { ref: commits[1], type: 'commit' as const }
                 },
                 {
-                    label: commits[2].abbreviated,
+                    label: '$(git-commit) ' + commits[2].abbreviated,
                     description: 'second',
                     target: { ref: commits[2], type: 'commit' as const }
                 }
@@ -681,14 +681,14 @@ describe('GetLinkCommand', () => {
 
             expectedTags = [
                 {
-                    label: 'v1.0.0',
+                    label: '$(tag) v1.0.0',
                     target: {
                         ref: { abbreviated: 'v1.0.0', symbolic: 'v1.0.0' },
                         type: 'tag'
                     }
                 },
                 {
-                    label: 'v2.0.0',
+                    label: '$(tag) v2.0.0',
                     target: {
                         ref: { abbreviated: 'v2.0.0', symbolic: 'v2.0.0' },
                         type: 'tag'

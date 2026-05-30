@@ -1,5 +1,6 @@
 #nullable enable
 
+using Microsoft.VisualStudio.Imaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,14 +46,26 @@ public class LinkTargetLoader : ILinkTargetLoader {
         defaultType = await _settings.GetDefaultLinkTypeAsync();
 
         presets = new[]{
-            new LinkTargetListItem(LinkTargetListItemKind.Preset,"Current branch", new LinkTargetPreset(LinkType.CurrentBranch)),
-            new LinkTargetListItem(LinkTargetListItemKind.Preset,"Current commit", new LinkTargetPreset(LinkType.Commit)),
-            new LinkTargetListItem(LinkTargetListItemKind.Preset,"Default branch", new LinkTargetPreset(LinkType.DefaultBranch))
+            new LinkTargetListItem(
+                LinkTargetListItemKind.Preset,
+                "Current branch",
+                new LinkTargetPreset(LinkType.CurrentBranch)
+            ) { Icon = KnownMonikers.Branch },
+            new LinkTargetListItem(
+                LinkTargetListItemKind.Preset,
+                "Current commit",
+                new LinkTargetPreset(LinkType.Commit)
+            ) { Icon = KnownMonikers.Commit },
+            new LinkTargetListItem(
+                LinkTargetListItemKind.Preset,
+                "Default branch",
+                new LinkTargetPreset(LinkType.DefaultBranch)
+            ) { Icon = KnownMonikers.Branch }
         };
 
-        // Sort the default preset to the top of the list. This
-        // is done when we create the view model so that they are
-        // initially shown in the correct orderDo this first so that.
+        // Sort the default preset to the top of the list.
+        // This is done when we create the view model so that
+        // they are initially shown in the correct order.
         return presets
             .OrderByDescending((x) => ((LinkTargetPreset)x.Target).Type == defaultType)
             .ThenBy((x) => x.Name)
@@ -138,7 +151,10 @@ public class LinkTargetLoader : ILinkTargetLoader {
                         LinkTargetListItemKind.Branch,
                         parts[0],
                         new LinkTargetRef(new RefInfo(parts[0], parts[1]), RefType.Branch)
-                    ) { Description = useShortHashes ? parts[2] : parts[3] }
+                    ) {
+                        Description = useShortHashes ? parts[2] : parts[3],
+                        Icon = KnownMonikers.Branch
+                    }
                 );
 
                 commits.Add(
@@ -146,7 +162,10 @@ public class LinkTargetLoader : ILinkTargetLoader {
                         LinkTargetListItemKind.Commit,
                         useShortHashes ? parts[2] : parts[3],
                         new LinkTargetRef(new RefInfo(parts[2], parts[3]), RefType.Commit)
-                    ) { Description = parts[0] }
+                    ) {
+                        Description = parts[0],
+                        Icon = KnownMonikers.Commit
+                    }
                 );
             }
 
@@ -156,7 +175,7 @@ public class LinkTargetLoader : ILinkTargetLoader {
                         LinkTargetListItemKind.Tag,
                         line,
                         new LinkTargetRef(new RefInfo(line, line), RefType.Tag)
-                    )
+                    ) { Icon = KnownMonikers.SmartTag }
                 );
             }
 

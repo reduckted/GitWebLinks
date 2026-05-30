@@ -1,5 +1,6 @@
 #nullable enable
 
+using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Text;
 using System.Collections.Immutable;
@@ -9,6 +10,7 @@ namespace GitWebLinks;
 public class LinkTargetListItem : ObservableObject {
 
     private string _description;
+    private ImageMoniker _icon;
     private ImmutableArray<Span> _nameHighlightSpans;
     private ImmutableArray<Span> _descriptionHighlightSpans;
 
@@ -35,6 +37,12 @@ public class LinkTargetListItem : ObservableObject {
     public string Description {
         get => _description;
         set => SetProperty(ref _description, value);
+    }
+
+
+    public ImageMoniker Icon {
+        get => _icon;
+        set => SetProperty(ref _icon, value);
     }
 
 
