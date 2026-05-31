@@ -1,7 +1,4 @@
-#nullable enable
-
 using Fluid;
-using System.Collections.Generic;
 
 namespace GitWebLinks;
 

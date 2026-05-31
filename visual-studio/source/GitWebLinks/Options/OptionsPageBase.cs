@@ -1,5 +1,3 @@
-#nullable enable
-
 using Microsoft.VisualStudio.Shell;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;

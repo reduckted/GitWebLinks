@@ -1,10 +1,4 @@
-#nullable enable
-
 using Microsoft.VisualStudio.Imaging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace GitWebLinks;
 
@@ -65,7 +59,7 @@ public class LinkTargetLoader : ILinkTargetLoader {
             TryGetRefAsync(LinkType.DefaultBranch)
         );
 
-        presets = new List<LinkTargetListItem>();
+        presets = [];
 
         // Omit the current branch as a preset target
         // if the current commit is a detached HEAD.
@@ -140,12 +134,12 @@ public class LinkTargetLoader : ILinkTargetLoader {
                 ),
                 _handler.SupportsTags ?
                     _git.ExecuteAsync(_repositoryRoot, "tag", "--points-at", "HEAD") :
-                    Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>())
+                    Task.FromResult<IReadOnlyList<string>>([])
             );
 
-            branches = new List<LinkTargetListItem>();
-            commits = new List<LinkTargetListItem>();
-            tags = new List<LinkTargetListItem>();
+            branches = [];
+            commits = [];
+            tags = [];
             useShortHashes = await _settings.GetUseShortHashesAsync();
 
             foreach (string line in lines[0].Where((x) => x.Length > 0)) {
@@ -198,7 +192,7 @@ public class LinkTargetLoader : ILinkTargetLoader {
 
         } catch (GitCommandException ex) {
             await _logger.LogAsync($"Error while finding branch and commit link targets: {ex}");
-            return Array.Empty<LinkTargetListItem>();
+            return [];
         }
     }
 

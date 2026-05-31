@@ -1,11 +1,5 @@
-#nullable enable
-
 using Fluid;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace GitWebLinks;
 
@@ -15,17 +9,17 @@ public class RemoteServer {
 
 
     public RemoteServer(IServer server) {
-        _matchers = new List<Matcher> { CreateMatcher(server) };
+        _matchers = [CreateMatcher(server)];
     }
 
 
     public RemoteServer(IEnumerable<IServer> servers) {
-        _matchers = servers.Select((x) => CreateMatcher(x)).ToList();
+        _matchers = servers.Select(CreateMatcher).ToList();
     }
 
 
     public RemoteServer(Func<Task<IEnumerable<StaticServer>>> serverFactory) {
-        _matchers = new List<Matcher> { CreateLazyStaticServerMatcher(serverFactory) };
+        _matchers = [CreateLazyStaticServerMatcher(serverFactory)];
     }
 
 

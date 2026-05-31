@@ -1,7 +1,3 @@
-#nullable enable
-
-using System.Collections.Generic;
-
 namespace GitWebLinks;
 
 public static partial class DefinitionProvider {

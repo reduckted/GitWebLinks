@@ -2,6 +2,6 @@ namespace GitWebLinks;
 
 public interface ISelectionTest {
 
-    public string Result { get; }
+    string Result { get; }
 
 }

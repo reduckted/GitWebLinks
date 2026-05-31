@@ -1,9 +1,5 @@
-#nullable enable
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 
 namespace GitWebLinks;
 
@@ -18,7 +14,7 @@ public static partial class DefinitionProvider {
             token = JToken.Load(reader);
 
             if (token.Type == JTokenType.Object) {
-                return new JsonServer[] { token.ToObject<JsonServer>(serializer)! };
+                return [token.ToObject<JsonServer>(serializer)!];
             }
 
             return token.ToObject<IReadOnlyList<JsonServer>>();

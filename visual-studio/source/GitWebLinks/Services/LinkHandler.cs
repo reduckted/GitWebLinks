@@ -1,15 +1,9 @@
-#nullable enable
-
 using Fluid;
 using Microsoft.VisualStudio;
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace GitWebLinks;
@@ -246,7 +240,7 @@ public class LinkHandler : ILinkHandler {
                     defaultBranch = await GetDefaultRemoteBranchAsync(repositoryRoot, remote);
                 }
 
-                return defaultBranch!;
+                return defaultBranch;
         }
     }
 

@@ -1,9 +1,3 @@
-#nullable enable
-
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace GitWebLinks;
 
 public class LinkHandlerProvider : ILinkHandlerProvider {
@@ -66,7 +60,7 @@ public class LinkHandlerProvider : ILinkHandlerProvider {
         List<UrlInfo> output;
 
 
-        output = new List<UrlInfo>();
+        output = [];
 
         foreach (ILinkHandler handler in _handlers) {
             UrlInfo? info;

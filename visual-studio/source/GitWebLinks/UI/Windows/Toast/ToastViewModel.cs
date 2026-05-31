@@ -1,9 +1,5 @@
-#nullable enable
-
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Threading;
-using System;
-using System.Collections.Generic;
 using System.Windows;
 
 namespace GitWebLinks;

@@ -1,8 +1,3 @@
-#nullable enable
-
-using System.Collections.Generic;
-using System.Linq;
-
 namespace GitWebLinks;
 
 public class Remote {

@@ -58,7 +58,7 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         SelectTargetDialogViewModel viewModel;
 
 
-        viewModel = await SelectTargetDialogViewModel.CreateAsync(
+        viewModel = new SelectTargetDialogViewModel(
             _loader,
             Substitute.For<IPatternMatcherFactory>(),
             new JoinableTaskFactory(_joinableTaskContext)
@@ -91,7 +91,7 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         SelectTargetDialogViewModel viewModel;
 
 
-        viewModel = await SelectTargetDialogViewModel.CreateAsync(
+        viewModel = new SelectTargetDialogViewModel(
             _loader,
             CreateMatcherFactory(),
             new JoinableTaskFactory(_joinableTaskContext)
@@ -124,7 +124,7 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         SelectTargetDialogViewModel viewModel;
 
 
-        viewModel = await SelectTargetDialogViewModel.CreateAsync(
+        viewModel = new SelectTargetDialogViewModel(
             _loader,
             CreateMatcherFactory(),
             new JoinableTaskFactory(_joinableTaskContext)
@@ -157,13 +157,12 @@ public sealed class SelectTargetDialogViewModelTests : IDisposable {
         SelectTargetDialogViewModel viewModel;
 
 
-        viewModel = await SelectTargetDialogViewModel.CreateAsync(
+        viewModel = new SelectTargetDialogViewModel(
             _loader,
             CreateMatcherFactory(),
             new JoinableTaskFactory(_joinableTaskContext)
-        );
+        ) { FilterText = "o" };
 
-        viewModel.FilterText = "o";
         Assert.Empty(viewModel.Targets);
 
         await viewModel.OnLoadedAsync();

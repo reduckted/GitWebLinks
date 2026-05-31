@@ -1,5 +1,3 @@
-#nullable enable
-
 using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Text;

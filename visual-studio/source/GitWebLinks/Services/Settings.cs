@@ -1,10 +1,5 @@
-#nullable enable
-
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace GitWebLinks;
 
@@ -17,7 +12,7 @@ public class Settings : ISettings {
 
     public Settings(AsyncPackage package) {
         _generalOptions = new AsyncLazy<GeneralOptionsPage>(
-            () => package.GetDialogPageAsync<GeneralOptionsPage>(),
+            package.GetDialogPageAsync<GeneralOptionsPage>,
             joinableTaskFactory: package.JoinableTaskFactory
         );
 
@@ -75,7 +70,7 @@ public class Settings : ISettings {
             return await provider.GetServersAsync();
         }
 
-        return Array.Empty<StaticServer>();
+        return [];
     }
 
 
@@ -116,7 +111,7 @@ public class Settings : ISettings {
             _valueProvider = valueProvider;
 
             _dialogPage = new AsyncLazy<T>(
-                () => package.GetDialogPageAsync<T>(),
+                package.GetDialogPageAsync<T>,
                 joinableTaskFactory: package.JoinableTaskFactory
             );
         }

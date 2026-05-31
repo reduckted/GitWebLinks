@@ -1,6 +1,3 @@
-#nullable enable
-
-using System;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Interop;
@@ -13,7 +10,6 @@ public partial class Toast : Window {
     private static Toast? _current;
     private readonly DispatcherTimer _timer;
     private readonly Window _mainWindow;
-
 
 
     public Toast() {

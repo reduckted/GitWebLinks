@@ -1,17 +1,11 @@
-#nullable enable
-
 using Community.VisualStudio.Toolkit;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.PatternMatching;
 using Microsoft.VisualStudio.Threading;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace GitWebLinks;
@@ -28,16 +22,7 @@ public class SelectTargetDialogViewModel : ObservableObject {
     private bool? _dialogResult;
 
 
-    public static async Task<SelectTargetDialogViewModel> CreateAsync(
-        ILinkTargetLoader loader,
-        IPatternMatcherFactory patternMatcherFactory,
-        JoinableTaskFactory joinableTaskFactory
-    ) {
-        return new SelectTargetDialogViewModel(loader, patternMatcherFactory, joinableTaskFactory);
-    }
-
-
-    private SelectTargetDialogViewModel(
+    public SelectTargetDialogViewModel(
         ILinkTargetLoader loader,
         IPatternMatcherFactory patternMatcherFactory,
         JoinableTaskFactory joinableTaskFactory
@@ -47,7 +32,7 @@ public class SelectTargetDialogViewModel : ObservableObject {
         _isLoading = true;
         _filterText = "";
 
-        _allTargets = new List<LinkTargetListItem>();
+        _allTargets = [];
         _filteredTargets = _allTargets.ToList();
         _selectedTarget = _filteredTargets.FirstOrDefault();
 

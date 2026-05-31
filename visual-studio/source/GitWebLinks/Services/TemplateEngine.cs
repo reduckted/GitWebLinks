@@ -1,12 +1,7 @@
-#nullable enable
-
 using Fluid;
 using Fluid.Values;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace GitWebLinks;
 

@@ -1,13 +1,8 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace GitWebLinks;
 
@@ -52,8 +47,8 @@ public class Git {
             info.Environment["LANG"] = "C.UTF-8";
             info.Environment["LC_ALL"] = "C.UTF-8";
 
-            output = new List<string>();
-            errors = new List<string>();
+            output = [];
+            errors = [];
 
             process.StartInfo = info;
 

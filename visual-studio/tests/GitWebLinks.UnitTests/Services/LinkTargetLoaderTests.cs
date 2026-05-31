@@ -337,7 +337,7 @@ public static class LinkTargetLoaderTests {
                         LinkTargetListItemKind.Preset
                     )
                 }.Concat(GetExpectedBranchItems()).Concat(GetExpectedCommitItems()).Concat(
-                    new[] {
+                    [
                         new TargetItem(
                             "v1.0.0",
                             "",
@@ -350,7 +350,7 @@ public static class LinkTargetLoaderTests {
                             null,
                             LinkTargetListItemKind.Tag
                         )
-                    }
+                    ]
                 ),
                 items.Select((x) => new TargetItem(x.Name, x.Description, (x.Target as LinkTargetPreset)?.Type, x.Kind)).ToArray()
             );
@@ -418,9 +418,9 @@ public static class LinkTargetLoaderTests {
                     "test",
                     BranchRefType.Abbreviated,
                     supportsTags,
-                    Array.Empty<string>(),
+                    [],
                     emptyTemplate,
-                    Array.Empty<QueryModification>(),
+                    [],
                     emptyTemplate,
                     new ReverseSettings(
                         new Regex(""),
@@ -438,7 +438,7 @@ public static class LinkTargetLoaderTests {
                             null
                         )
                     ),
-                    Array.Empty<IServer>()
+                    []
                 ),
                 _settings,
                 Git

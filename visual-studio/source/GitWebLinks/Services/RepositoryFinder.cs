@@ -1,10 +1,4 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace GitWebLinks;
 
@@ -12,7 +6,7 @@ namespace GitWebLinks;
 public class RepositoryFinder : IRepositoryFinder {
 
     private static readonly HashSet<string> IgnoredDirectories = new(
-        new[] { "node_modules", "bin", "obj" },
+        ["node_modules", "bin", "obj"],
         StringComparer.OrdinalIgnoreCase
     );
 
@@ -75,7 +69,7 @@ public class RepositoryFinder : IRepositoryFinder {
             )
             .Select((entry) => entry.FullName);
 
-        descendInto = new List<string>();
+        descendInto = [];
 
         // Yield any direct child that is a repository root. Any other directories
         // can be descended into, but we'll look at all direct children first.

@@ -1,8 +1,4 @@
-#nullable enable
-
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 
@@ -33,17 +29,17 @@ public class GeneralOptionsPage : OptionsPageBase {
         _showOpenLinkMenuItem = false;
         _useShortHashes = false;
 
-        LinkTypes = new List<LinkTypeListItem> {
+        LinkTypes = [
             new (LinkType.Commit),
             new (LinkType.CurrentBranch),
             new (LinkType.DefaultBranch)
-        };
+        ];
 
-        LinkFormats = new List<LinkFormatListItem> {
+        LinkFormats = [
             new (LinkFormat.Raw),
             new (LinkFormat.Markdown),
             new (LinkFormat.MarkdownWithPreview)
-        };
+        ];
     }
 
 

@@ -1,5 +1,3 @@
-#nullable enable
-
 namespace GitWebLinks;
 
 public abstract partial class GetLinkCommandBase<T> {
