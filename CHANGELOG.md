@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.15.0 (2026-01-16)
+
+-   ⭐ GitHub Remotes: Allow tags to be selected when choosing what ref to create a link to.
+-   ⭐ VS Code: The Quick Pick for selecting the ref to create a link to now has icons.
+-   🐛 Exclude the detached HEAD from the list of branches to create a link to.
+-   🔨 Dependency updates.
+
+
 ## 2.14.1 (2026-01-16)
 
 -   🐛 Supported SSH user specifications other than "git".

@@ -59,10 +59,10 @@ $code = Get-Content -Path $codeFileName -Raw
 $code = $code -replace "public const string Version = `"[\d.]+`";", "public const string Version = `"$($new.ToString())`";"
 Set-Content -Path $codeFileName -Value $code -NoNewLine
 
-# Set the version in the assembly info.
-$assemblyInfoFileName = Join-Path -Path $root -ChildPath "visual-studio/source/GitWebLinks/Properties/AssemblyInfo.cs"
-$assemblyInfo = Get-Content -Path $assemblyInfoFileName -Raw
-$assemblyInfo = $assemblyInfo -replace "Version\(`"[\d.]+`"\)", "Version(`"$($new.ToString()).0`")"
-Set-Content -Path $assemblyInfoFileName -Value $assemblyInfo -NoNewLine
+# Set the version in the props file.
+$propsFileName = Join-Path -Path $root -ChildPath "visual-studio/Directory.Build.props"
+$props = Get-Content -Path $propsFileName -Raw
+$props = $props -replace "<Version>[\d.]+</Version>", "<Version>$($new.ToString())</Version>"
+Set-Content -Path $propsFileName -Value $props -NoNewLine
 
 Write-Host "Done"
