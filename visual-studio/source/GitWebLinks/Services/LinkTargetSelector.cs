@@ -1,9 +1,6 @@
-#nullable enable
-
 using Community.VisualStudio.Toolkit;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.PatternMatching;
-using System.Threading.Tasks;
 
 namespace GitWebLinks;
 
@@ -26,7 +23,7 @@ public class LinkTargetSelector {
         SelectTargetDialog dialog;
 
 
-        viewModel = await SelectTargetDialogViewModel.CreateAsync(
+        viewModel = new SelectTargetDialogViewModel(
             new LinkTargetLoader(_settings, _git, handler, repository, _logger),
             await VS.GetMefServiceAsync<IPatternMatcherFactory>(),
             ThreadHelper.JoinableTaskFactory

@@ -1,9 +1,4 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.VisualStudio.Imaging;
 
 namespace GitWebLinks;
 
@@ -37,32 +32,26 @@ public class LinkTargetLoader : ILinkTargetLoader {
     }
 
 
-    public async Task<IReadOnlyList<LinkTargetListItem>> LoadPresetsAsync() {
-        LinkType defaultType;
-        IEnumerable<LinkTargetListItem> presets;
+    public async Task<IReadOnlyList<LinkTargetListItem>> LoadAsync() {
+        IReadOnlyList<LinkTargetListItem>[] items;
 
 
-        defaultType = await _settings.GetDefaultLinkTypeAsync();
+        items = await Task.WhenAll(
+            LoadPresetsAsync(),
+            LoadRefsAsync()
+        );
 
-        presets = new[]{
-            new LinkTargetListItem(LinkTargetListItemKind.Preset,"Current branch", new LinkTargetPreset(LinkType.CurrentBranch)),
-            new LinkTargetListItem(LinkTargetListItemKind.Preset,"Current commit", new LinkTargetPreset(LinkType.Commit)),
-            new LinkTargetListItem(LinkTargetListItemKind.Preset,"Default branch", new LinkTargetPreset(LinkType.DefaultBranch))
-        };
-
-        // Sort the default preset to the top of the list. This
-        // is done when we create the view model so that they are
-        // initially shown in the correct orderDo this first so that.
-        return presets
-            .OrderByDescending((x) => ((LinkTargetPreset)x.Target).Type == defaultType)
-            .ThenBy((x) => x.Name)
-            .ToList();
+        return items.SelectMany((x) => x).ToList();
     }
 
 
-    public async Task PopulatePresetDescriptionsAsync(IEnumerable<LinkTargetListItem> presets) {
+    private async Task<IReadOnlyList<LinkTargetListItem>> LoadPresetsAsync() {
+        LinkType defaultType;
         string[] descriptions;
+        List<LinkTargetListItem> presets;
 
+
+        defaultType = await _settings.GetDefaultLinkTypeAsync();
 
         descriptions = await Task.WhenAll(
             TryGetRefAsync(LinkType.CurrentBranch),
@@ -70,21 +59,47 @@ public class LinkTargetLoader : ILinkTargetLoader {
             TryGetRefAsync(LinkType.DefaultBranch)
         );
 
-        foreach (LinkTargetListItem preset in presets) {
-            switch (((LinkTargetPreset)preset.Target).Type) {
-                case LinkType.CurrentBranch:
-                    preset.Description = descriptions[0];
-                    break;
+        presets = [];
 
-                case LinkType.Commit:
-                    preset.Description = descriptions[1];
-                    break;
-
-                case LinkType.DefaultBranch:
-                    preset.Description = descriptions[2];
-                    break;
-            }
+        // Omit the current branch as a preset target
+        // if the current commit is a detached HEAD.
+        if (descriptions[0] != "HEAD") {
+            presets.Add(
+                new LinkTargetListItem(
+                    LinkTargetListItemKind.Preset,
+                    "Current branch",
+                    descriptions[0],
+                    KnownMonikers.Branch,
+                    new LinkTargetPreset(LinkType.CurrentBranch)
+                )
+            );
         }
+
+        presets.Add(
+            new LinkTargetListItem(
+                LinkTargetListItemKind.Preset,
+                "Current commit",
+                descriptions[1],
+                KnownMonikers.Commit,
+                new LinkTargetPreset(LinkType.Commit)
+            )
+        );
+
+        presets.Add(
+            new LinkTargetListItem(
+                LinkTargetListItemKind.Preset,
+                "Default branch",
+                descriptions[2],
+                KnownMonikers.Branch,
+                new LinkTargetPreset(LinkType.DefaultBranch)
+            )
+        );
+
+        // Sort the default preset to the top of the list.
+        return presets
+            .OrderByDescending((x) => ((LinkTargetPreset)x.Target).Type == defaultType)
+            .ThenBy((x) => x.Name)
+            .ToList();
     }
 
 
@@ -99,58 +114,85 @@ public class LinkTargetLoader : ILinkTargetLoader {
     }
 
 
-    public async Task<IReadOnlyList<LinkTargetListItem>> LoadBranchesAndCommitsAsync() {
+    private async Task<IReadOnlyList<LinkTargetListItem>> LoadRefsAsync() {
         try {
-            IReadOnlyList<string> lines;
+            IReadOnlyList<string>[] lines;
             List<LinkTargetListItem> branches;
             List<LinkTargetListItem> commits;
+            List<LinkTargetListItem> tags;
             bool useShortHashes;
 
 
-            lines = await _git.ExecuteAsync(
-                _repositoryRoot,
-                "branch",
-                "--list",
-                "--no-color",
-                "--format",
-                "\"%(refname:short) %(refname) %(objectname:short) %(objectname)\""
+            lines = await Task.WhenAll(
+                _git.ExecuteAsync(
+                    _repositoryRoot,
+                    "branch",
+                    "--list",
+                    "--no-color",
+                    "--format",
+                    "\"%(refname:short)~%(refname)~%(objectname:short)~%(objectname)\""
+                ),
+                _handler.SupportsTags ?
+                    _git.ExecuteAsync(_repositoryRoot, "tag", "--points-at", "HEAD") :
+                    Task.FromResult<IReadOnlyList<string>>([])
             );
 
-            branches = new List<LinkTargetListItem>();
-            commits = new List<LinkTargetListItem>();
+            branches = [];
+            commits = [];
+            tags = [];
             useShortHashes = await _settings.GetUseShortHashesAsync();
 
-            foreach (string line in lines.Where((x) => x.Length > 0)) {
+            foreach (string line in lines[0].Where((x) => x.Length > 0)) {
                 string[] parts;
 
 
-                parts = line.Split(' ');
+                parts = line.Split('~');
 
-                branches.Add(
-                    new LinkTargetListItem(
-                        LinkTargetListItemKind.Branch,
-                        parts[0],
-                        new LinkTargetRef(new RefInfo(parts[0], parts[1]), RefType.Branch)
-                    ) { Description = useShortHashes ? parts[2] : parts[3] }
-                );
+                // Omit the branch item for a detached HEAD, but include the commit.
+                if (!parts[0].StartsWith("(HEAD detached", StringComparison.Ordinal)) {
+                    branches.Add(
+                        new LinkTargetListItem(
+                            LinkTargetListItemKind.Branch,
+                            parts[0],
+                            useShortHashes ? parts[2] : parts[3],
+                            KnownMonikers.Branch,
+                            new LinkTargetRef(new RefInfo(parts[0], parts[1]), RefType.Branch)
+                        )
+                    );
+                }
 
                 commits.Add(
                     new LinkTargetListItem(
                         LinkTargetListItemKind.Commit,
                         useShortHashes ? parts[2] : parts[3],
+                        parts[0],
+                        KnownMonikers.Commit,
                         new LinkTargetRef(new RefInfo(parts[2], parts[3]), RefType.Commit)
-                    ) { Description = parts[0] }
+                    )
+                );
+            }
+
+            foreach (string line in lines[1].Where((x) => x.Length > 0)) {
+                tags.Add(
+                    new LinkTargetListItem(
+                        LinkTargetListItemKind.Tag,
+                        line,
+                        "",
+                        KnownMonikers.SmartTag,
+                        new LinkTargetRef(new RefInfo(line, line), RefType.Tag)
+                    )
                 );
             }
 
             branches.Sort((x, y) => string.Compare(x.Name, y.Name, true));
             commits.Sort((x, y) => string.Compare(x.Name, y.Name, true));
+            tags.Sort((x, y) => string.Compare(x.Name, y.Name, true));
 
-            return branches.Concat(commits).ToList();
+            return branches.Concat(commits).Concat(tags).ToList();
 
         } catch (GitCommandException ex) {
             await _logger.LogAsync($"Error while finding branch and commit link targets: {ex}");
-            return Array.Empty<LinkTargetListItem>();
+            return [];
         }
     }
 

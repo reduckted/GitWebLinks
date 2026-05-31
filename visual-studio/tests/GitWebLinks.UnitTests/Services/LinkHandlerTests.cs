@@ -201,6 +201,25 @@ public static class LinkHandlerTests {
 
 
         [Fact]
+        public async Task ShouldUseTheGivenTag() {
+            await SetupRepositoryAsync(RootDirectory);
+
+            Assert.Equal(
+                "short.tag",
+                await CreateUrlAsync(
+                    new PartialHandlerDefinition {
+                        Url = "{{ ref }}.{{ type }}"
+                    },
+                     // For tags, we expect the abbreviated and symbolic values
+                     // to have the same value, but we always use the abbreviated
+                     // value. To verify this, we'll use different values.
+                     new LinkTargetRef(new RefInfo("short", "long"), RefType.Tag)
+                )
+            );
+        }
+
+
+        [Fact]
         public async Task ShouldUseTheGivenShortBranchNameWhenAbbreviatedBranchRefsShouldBeUsed() {
             await SetupRepositoryAsync(RootDirectory);
 
@@ -650,6 +669,7 @@ public static class LinkHandlerTests {
                 new PublicHandlerDefinition(
                     "Test",
                     definition.BranchRef ?? BranchRefType.Abbreviated,
+                    true,
                     [],
                     Parser.Parse(definition.Url ?? ""),
                     definition.Query ?? [],
@@ -862,6 +882,7 @@ public static class LinkHandlerTests {
                 new PublicHandlerDefinition(
                     "Test",
                     BranchRefType.Abbreviated,
+                    true,
                     [],
                     EmptyTemplate,
                     [],

@@ -1,15 +1,9 @@
-#nullable enable
-
 using Fluid;
 using Microsoft.VisualStudio;
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace GitWebLinks;
@@ -34,6 +28,9 @@ public class LinkHandler : ILinkHandler {
 
 
     public string Name => _definition.Name;
+
+
+    public bool SupportsTags => _definition.SupportsTags;
 
 
     public async Task<bool> HandlesRemoteUrlAsync(string remoteUrl) {
@@ -66,20 +63,32 @@ public class LinkHandler : ILinkHandler {
         // the default type that's defined in the settings.
         if (options.Target is LinkTargetPreset preset) {
             linkType = preset.Type ?? await _settings.GetDefaultLinkTypeAsync();
+            // Presets are either commits or branches.
             refType = linkType == LinkType.Commit ? RefType.Commit : RefType.Branch;
             refValue = await GetRefAsync(linkType, repository.Root, repository.Remote);
 
         } else if (options.Target is LinkTargetRef refTarget) {
-            if (refTarget.Type == RefType.Branch) {
-                refType = RefType.Branch;
-                refValue = _definition.BranchRef == BranchRefType.Abbreviated
-                    ? refTarget.RefInfo.Abbreviated
-                    : refTarget.RefInfo.Symbolic;
-            } else {
-                refType = RefType.Commit;
-                refValue = await _settings.GetUseShortHashesAsync()
-                    ? refTarget.RefInfo.Abbreviated
-                    : refTarget.RefInfo.Symbolic;
+            switch (refTarget.Type) {
+                case RefType.Branch:
+                    refType = RefType.Branch;
+                    refValue = _definition.BranchRef == BranchRefType.Abbreviated
+                        ? refTarget.RefInfo.Abbreviated
+                        : refTarget.RefInfo.Symbolic;
+                    break;
+
+                case RefType.Tag:
+                    refType = RefType.Tag;
+                    // We don't differentiate between abbreviated and symbolic
+                    // refs for tags, so just use the abbreviated ref value.
+                    refValue = refTarget.RefInfo.Abbreviated;
+                    break;
+
+                default:
+                    refType = RefType.Commit;
+                    refValue = await _settings.GetUseShortHashesAsync()
+                        ? refTarget.RefInfo.Abbreviated
+                        : refTarget.RefInfo.Symbolic;
+                    break;
             }
 
         } else {
@@ -96,7 +105,7 @@ public class LinkHandler : ILinkHandler {
             .Add("ref", refValue)
             .Add("commit", await GetRefAsync(LinkType.Commit, repository.Root, repository.Remote))
             .Add("file", relativePath)
-            .Add("type", refType == RefType.Commit ? "commit" : "branch")
+            .Add("type", refType.ToString().ToLowerInvariant())
             .Add("sshUserSpecification", UrlHelpers.GetSshUserSpecification(remoteUrl));
 
         if (file.Selection is not null) {
@@ -231,7 +240,7 @@ public class LinkHandler : ILinkHandler {
                     defaultBranch = await GetDefaultRemoteBranchAsync(repositoryRoot, remote);
                 }
 
-                return defaultBranch!;
+                return defaultBranch;
         }
     }
 

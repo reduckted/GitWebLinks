@@ -1,11 +1,7 @@
-#nullable enable
-
 using Community.VisualStudio.Toolkit;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
-using System;
-using System.Threading.Tasks;
 
 namespace GitWebLinks;
 

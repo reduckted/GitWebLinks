@@ -1,7 +1,4 @@
-#nullable enable
-
 using Newtonsoft.Json;
-using System;
 
 namespace GitWebLinks;
 
@@ -17,7 +14,7 @@ public class StringArrayJsonConverter : JsonConverter<string> {
             string[] values;
 
 
-            values = serializer.Deserialize<string[]>(reader) ?? Array.Empty<string>();
+            values = serializer.Deserialize<string[]>(reader) ?? [];
 
             return string.Concat(values);
         }

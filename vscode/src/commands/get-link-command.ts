@@ -258,15 +258,9 @@ export class GetLinkCommand {
      * @returns The target, or undefined to cancel the operation.
      */
     private async promptForLinkTarget(info: ResourceInfo): Promise<LinkTarget | undefined> {
-        let items: (QuickPickItem | QuickPickLinkTargetItem)[];
         let selection: QuickPickItem | QuickPickLinkTargetItem | undefined;
 
-        items = [
-            ...(await this.getPresetTargetItems(info)),
-            ...(await this.getRefTargetItems(info))
-        ];
-
-        selection = await window.showQuickPick(items, {
+        selection = await window.showQuickPick(this.getQuickPickItems(info), {
             placeHolder: 'What would you like to create the link to?',
             matchOnDescription: true
         });
@@ -276,6 +270,20 @@ export class GetLinkCommand {
         }
 
         return undefined;
+    }
+
+    /**
+     * Gets the quick pick items for the link target selection.
+     *
+     * @param info The info for the resource that the link will be created for.
+     * @returns The quick pick items.
+     */
+    private async getQuickPickItems(
+        info: ResourceInfo
+    ): Promise<(QuickPickItem | QuickPickLinkTargetItem)[]> {
+        return (
+            await Promise.all([this.getPresetTargetItems(info), this.getRefTargetItems(info)])
+        ).flat();
     }
 
     /**
@@ -297,19 +305,25 @@ export class GetLinkCommand {
         ]);
 
         defaultType = this.settings.getDefaultLinkType();
+        items = [];
 
-        items = [
-            {
+        // Omit the current branch as a preset target
+        // if the current commit is a detached HEAD.
+        if (targets[0] !== 'HEAD') {
+            items.push({
                 item: {
-                    label: 'Current branch',
+                    label: '$(git-branch) Current branch',
                     description: targets[0],
                     target: { preset: 'branch' }
                 },
                 default: defaultType === 'branch'
-            },
+            });
+        }
+
+        items.push(
             {
                 item: {
-                    label: 'Current commit',
+                    label: '$(git-commit) Current commit',
                     description: targets[1],
                     target: { preset: 'commit' }
                 },
@@ -317,13 +331,13 @@ export class GetLinkCommand {
             },
             {
                 item: {
-                    label: 'Default branch',
+                    label: '$(git-branch) Default branch',
                     description: targets[2],
                     target: { preset: 'defaultBranch' }
                 },
                 default: defaultType === 'defaultBranch'
             }
-        ];
+        );
 
         // Sort the presets so that the default link type is at
         // the top. This will cause it to be the initial selection.
@@ -361,37 +375,47 @@ export class GetLinkCommand {
     ): Promise<(QuickPickItem | QuickPickLinkTargetItem)[]> {
         let branches: (QuickPickItem | QuickPickLinkTargetItem)[];
         let commits: (QuickPickItem | QuickPickLinkTargetItem)[];
-        let lines: string[];
+        let tags: (QuickPickItem | QuickPickLinkTargetItem)[];
+        let branchOutput: string;
+        let tagOutput: string;
         let useShortHashes: boolean;
 
-        lines = (
-            await this.git.exec(
+        [branchOutput, tagOutput] = await Promise.all([
+            this.git.exec(
                 info.repository.root,
                 'branch',
                 '--list',
                 '--no-color',
                 '--format',
-                '%(refname:short) %(refname) %(objectname:short) %(objectname)'
-            )
-        )
-            .split(/\r?\n/)
-            .filter((x) => x.length > 0);
+                '%(refname:short)~%(refname)~%(objectname:short)~%(objectname)'
+            ),
+            info.handler.supportsTags
+                ? this.git.exec(info.repository.root, 'tag', '--points-at', 'HEAD')
+                : Promise.resolve('')
+        ]);
 
         branches = [];
         commits = [];
+        tags = [];
         useShortHashes = this.settings.getUseShortHash();
 
-        for (let line of lines) {
-            let [branchName, branchRef, shortHash, fullHash] = line.split(' ');
+        for (let line of branchOutput.split(/\r?\n/).filter((x) => x.length > 0)) {
+            let [branchName, branchRef, shortHash, fullHash] = line.split('~');
 
-            branches.push({
-                label: branchName,
-                description: useShortHashes ? shortHash : fullHash,
-                target: { ref: { abbreviated: branchName, symbolic: branchRef }, type: 'branch' }
-            });
+            // Omit the branch item for a detached HEAD, but include the commit.
+            if (!branchName.startsWith('(HEAD detached')) {
+                branches.push({
+                    label: `$(git-branch) ${branchName}`,
+                    description: useShortHashes ? shortHash : fullHash,
+                    target: {
+                        ref: { abbreviated: branchName, symbolic: branchRef },
+                        type: 'branch'
+                    }
+                });
+            }
 
             commits.push({
-                label: useShortHashes ? shortHash : fullHash,
+                label: `$(git-commit) ${useShortHashes ? shortHash : fullHash}`,
                 description: branchName,
                 target: { ref: { abbreviated: shortHash, symbolic: fullHash }, type: 'commit' }
             });
@@ -400,11 +424,24 @@ export class GetLinkCommand {
         branches.sort((x, y) => x.label.localeCompare(y.label));
         commits.sort((x, y) => x.label.localeCompare(y.label));
 
+        for (let line of tagOutput.split(/\r?\n/).filter((x) => x.length > 0)) {
+            tags.push({
+                label: `$(tag) ${line}`,
+                target: {
+                    ref: { abbreviated: line, symbolic: line },
+                    type: 'tag'
+                }
+            });
+        }
+
         return [
             { label: 'Branches', kind: QuickPickItemKind.Separator },
             ...branches,
             { label: 'Commits', kind: QuickPickItemKind.Separator },
-            ...commits
+            ...commits,
+            ...(tags.length > 0
+                ? [{ label: 'Tags', kind: QuickPickItemKind.Separator }, ...tags]
+                : [])
         ];
     }
 
@@ -549,7 +586,7 @@ interface ResourceInfo {
 /**
  * An quick pick item for selecting a link target.
  */
-interface QuickPickLinkTargetItem extends QuickPickItem {
+export interface QuickPickLinkTargetItem extends QuickPickItem {
     /**
      * The target that the item represents.
      */

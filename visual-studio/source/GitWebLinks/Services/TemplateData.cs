@@ -1,8 +1,4 @@
-#nullable enable
-
 using Fluid;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace GitWebLinks;
@@ -34,8 +30,8 @@ public class TemplateData {
             Dictionary<string, object?> groupsData;
 
 
-            matchData = new Dictionary<string, object?>();
-            groupsData = new Dictionary<string, object?>();
+            matchData = [];
+            groupsData = [];
 
             foreach (Group group in match.Groups.OfType<Group>()) {
                 groupsData[group.Name] = group.Success ? group.Value : null;

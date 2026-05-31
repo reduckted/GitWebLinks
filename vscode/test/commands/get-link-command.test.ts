@@ -7,7 +7,10 @@ import type {
     TextDocument
 } from 'vscode';
 
-import type { GetLinkCommandOptions } from '../../src/commands/get-link-command';
+import type {
+    GetLinkCommandOptions,
+    QuickPickLinkTargetItem
+} from '../../src/commands/get-link-command';
 import type { Git } from '../../src/git';
 import type { CreateUrlResult } from '../../src/link-handler';
 import type { SelectedLinkHandler } from '../../src/link-handler-provider';
@@ -25,7 +28,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { env, Position, Uri, window } from 'vscode';
+import { env, Position, QuickPickItemKind, Uri, window } from 'vscode';
 
 import { GetLinkCommand } from '../../src/commands/get-link-command';
 import { LinkHandler } from '../../src/link-handler';
@@ -33,7 +36,7 @@ import { LinkHandlerProvider } from '../../src/link-handler-provider';
 import { RepositoryFinder } from '../../src/repository-finder';
 import { Settings } from '../../src/settings';
 import { STRINGS } from '../../src/strings';
-import { Directory, getGitService, markAsSlow, setupRepository } from '../helpers';
+import { Directory, expectToExist, getGitService, markAsSlow, setupRepository } from '../helpers';
 
 const expect = chai.use(sinonChai).expect;
 
@@ -54,8 +57,11 @@ describe('GetLinkCommand', () => {
     let repository: Repository | undefined;
     let link: string | undefined;
 
-    beforeEach(() => {
+    before(() => {
         git = getGitService();
+    });
+
+    beforeEach(() => {
         finder = new RepositoryFinder(git);
         sinon.stub(finder, 'findRepository').callsFake(() => repository);
 
@@ -575,6 +581,10 @@ describe('GetLinkCommand', () => {
             ],
             Thenable<QuickPickItem | undefined>
         >;
+        let expectedPresets: QuickPickLinkTargetItem[];
+        let expectedBranches: QuickPickLinkTargetItem[];
+        let expectedCommits: QuickPickLinkTargetItem[];
+        let expectedTags: QuickPickLinkTargetItem[];
 
         // We need to create repositories, so mark the
         // tests as being a bit slower than other tests.
@@ -603,7 +613,95 @@ describe('GetLinkCommand', () => {
             await git.exec(root.path, 'commit', '-m', '2');
             commits.push(await getRef());
 
-            commits.sort((x, y) => x.abbreviated.localeCompare(y.abbreviated));
+            // Add another commit so that we can checkout the
+            // previous commit and end up in a detached HEAD state.
+            await fs.writeFile(path.join(root.path, '3'), '');
+            await git.exec(root.path, 'add', '*');
+            await git.exec(root.path, 'commit', '-m', '3');
+            commits.push(await getRef());
+
+            await git.exec(root.path, 'tag', 'v1.0.0');
+            await git.exec(root.path, 'tag', 'v2.0.0');
+
+            expectedPresets = [
+                {
+                    label: '$(git-commit) Current commit',
+                    description: commits[3].abbreviated,
+                    target: { preset: 'commit' }
+                },
+                {
+                    label: '$(git-branch) Current branch',
+                    description: 'second',
+                    target: { preset: 'branch' }
+                },
+                {
+                    label: '$(git-branch) Default branch',
+                    description: 'master',
+                    target: { preset: 'defaultBranch' }
+                }
+            ];
+
+            expectedBranches = [
+                {
+                    label: '$(git-branch) first',
+                    description: commits[1].abbreviated,
+                    target: {
+                        ref: { abbreviated: 'first', symbolic: 'refs/heads/first' },
+                        type: 'branch'
+                    }
+                },
+                {
+                    label: '$(git-branch) master',
+                    description: commits[0].abbreviated,
+                    target: {
+                        ref: { abbreviated: 'master', symbolic: 'refs/heads/master' },
+                        type: 'branch'
+                    }
+                },
+                {
+                    label: '$(git-branch) second',
+                    description: commits[3].abbreviated,
+                    target: {
+                        ref: { abbreviated: 'second', symbolic: 'refs/heads/second' },
+                        type: 'branch'
+                    }
+                }
+            ];
+
+            expectedCommits = [
+                {
+                    label: '$(git-commit) ' + commits[0].abbreviated,
+                    description: 'master',
+                    target: { ref: commits[0], type: 'commit' as const }
+                },
+                {
+                    label: '$(git-commit) ' + commits[1].abbreviated,
+                    description: 'first',
+                    target: { ref: commits[1], type: 'commit' as const }
+                },
+                {
+                    label: '$(git-commit) ' + commits[3].abbreviated,
+                    description: 'second',
+                    target: { ref: commits[3], type: 'commit' as const }
+                }
+            ].sort((a, b) => a.label.localeCompare(b.label));
+
+            expectedTags = [
+                {
+                    label: '$(tag) v1.0.0',
+                    target: {
+                        ref: { abbreviated: 'v1.0.0', symbolic: 'v1.0.0' },
+                        type: 'tag'
+                    }
+                },
+                {
+                    label: '$(tag) v2.0.0',
+                    target: {
+                        ref: { abbreviated: 'v2.0.0', symbolic: 'v2.0.0' },
+                        type: 'tag'
+                    }
+                }
+            ];
         });
 
         beforeEach(() => {
@@ -633,6 +731,93 @@ describe('GetLinkCommand', () => {
             expect(createUrl).to.have.not.been.called;
         });
 
+        it('should show branches and commits when the handler does not support tags.', async () => {
+            sinon.stub(Settings.prototype, 'getUseShortHash').returns(true);
+            sinon.stub(Settings.prototype, 'getDefaultBranch').returns('master');
+
+            expectToExist(selectedHandler);
+            sinon.stub(selectedHandler.handler, 'supportsTags').get(() => false);
+
+            showQuickPick.resolves(undefined);
+
+            await command.execute(file);
+
+            expect(await showQuickPick.getCall(0).args[0]).to.deep.equal([
+                ...expectedPresets,
+                { label: 'Branches', kind: QuickPickItemKind.Separator },
+                ...expectedBranches,
+                { label: 'Commits', kind: QuickPickItemKind.Separator },
+                ...expectedCommits
+            ]);
+        });
+
+        it('should show branches, commits and tags when the handler supports tags.', async () => {
+            sinon.stub(Settings.prototype, 'getUseShortHash').returns(true);
+            sinon.stub(Settings.prototype, 'getDefaultBranch').returns('master');
+
+            expectToExist(selectedHandler);
+            sinon.stub(selectedHandler.handler, 'supportsTags').get(() => true);
+
+            showQuickPick.resolves(undefined);
+
+            await command.execute(file);
+
+            expect(await showQuickPick.getCall(0).args[0]).to.deep.equal([
+                ...expectedPresets,
+                { label: 'Branches', kind: QuickPickItemKind.Separator },
+                ...expectedBranches,
+                { label: 'Commits', kind: QuickPickItemKind.Separator },
+                ...expectedCommits,
+                { label: 'Tags', kind: QuickPickItemKind.Separator },
+                ...expectedTags
+            ]);
+        });
+
+        it('should omit detached HEAD from list of branches.', async () => {
+            await git.exec(root.path, 'checkout', commits[2].symbolic);
+
+            try {
+                sinon.stub(Settings.prototype, 'getUseShortHash').returns(true);
+                sinon.stub(Settings.prototype, 'getDefaultBranch').returns('master');
+
+                expectToExist(selectedHandler);
+                sinon.stub(selectedHandler.handler, 'supportsTags').get(() => true);
+
+                showQuickPick.resolves(undefined);
+
+                await command.execute(file);
+
+                expect(await showQuickPick.getCall(0).args[0]).to.deep.equal([
+                    {
+                        label: '$(git-commit) Current commit',
+                        description: commits[2].abbreviated,
+                        target: { preset: 'commit' }
+                    },
+                    {
+                        label: '$(git-branch) Default branch',
+                        description: 'master',
+                        target: { preset: 'defaultBranch' }
+                    },
+                    { label: 'Branches', kind: QuickPickItemKind.Separator },
+                    // The expected branches don't change. The detached HEAD would be listed
+                    // by `git branch`, but it should be omitted from the quick pick items.
+                    ...expectedBranches,
+                    { label: 'Commits', kind: QuickPickItemKind.Separator },
+                    // The commit for the detached HEAD should be included.
+                    ...[
+                        ...expectedCommits,
+                        {
+                            label: '$(git-commit) ' + commits[2].abbreviated,
+                            description: '(HEAD detached at ' + commits[2].abbreviated + ')',
+                            target: { ref: commits[2], type: 'commit' as const }
+                        }
+                    ].sort((a, b) => a.label.localeCompare(b.label))
+                ]);
+            } finally {
+                await git.exec(root.path, 'checkout', '-');
+            }
+        });
+
         getLinkTypes()
             .filter((x): x is LinkType => x !== undefined)
             .forEach((type) => {
@@ -660,12 +845,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                {
-                    target: {
-                        ref: { abbreviated: 'first', symbolic: 'refs/heads/first' },
-                        type: 'branch'
-                    }
-                }
+                { target: expectedBranches[0].target }
             );
 
             showQuickPick.callsFake(async (items) => (await items)[5]);
@@ -675,12 +855,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                {
-                    target: {
-                        ref: { abbreviated: 'master', symbolic: 'refs/heads/master' },
-                        type: 'branch'
-                    }
-                }
+                { target: expectedBranches[1].target }
             );
 
             showQuickPick.callsFake(async (items) => (await items)[6]);
@@ -690,12 +865,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                {
-                    target: {
-                        ref: { abbreviated: 'second', symbolic: 'refs/heads/second' },
-                        type: 'branch'
-                    }
-                }
+                { target: expectedBranches[2].target }
             );
         });
 
@@ -707,7 +877,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                { target: { ref: commits[0], type: 'commit' } }
+                { target: expectedCommits[0].target }
             );
 
             showQuickPick.callsFake(async (items) => (await items)[9]);
@@ -717,7 +887,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                { target: { ref: commits[1], type: 'commit' } }
+                { target: expectedCommits[1].target }
             );
 
             showQuickPick.callsFake(async (items) => (await items)[10]);
@@ -727,7 +897,7 @@ describe('GetLinkCommand', () => {
                 repository,
                 selectedHandler?.remoteUrl,
                 { uri: file, selection: undefined },
-                { target: { ref: commits[2], type: 'commit' } }
+                { target: expectedCommits[2].target }
             );
         });
 

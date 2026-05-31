@@ -174,6 +174,25 @@ describe('LinkHandler', function () {
             ).to.equal('long.commit');
         });
 
+        it('should use the given tag.', async () => {
+            await setupRepository(root.path);
+
+            expect(
+                await createUrl(
+                    { url: '{{ ref }}.{{ type }}' },
+                    {
+                        target: {
+                            // For tags, we expect the abbreviated and symbolic values
+                            // to have the same value, but we always use the abbreviated
+                            // value. To verify this, we'll use different values.
+                            ref: { abbreviated: 'short', symbolic: 'long' },
+                            type: 'tag'
+                        }
+                    }
+                )
+            ).to.equal('short.tag');
+        });
+
         it('should use the given short branch name when abbreviated branch refs should be used.', async () => {
             await setupRepository(root.path);
 

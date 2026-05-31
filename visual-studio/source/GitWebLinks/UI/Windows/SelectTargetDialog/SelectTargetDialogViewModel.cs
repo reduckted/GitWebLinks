@@ -1,17 +1,11 @@
-#nullable enable
-
 using Community.VisualStudio.Toolkit;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.PatternMatching;
 using Microsoft.VisualStudio.Threading;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace GitWebLinks;
@@ -20,8 +14,7 @@ public class SelectTargetDialogViewModel : ObservableObject {
 
     private readonly ILinkTargetLoader _loader;
     private readonly IPatternMatcherFactory _patternMatcherFactory;
-    private readonly IEnumerable<LinkTargetListItem> _presets;
-    private List<LinkTargetListItem> _allTargets;
+    private readonly List<LinkTargetListItem> _allTargets;
     private List<LinkTargetListItem> _filteredTargets;
     private LinkTargetListItem? _selectedTarget;
     private bool _isLoading;
@@ -29,28 +22,17 @@ public class SelectTargetDialogViewModel : ObservableObject {
     private bool? _dialogResult;
 
 
-    public static async Task<SelectTargetDialogViewModel> CreateAsync(
+    public SelectTargetDialogViewModel(
         ILinkTargetLoader loader,
         IPatternMatcherFactory patternMatcherFactory,
         JoinableTaskFactory joinableTaskFactory
     ) {
-        return new SelectTargetDialogViewModel(await loader.LoadPresetsAsync(), loader, patternMatcherFactory, joinableTaskFactory);
-    }
-
-
-    private SelectTargetDialogViewModel(
-        IEnumerable<LinkTargetListItem> presets,
-        ILinkTargetLoader loader,
-        IPatternMatcherFactory patternMatcherFactory,
-        JoinableTaskFactory joinableTaskFactory
-    ) {
-        _presets = presets;
         _loader = loader;
         _patternMatcherFactory = patternMatcherFactory;
         _isLoading = true;
         _filterText = "";
 
-        _allTargets = _presets.ToList();
+        _allTargets = [];
         _filteredTargets = _allTargets.ToList();
         _selectedTarget = _filteredTargets.FirstOrDefault();
 
@@ -60,11 +42,7 @@ public class SelectTargetDialogViewModel : ObservableObject {
 
     public async Task OnLoadedAsync() {
         try {
-            await Task.WhenAll(
-                PopulatePresetDescriptionsAsync(),
-                LoadBranchesAndCommitsAsync()
-            );
-
+            _allTargets.AddRange(await _loader.LoadAsync());
             ApplyFilter();
 
         } catch (Exception ex) when (!ErrorHandler.IsCriticalException(ex)) {
@@ -74,18 +52,6 @@ public class SelectTargetDialogViewModel : ObservableObject {
         }
 
         IsLoading = false;
-    }
-
-
-    private async Task PopulatePresetDescriptionsAsync() {
-        await _loader.PopulatePresetDescriptionsAsync(_presets);
-        ApplyFilter();
-    }
-
-
-    private async Task LoadBranchesAndCommitsAsync() {
-        _allTargets = _presets.Concat(await _loader.LoadBranchesAndCommitsAsync()).ToList();
-        ApplyFilter();
     }
 
 
@@ -115,7 +81,9 @@ public class SelectTargetDialogViewModel : ObservableObject {
     }
 
 
-    public Visibility NoTargetsVisibility => Targets.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility NoTargetsVisibility => IsLoading ?
+        Visibility.Collapsed :
+        Targets.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
 
     public LinkTargetListItem? SelectedTarget {

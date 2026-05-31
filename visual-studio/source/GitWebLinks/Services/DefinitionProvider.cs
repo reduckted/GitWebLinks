@@ -1,11 +1,6 @@
-#nullable enable
-
 using Fluid;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -14,10 +9,10 @@ namespace GitWebLinks;
 public static partial class DefinitionProvider {
 
     private static readonly JsonSerializerSettings SerializerSettings = new() {
-        Converters = new List<JsonConverter> {
+        Converters = [
             new StringArrayJsonConverter(),
             new ServerArrayJsonConverter()
-        }
+        ]
     };
 
 
@@ -31,7 +26,7 @@ public static partial class DefinitionProvider {
             FluidParser parser;
 
 
-            definitions = new List<HandlerDefinition>();
+            definitions = [];
             container = typeof(LinkHandlerProvider).Assembly;
             parser = new FluidParser();
 
@@ -66,9 +61,10 @@ public static partial class DefinitionProvider {
             return new PrivateHandlerDefinition(
                 json.Name,
                 json.BranchRef,
-                json.SettingsKeys ?? Array.Empty<string>(),
+                json.SupportsTags ?? false,
+                json.SettingsKeys ?? [],
                 parser.Parse(json.Url),
-                json.Query is not null ? ParseQueryModifications(json.Query) : Array.Empty<QueryModification>(),
+                json.Query is not null ? ParseQueryModifications(json.Query) : [],
                 parser.Parse(json.Selection),
                 ParseReverseSettings(json.Reverse, parser),
                 json.Private
@@ -78,9 +74,10 @@ public static partial class DefinitionProvider {
             return new PublicHandlerDefinition(
                 json.Name,
                 json.BranchRef,
-                json.SettingsKeys ?? Array.Empty<string>(),
+                json.SupportsTags ?? false,
+                json.SettingsKeys ?? [],
                 parser.Parse(json.Url),
-                json.Query is not null ? ParseQueryModifications(json.Query) : Array.Empty<QueryModification>(),
+                json.Query is not null ? ParseQueryModifications(json.Query) : [],
                 parser.Parse(json.Selection),
                 ParseReverseSettings(json.Reverse, parser),
                 ParseServers(json.Server!, parser)
@@ -93,7 +90,7 @@ public static partial class DefinitionProvider {
         List<IServer> servers;
 
 
-        servers = new List<IServer>();
+        servers = [];
 
         foreach (JsonServer server in json) {
             if (server.RemotePattern is not null) {

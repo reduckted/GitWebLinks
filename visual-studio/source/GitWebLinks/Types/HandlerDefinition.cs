@@ -1,7 +1,4 @@
-#nullable enable
-
 using Fluid;
-using System.Collections.Generic;
 
 namespace GitWebLinks;
 
@@ -10,6 +7,7 @@ public class HandlerDefinition {
     public HandlerDefinition(
         string name,
         BranchRefType branchRef,
+        bool supportsTags,
         IReadOnlyList<string> settingsKeys,
         IFluidTemplate url,
         IReadOnlyList<QueryModification> query,
@@ -18,6 +16,7 @@ public class HandlerDefinition {
     ) {
         Name = name;
         BranchRef = branchRef;
+        SupportsTags = supportsTags;
         SettingsKeys = settingsKeys;
         Url = url;
         Query = query;
@@ -30,6 +29,9 @@ public class HandlerDefinition {
 
 
     public BranchRefType BranchRef { get; }
+
+
+    public bool SupportsTags { get; }
 
 
     public IReadOnlyList<string> SettingsKeys { get; }

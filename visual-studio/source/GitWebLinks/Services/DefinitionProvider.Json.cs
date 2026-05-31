@@ -1,7 +1,3 @@
-#nullable enable
-
-using System.Collections.Generic;
-
 namespace GitWebLinks;
 
 public static partial class DefinitionProvider {
@@ -18,6 +14,9 @@ public static partial class DefinitionProvider {
 
 
         public BranchRefType BranchRef { get; set; }
+
+
+        public bool? SupportsTags { get; set; }
 
 
         public IReadOnlyList<string>? SettingsKeys { get; set; }

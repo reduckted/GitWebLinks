@@ -1,9 +1,5 @@
-#nullable enable
-
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace GitWebLinks;
@@ -11,7 +7,7 @@ namespace GitWebLinks;
 [ComVisible(true)]
 public abstract class ServerOptionsPageBase : OptionsPageBase {
 
-    private List<ServerListItem> _servers = new();
+    private List<ServerListItem> _servers = [];
 
 
     internal IReadOnlyList<StaticServer> GetServers() {
@@ -29,7 +25,7 @@ public abstract class ServerOptionsPageBase : OptionsPageBase {
     public List<ServerListItem> Servers {
         get => _servers;
         set {
-            SetProperty(ref _servers, value ?? new List<ServerListItem>());
+            SetProperty(ref _servers, value ?? []);
             OnPropertyChanged(nameof(JsonServers));
         }
     }
@@ -55,7 +51,7 @@ public abstract class ServerOptionsPageBase : OptionsPageBase {
 
     protected static List<ServerListItem> DeserializeServers(string? data) {
         if ((data is null) || (data.Length == 0)) {
-            return new List<ServerListItem>();
+            return [];
         } else {
             return JsonConvert.DeserializeObject<IEnumerable<ServerListItem>>(data).ToList();
         }

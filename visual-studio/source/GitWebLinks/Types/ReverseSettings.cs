@@ -1,5 +1,3 @@
-#nullable enable
-
 using Fluid;
 using System.Text.RegularExpressions;
 

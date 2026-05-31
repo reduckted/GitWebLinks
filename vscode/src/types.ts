@@ -103,7 +103,7 @@ export interface LinkTargetRef {
     /**
      * What the ref refers to.
      */
-    readonly type: 'branch' | 'commit';
+    readonly type: 'branch' | 'commit' | 'tag';
 }
 
 export interface LinkTargetPreset {

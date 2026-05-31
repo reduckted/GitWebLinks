@@ -1,7 +1,4 @@
-#nullable enable
-
 using Microsoft.VisualStudio;
-using System;
 using System.Diagnostics;
 using System.Windows;
 

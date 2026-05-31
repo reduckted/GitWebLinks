@@ -1,5 +1,3 @@
-#nullable enable
-
 namespace GitWebLinks;
 
 public class CreateUrlResult {

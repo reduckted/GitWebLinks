@@ -1,5 +1,3 @@
-#nullable enable
-
 using GitWebLinks;
 
 public class SelectedLinkHandler {

@@ -1,5 +1,3 @@
-#nullable enable
-
 using Microsoft.VisualStudio.Imaging.Interop;
 using System.IO;
 

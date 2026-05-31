@@ -61,6 +61,11 @@ export interface UrlTests {
     commit: UrlTest;
 
     /**
+     * A test for creating a link using a tag.
+     */
+    tag?: UrlTest;
+
+    /**
      * Tests for including the selected range in the URL.
      */
     selection: SelectionTests;
