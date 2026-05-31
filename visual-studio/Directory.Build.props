@@ -9,7 +9,7 @@
         <AnalysisMode>AllEnabledByDefault</AnalysisMode>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <RootNamespace>GitWebLinks</RootNamespace>
-        <Version>2.15.0</Version>
+        <Version>2.15.1</Version>
     </PropertyGroup>
 
 </Project>

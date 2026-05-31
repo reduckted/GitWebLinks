@@ -42,4 +42,6 @@ jobs:
 
       - name: Publish
         working-directory: ./visual-studio/source/GitWebLinks
-        run: dotnet msbuild -target:PublishToMarketplace -property:BuildBeforePublish=true -property:PersonalAccessToken=${{ secrets.PUBLISHER_TOKEN }}
+        run: |
+          dotnet restore
+          dotnet msbuild -target:PublishToMarketplace -property:BuildBeforePublish=true -property:PersonalAccessToken=${{ secrets.PUBLISHER_TOKEN }}

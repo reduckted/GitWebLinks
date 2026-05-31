@@ -64,16 +64,21 @@ public static class HandlerTests {
         }
 
 
-        [HandlerFact(WhenExists = nameof(UrlTests.Tag))]
+        [HandlerFact]
         public async Task Tag() {
-            Assert.NotNull(Definition.Tests.CreateUrl.Tag);
+            if (Definition.SupportsTags) {
+                Assert.NotNull(Definition.Tests.CreateUrl.Tag);
 
-            await RunUrlTestAsync(
-                Definition.Tests.CreateUrl.Tag,
-                new TestOptions {
-                    Target = new LinkTargetRef(new RefInfo(TestTagName, TestTagName), RefType.Tag)
-                }
-            );
+                await RunUrlTestAsync(
+                    Definition.Tests.CreateUrl.Tag,
+                    new TestOptions {
+                        Target = new LinkTargetRef(new RefInfo(TestTagName, TestTagName), RefType.Tag)
+                    }
+                );
+
+            } else {
+                Assert.Null(Definition.Tests.CreateUrl.Tag);
+            }
         }
 
 
@@ -283,13 +288,18 @@ public static class HandlerTests {
         }
 
 
-        [HandlerFact(WhenExists = nameof(UrlTests.Tag))]
+        [HandlerFact]
         public async Task Tag() {
-            Assert.NotNull(Definition.Tests.CreateUrl.Tag);
+            if (Definition.SupportsTags) {
+                Assert.NotNull(Definition.Tests.CreateUrl.Tag);
 
-            await RunUrlTestAsync(
-                Definition.Tests.CreateUrl.Tag
-            );
+                await RunUrlTestAsync(
+                    Definition.Tests.CreateUrl.Tag
+                );
+
+            } else {
+                Assert.Null(Definition.Tests.CreateUrl.Tag);
+            }
         }
 
 

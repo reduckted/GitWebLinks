@@ -126,16 +126,18 @@ describe('Link handlers', function () {
                     await runUrlTest('commit', { target: { preset: 'commit' } });
                 });
 
-                if (definition.supportsTags) {
-                    it('tag', async () => {
+                it('tag', async () => {
+                    if (definition.supportsTags) {
                         await runUrlTest('tag', {
                             target: {
                                 ref: { abbreviated: TEST_TAG_NAME, symbolic: TEST_TAG_NAME },
                                 type: 'tag'
                             }
                         });
-                    });
-                }
+                    } else {
+                        expect(definition.tests.createUrl.tag).to.be.undefined;
+                    }
+                });
 
                 it('default branch', async () => {
                     await runTest(
@@ -313,16 +315,18 @@ describe('Link handlers', function () {
                     await runUrlTest('commit', { target: { preset: 'commit' } });
                 });
 
-                if (definition.supportsTags) {
-                    it('tag', async () => {
+                it('tag', async () => {
+                    if (definition.supportsTags) {
                         await runUrlTest('tag', {
                             target: {
                                 ref: { abbreviated: TEST_TAG_NAME, symbolic: TEST_TAG_NAME },
                                 type: 'tag'
                             }
                         });
-                    });
-                }
+                    } else {
+                        expect(definition.tests.createUrl.tag).to.be.undefined;
+                    }
+                });
 
                 definition.tests.createUrl.misc?.forEach((test) => {
                     it(test.name, async () => {
