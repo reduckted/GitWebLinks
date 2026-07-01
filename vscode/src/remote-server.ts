@@ -18,10 +18,7 @@ export class RemoteServer {
      */
     public constructor(
         servers:
-            | (DynamicServer | StaticServer)[]
-            | DynamicServer
-            | StaticServer
-            | StaticServerFactory
+            (DynamicServer | StaticServer)[] | DynamicServer | StaticServer | StaticServerFactory
     ) {
         if (typeof servers === 'function') {
             this.matchers = [createLazyStaticServerMatcher(servers)];
